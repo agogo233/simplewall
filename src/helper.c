@@ -902,7 +902,7 @@ NTSTATUS _app_verifyfilefromcatalog (
 	ULONG file_hash_length;
 	NTSTATUS status;
 
-	status = _r_fs_getsize (NULL, hfile, &file_size);
+	status = _r_fs_getsize (NULL, hfile, (PLARGE_INTEGER)&file_size);
 
 	if (!NT_SUCCESS (status))
 	{
@@ -1036,12 +1036,12 @@ VOID _app_getfileversioninfo (
 		NOTHING;
 	}
 
-	status = _r_sys_loadlibraryasresource (&hlibrary, &ptr_app_info->path->sr);
+	status = _r_sys_loadlibraryasresource (&ptr_app_info->path->sr, &hlibrary);
 
 	if (!NT_SUCCESS (status))
 		goto CleanupExit;
 
-	status = _r_res_loadresource (&ver_block, hlibrary, RT_VERSION, MAKEINTRESOURCE (VS_VERSION_INFO), 0);
+	status = _r_res_loadresource (hlibrary, RT_VERSION, MAKEINTRESOURCE (VS_VERSION_INFO), 0, &ver_block);
 
 	if (!NT_SUCCESS (status))
 		goto CleanupExit;
@@ -1117,7 +1117,7 @@ PR_STRING _app_getfilehashinfo (
 	if (!ptr_app)
 		return NULL;
 
-	_r_crypt_getfilehash (&string, BCRYPT_SHA256_ALGORITHM, NULL, hfile);
+	_r_crypt_getfilehash (BCRYPT_SHA256_ALGORITHM, NULL, hfile, &string);
 
 	_r_obj_movereference ((PVOID_PTR)&ptr_app->hash, string);
 
@@ -1143,7 +1143,7 @@ ULONG _app_addcolor (
 	ptr_clr.locale_id = locale_id;
 	ptr_clr.is_enabled = is_enabled;
 
-	hash_code = _r_str_gethash (&ptr_clr.config_name->sr, TRUE);
+	hash_code = _r_str_gethash2 (ptr_clr.config_name->sr, TRUE);
 
 	_r_obj_addhashtableitem (colors_table, hash_code, &ptr_clr);
 
@@ -1522,7 +1522,7 @@ PR_STRING _app_resolveaddress (
 	DNS_STATUS status;
 
 	arpa_string = _app_formatarpa (af, address);
-	arpa_hash = _r_str_gethash (&arpa_string->sr, TRUE);
+	arpa_hash = _r_str_gethash2 (arpa_string->sr, TRUE);
 
 	if (_app_getcachetable (cache_resolution, arpa_hash, &lock_cache_resolution, &string))
 	{
@@ -1637,7 +1637,7 @@ VOID NTAPI _app_timercallback (
 			if (!ptr_app->hash || !_app_isappvalidbinary (ptr_app->real_path) || !_app_isappused (ptr_app))
 				continue;
 
-			status = _r_crypt_getfilehash (&string, BCRYPT_SHA256_ALGORITHM, &ptr_app->real_path->sr, NULL);
+			status = _r_crypt_getfilehash (BCRYPT_SHA256_ALGORITHM, &ptr_app->real_path->sr, NULL, &string);
 
 			if (NT_SUCCESS (status))
 			{
@@ -1982,7 +1982,7 @@ VOID _app_wufixhelper (
 
 	_r_str_printf (reg_key, RTL_NUMBER_OF (reg_key), L"SYSTEM\\CurrentControlSet\\Services\\%s", service_name);
 
-	status = _r_reg_openkey (&hkey, HKEY_LOCAL_MACHINE, reg_key, 0, KEY_READ | KEY_WRITE);
+	status = _r_reg_openkey (HKEY_LOCAL_MACHINE, reg_key, 0, KEY_READ | KEY_WRITE, &hkey);
 
 	if (!NT_SUCCESS (status))
 	{
@@ -2073,7 +2073,7 @@ VOID _app_wufixenable (
 	{
 		if (_r_fs_isexists (&config.wusvc_path->sr))
 		{
-			ptr_app = _app_getappitem (_r_str_gethash (&config.wusvc_path->sr, TRUE));
+			ptr_app = _app_getappitem (_r_str_gethash2 (config.wusvc_path->sr, TRUE));
 
 			if (ptr_app)
 			{

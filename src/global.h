@@ -227,5 +227,15 @@ FORCEINLINE VOID _r_rebar_setinfo (
 #include "search.h"
 #include "security.h"
 #include "timer.h"
+
+FORCEINLINE VOID _r_listview_scroll (
+	_In_ HWND hwnd,
+	_In_opt_ INT ctrl_id,
+	_In_ INT scroll_pos
+)
+{
+	SendMessage (GetDlgItem (hwnd, ctrl_id), LVM_GETTOPINDEX, 0, 0);
+	SendMessage (GetDlgItem (hwnd, ctrl_id), LVM_ENSUREVISIBLE, scroll_pos, FALSE);
+}
 #include "uwp.h"
 #include "wfp.h"

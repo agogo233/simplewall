@@ -1708,7 +1708,7 @@ INT_PTR CALLBACK EditorProc (
 
 							_r_obj_movereference ((PVOID_PTR)&context->ptr_rule->name, string);
 
-							context->ptr_rule->rule_hash = _r_str_gethash (&context->ptr_rule->name->sr, TRUE); // change rule hash if it is changed
+							context->ptr_rule->rule_hash = _r_str_gethash2 (context->ptr_rule->name->sr, TRUE); // change rule hash if it is changed
 
 							// comment
 							string = _r_ctrl_getstring (hpage_general, IDC_RULE_COMMENT_ID);
