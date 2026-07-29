@@ -196,7 +196,7 @@ FORCEINLINE BOOLEAN _r_rebar_getinfo (
 	_In_ HWND hwnd,
 	_In_opt_ INT ctrl_id,
 	_In_ UINT_PTR band_id,
-	_Inout_ PRBANDINFO rbi
+	_Inout_ PVOID rbi
 )
 {
 	return (BOOLEAN)SendMessage (GetDlgItem (hwnd, ctrl_id), RB_GETBANDINFO, (WPARAM)band_id, (LPARAM)rbi);
@@ -206,7 +206,7 @@ FORCEINLINE VOID _r_rebar_setinfo (
 	_In_ HWND hwnd,
 	_In_opt_ INT ctrl_id,
 	_In_ UINT_PTR band_id,
-	_In_ PRBANDINFO rbi
+	_In_ PVOID rbi
 )
 {
 	SendMessage (GetDlgItem (hwnd, ctrl_id), RB_SETBANDINFO, (WPARAM)band_id, (LPARAM)rbi);
