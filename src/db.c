@@ -419,7 +419,7 @@ VOID _app_db_parse_rule (
 			if (status != STATUS_SUCCESS)
 				_r_obj_movereference ((PVOID_PTR)&path_string, _r_obj_createstring2 (&first_part));
 
-			app_hash = _r_str_gethash2 (path_string->sr, TRUE);
+			app_hash = _r_str_gethash2 (&path_string->sr, TRUE);
 
 			if (app_hash)
 			{
@@ -486,7 +486,7 @@ VOID _app_db_parse_ruleconfig (
 	if (!rule_name)
 		return;
 
-	rule_hash = _r_str_gethash2 (rule_name->sr, TRUE);
+	rule_hash = _r_str_gethash2 (&rule_name->sr, TRUE);
 
 	if (!rule_hash)
 	{
@@ -1115,7 +1115,7 @@ VOID _app_db_save_ruleconfig (
 			continue;
 
 		is_enabled_default = ptr_config->is_enabled;
-		rule_hash = _r_str_gethash2 (ptr_config->name->sr, TRUE);
+		rule_hash = _r_str_gethash2 (&ptr_config->name->sr, TRUE);
 
 		ptr_rule = _app_getrulebyhash (rule_hash);
 
