@@ -204,7 +204,7 @@ VOID _app_icons_loadfromfile (
 		*out_hicon = NULL;
 
 	if (!_r_obj_isstringempty (path))
-		_r_path_geticon (&path->sr, out_hicon, out_icon_id);
+		_r_path_geticon (&path->sr, out_icon_id, out_hicon);
 
 	if (is_loaddefaults)
 		_app_icons_loaddefaults (type, out_hicon, out_icon_id);

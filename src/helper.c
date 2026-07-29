@@ -1143,7 +1143,7 @@ ULONG _app_addcolor (
 	ptr_clr.locale_id = locale_id;
 	ptr_clr.is_enabled = is_enabled;
 
-	hash_code = _r_str_gethash2 (ptr_clr.config_name->sr, TRUE);
+	hash_code = _r_str_gethash2 (&ptr_clr.config_name->sr, TRUE);
 
 	_r_obj_addhashtableitem (colors_table, hash_code, &ptr_clr);
 
@@ -1522,7 +1522,7 @@ PR_STRING _app_resolveaddress (
 	DNS_STATUS status;
 
 	arpa_string = _app_formatarpa (af, address);
-	arpa_hash = _r_str_gethash2 (arpa_string->sr, TRUE);
+	arpa_hash = _r_str_gethash2 (&arpa_string->sr, TRUE);
 
 	if (_app_getcachetable (cache_resolution, arpa_hash, &lock_cache_resolution, &string))
 	{
@@ -2073,7 +2073,7 @@ VOID _app_wufixenable (
 	{
 		if (_r_fs_isexists (&config.wusvc_path->sr))
 		{
-			ptr_app = _app_getappitem (_r_str_gethash2 (config.wusvc_path->sr, TRUE));
+			ptr_app = _app_getappitem (_r_str_gethash2 (&config.wusvc_path->sr, TRUE));
 
 			if (ptr_app)
 			{
