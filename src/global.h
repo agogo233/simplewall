@@ -5,6 +5,8 @@
 
 #include "routine.h"
 
+typedef const R_STRINGREF* PCR_STRINGREF;
+
 #include <winsock2.h>
 #include <ws2ipdef.h>
 #include <ws2tcpip.h>
