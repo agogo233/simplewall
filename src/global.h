@@ -110,6 +110,108 @@ DECLSPEC_SELECTANY const LONG64 timer_array[] =
 
 #define WM_NOTIFICATION (WM_APP + 21)
 
+// Missing routine library functions (compatibility shims)
+FORCEINLINE VOID _r_edit_setreadonly (
+	_In_ HWND hwnd,
+	_In_opt_ INT ctrl_id,
+	_In_ BOOLEAN is_readonly
+)
+{
+	SendMessage (GetDlgItem (hwnd, ctrl_id), EM_SETREADONLY, (WPARAM)is_readonly, 0);
+}
+
+FORCEINLINE VOID _r_edit_setmargin (
+	_In_ HWND hwnd,
+	_In_opt_ INT ctrl_id,
+	_In_ INT left_margin,
+	_In_ INT right_margin
+)
+{
+	SendMessage (GetDlgItem (hwnd, ctrl_id), EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELPARAM (left_margin, right_margin));
+}
+
+FORCEINLINE VOID _r_wnd_sendcommand (
+	_In_ HWND hwnd,
+	_In_ INT ctrl_id,
+	_In_ WPARAM wparam
+)
+{
+	SendMessage (GetDlgItem (hwnd, ctrl_id), WM_COMMAND, wparam, 0);
+}
+
+FORCEINLINE VOID _r_menu_addseparator (
+	_In_ HMENU hmenu
+)
+{
+	MENUITEMINFO mii = {0};
+	mii.cbSize = sizeof (mii);
+	mii.fMask = MIIM_FTYPE;
+	mii.fType = MFT_SEPARATOR;
+	InsertMenuItem (hmenu, GetMenuItemCount (hmenu), TRUE, &mii);
+}
+
+FORCEINLINE VOID _r_button_setcheck (
+	_In_ HWND hwnd,
+	_In_opt_ INT ctrl_id,
+	_In_ BOOLEAN is_checked
+)
+{
+	Button_SetCheck (GetDlgItem (hwnd, ctrl_id), is_checked ? BST_CHECKED : BST_UNCHECKED);
+}
+
+FORCEINLINE BOOLEAN _r_button_ischecked (
+	_In_ HWND hwnd,
+	_In_opt_ INT ctrl_id
+)
+{
+	return (Button_GetCheck (GetDlgItem (hwnd, ctrl_id)) == BST_CHECKED);
+}
+
+FORCEINLINE BOOLEAN _r_fs_isexists (
+	_In_ PR_STRINGREF path
+)
+{
+	return _r_fs_exists (path);
+}
+
+FORCEINLINE BOOLEAN _r_obj_isbyteempty (
+	_In_ PR_BYTE string
+)
+{
+	return _r_obj_isbyteempty2 (string);
+}
+
+FORCEINLINE BOOLEAN _r_toolbar_getidealsize (
+	_In_ HWND hwnd,
+	_In_opt_ INT ctrl_id,
+	_In_ BOOLEAN is_vertical,
+	_Out_ PSIZE out_size
+)
+{
+	SendMessage (GetDlgItem (hwnd, ctrl_id), TB_GETIDEALSIZE, (WPARAM)is_vertical, (LPARAM)out_size);
+	return TRUE;
+}
+
+FORCEINLINE BOOLEAN _r_rebar_getinfo (
+	_In_ HWND hwnd,
+	_In_opt_ INT ctrl_id,
+	_In_ UINT_PTR band_id,
+	_Inout_ PRBANDINFO rbi
+)
+{
+	return (BOOLEAN)SendMessage (GetDlgItem (hwnd, ctrl_id), RB_GETBANDINFO, (WPARAM)band_id, (LPARAM)rbi);
+}
+
+FORCEINLINE VOID _r_rebar_setinfo (
+	_In_ HWND hwnd,
+	_In_opt_ INT ctrl_id,
+	_In_ UINT_PTR band_id,
+	_In_ PRBANDINFO rbi
+)
+{
+	SendMessage (GetDlgItem (hwnd, ctrl_id), RB_SETBANDINFO, (WPARAM)band_id, (LPARAM)rbi);
+}
+
 #include "controls.h"
 #include "db.h"
 #include "editor.h"

@@ -712,7 +712,7 @@ BOOLEAN _app_calculatefilehash (
 
 	if (_r_initonce_begin (&init_once))
 	{
-		status = _r_sys_loadlibrary2 (&hwintrust, L"wintrust.dll", 0);
+		status = _r_sys_loadlibrary2 (L"wintrust.dll", 0, &hwintrust);
 
 		if (NT_SUCCESS (status))
 		{

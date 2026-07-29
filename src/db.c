@@ -909,7 +909,7 @@ NTSTATUS _app_db_save_streamtofile (
 			_r_fs_setattributes (&path->sr, NULL, attributes & ~FILE_ATTRIBUTE_READONLY);
 	}
 
-	status = _r_fs_createfile (&hfile, &path->sr, FILE_OVERWRITE_IF, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, FILE_ATTRIBUTE_NORMAL, 0, FALSE, NULL);
+	status = _r_fs_createfile (&path->sr, FILE_OVERWRITE_IF, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, FILE_ATTRIBUTE_NORMAL, 0, FALSE, NULL, &hfile);
 
 	if (!NT_SUCCESS (status))
 		return status;
