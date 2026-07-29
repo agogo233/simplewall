@@ -1,0 +1,37 @@
+name: Build simplewall
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          submodules: false
+
+      - name: Clone routine submodule
+        run: |
+          git clone --depth 1 https://github.com/henrypp/routine.git ../routine
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v3
+
+      - name: Restore NuGet packages
+        run: nuget restore simplewall.sln
+
+      - name: Build x64 Release
+        run: msbuild simplewall.sln /p:Configuration=Release /p:Platform=x64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: simplewall-x64
+          path: x64/Release/simplewall.exe
