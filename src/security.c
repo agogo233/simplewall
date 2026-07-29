@@ -3,6 +3,38 @@
 
 #include "global.h"
 
+// Forward declarations for Set*SecurityInfoByKey0 functions
+// These are declared in fwpmu.h but may be missing in certain SDK versions
+DWORD WINAPI FwpmProviderSetSecurityInfoByKey0 (
+	_In_ HANDLE engineHandle,
+	_In_opt_ const GUID* key,
+	_In_ SECURITY_INFORMATION securityInfo,
+	_In_opt_ const SID* sidOwner,
+	_In_opt_ const SID* sidGroup,
+	_In_opt_ const ACL* dacl,
+	_In_opt_ const ACL* sacl
+);
+
+DWORD WINAPI FwpmSubLayerSetSecurityInfoByKey0 (
+	_In_ HANDLE engineHandle,
+	_In_opt_ const GUID* key,
+	_In_ SECURITY_INFORMATION securityInfo,
+	_In_opt_ const SID* sidOwner,
+	_In_opt_ const SID* sidGroup,
+	_In_opt_ const ACL* dacl,
+	_In_opt_ const ACL* sacl
+);
+
+DWORD WINAPI FwpmCalloutSetSecurityInfoByKey0 (
+	_In_ HANDLE engineHandle,
+	_In_opt_ const GUID* key,
+	_In_ SECURITY_INFORMATION securityInfo,
+	_In_opt_ const SID* sidOwner,
+	_In_opt_ const SID* sidGroup,
+	_In_opt_ const ACL* dacl,
+	_In_opt_ const ACL* sacl
+);
+
 _Ret_maybenull_
 PSID _app_quyerybuiltinsid (
 	_In_ WELL_KNOWN_SID_TYPE sid_type
