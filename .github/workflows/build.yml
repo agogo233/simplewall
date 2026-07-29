@@ -17,9 +17,10 @@ jobs:
         with:
           submodules: false
 
-      - name: Clone routine submodule
+      - name: Clone submodules
         run: |
           git clone --depth 1 https://github.com/henrypp/routine.git ../routine
+          git clone --depth 1 https://github.com/henrypp/builder.git ../builder
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v3
