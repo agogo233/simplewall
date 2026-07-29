@@ -120,7 +120,7 @@ BYTE _app_getprofiletype ()
 {
 	LONG profile_type;
 
-	profile_type = _r_config_getlong (L"ProfileType", 0, NULL);
+	profile_type = _r_config_getlong_ex(L"ProfileType", 0, NULL);
 
 	switch (profile_type)
 	{
@@ -358,9 +358,9 @@ VOID _app_db_parse_rule (
 
 	if (type == DATA_RULE_BLOCKLIST)
 	{
-		blocklist_update_state = _r_calc_clamp (_r_config_getlong (L"BlocklistUpdateState", 0, NULL), 0, 2);
-		blocklist_extra_state = _r_calc_clamp (_r_config_getlong (L"BlocklistExtraState", 0, NULL), 0, 2);
-		blocklist_spy_state = _r_calc_clamp (_r_config_getlong (L"BlocklistSpyState", 2, NULL), 0, 2);
+		blocklist_update_state = _r_calc_clamp (_r_config_getlong_ex(L"BlocklistUpdateState", 0, NULL), 0, 2);
+		blocklist_extra_state = _r_calc_clamp (_r_config_getlong_ex(L"BlocklistExtraState", 0, NULL), 0, 2);
+		blocklist_spy_state = _r_calc_clamp (_r_config_getlong_ex(L"BlocklistSpyState", 2, NULL), 0, 2);
 
 		_app_ruleblocklistsetstate (ptr_rule, blocklist_spy_state, blocklist_update_state, blocklist_extra_state);
 	}
@@ -459,7 +459,7 @@ VOID _app_db_parse_rule (
 	}
 
 	_r_queuedlock_acquireexclusive (&lock_rules);
-	_r_obj_addlistitem (rules_list, ptr_rule, NULL);
+	_r_obj_addlistitem_ex(rules_list, ptr_rule, NULL);
 	_r_queuedlock_releaseexclusive (&lock_rules);
 
 	_r_obj_deletestringbuilder (&sb);
@@ -954,7 +954,7 @@ VOID _app_db_save_app (
 	ULONG_PTR enum_key = 0;
 	BOOLEAN is_keepunusedapps;
 
-	is_keepunusedapps = _r_config_getboolean (L"IsKeepUnusedApps", TRUE, NULL);
+	is_keepunusedapps = _r_config_getboolean_ex(L"IsKeepUnusedApps", TRUE, NULL);
 
 	_app_db_writeelementstart (db_info, L"apps");
 
@@ -975,7 +975,7 @@ VOID _app_db_save_app (
 		_r_xml_writewhitespace (&db_info->xml_library, L"\r\n\t\t");
 		_r_xml_writestartelement (&db_info->xml_library, L"item");
 
-		if (_r_config_getboolean (L"IsSaveAppsWithEnvironment", TRUE, NULL))
+		if (_r_config_getboolean_ex(L"IsSaveAppsWithEnvironment", TRUE, NULL))
 		{
 			expanded_path = _r_str_environmentunexpandstring (&ptr_app->original_path->sr);
 
@@ -988,7 +988,7 @@ VOID _app_db_save_app (
 			_r_xml_setattribute (&db_info->xml_library, L"path", ptr_app->original_path->buffer);
 		}
 
-		if (!_r_obj_isstringempty (ptr_app->hash) && _r_config_getboolean (L"IsHashesEnabled", FALSE, NULL))
+		if (!_r_obj_isstringempty (ptr_app->hash) && _r_config_getboolean_ex(L"IsHashesEnabled", FALSE, NULL))
 			_r_xml_setattribute (&db_info->xml_library, L"hash", ptr_app->hash->buffer);
 
 		if (!_r_obj_isstringempty (ptr_app->comment))

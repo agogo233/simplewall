@@ -17,7 +17,7 @@ VOID _app_loginit (
 	if (current_handle)
 		NtClose (current_handle);
 
-	if (!is_install || !_r_config_getboolean (L"IsLogEnabled", FALSE, NULL))
+	if (!is_install || !_r_config_getboolean_ex(L"IsLogEnabled", FALSE, NULL))
 		return; // already closed or not enabled
 
 	log_path = _app_getlogpath ();
@@ -129,7 +129,7 @@ BOOLEAN _app_logislimitreached (
 {
 	LONG64 file_size, limit;
 
-	limit = _r_config_getlong64 (L"LogSizeLimitKb", LOG_SIZE_LIMIT_DEFAULT, NULL);
+	limit = _r_config_getlong64_ex(L"LogSizeLimitKb", LOG_SIZE_LIMIT_DEFAULT, NULL);
 
 	if (!limit)
 		return FALSE;
@@ -393,7 +393,7 @@ VOID _wfp_logsubscribe (
 	}
 
 	// initialize log file
-	if (_r_config_getboolean (L"IsLogEnabled", FALSE, NULL))
+	if (_r_config_getboolean_ex(L"IsLogEnabled", FALSE, NULL))
 		_app_loginit (TRUE);
 }
 
@@ -430,15 +430,15 @@ VOID _wfp_logsetoption (
 		return;
 
 	// add inbound multicast and broadcast connections monitor
-	if (!_r_config_getboolean (L"IsExcludeInbound", FALSE, NULL))
+	if (!_r_config_getboolean_ex(L"IsExcludeInbound", FALSE, NULL))
 		mask |= FWPM_NET_EVENT_KEYWORD_INBOUND_MCAST | FWPM_NET_EVENT_KEYWORD_INBOUND_BCAST;
 
 	// add allowed connections monitor
-	if (!_r_config_getboolean (L"IsExcludeClassifyAllow", TRUE, NULL))
+	if (!_r_config_getboolean_ex(L"IsExcludeClassifyAllow", TRUE, NULL))
 		mask |= FWPM_NET_EVENT_KEYWORD_CLASSIFY_ALLOW;
 
 	// add port scanning drop connections monitor (win10 19H1+)
-	if (_r_sys_isosversiongreaterorequal (WINDOWS_10_19H1) && !_r_config_getboolean (L"IsExcludePortScanningDrop", FALSE, NULL))
+	if (_r_sys_isosversiongreaterorequal (WINDOWS_10_19H1) && !_r_config_getboolean_ex(L"IsExcludePortScanningDrop", FALSE, NULL))
 		mask |= FWPM_NET_EVENT_KEYWORD_PORT_SCANNING_DROP;
 
 	// the filter engine will collect WFP network events that match any supplied key words
@@ -456,7 +456,7 @@ VOID _wfp_logsetoption (
 	RtlZeroMemory (&val, sizeof (FWP_VALUE0));
 
 	val.type = FWP_UINT32;
-	val.uint32 = !_r_config_getboolean (L"IsExcludeIPSecConnections", FALSE, NULL);
+	val.uint32 = !_r_config_getboolean_ex(L"IsExcludeIPSecConnections", FALSE, NULL);
 
 	status = FwpmEngineSetOption0 (engine_handle, FWPM_ENGINE_MONITOR_IPSEC_CONNECTIONS, &val);
 
@@ -481,7 +481,7 @@ VOID CALLBACK _wfp_logcallback (
 	if ((log->filter_id) == 0 || (log->layer_id) == 0)
 		return;
 
-	if (log->is_allow && _r_config_getboolean (L"IsExcludeClassifyAllow", TRUE, NULL))
+	if (log->is_allow && _r_config_getboolean_ex(L"IsExcludeClassifyAllow", TRUE, NULL))
 		return;
 
 	status = FwpmLayerGetById0 (_wfp_getenginehandle (), log->layer_id, &layer_ptr);
@@ -1356,12 +1356,12 @@ VOID NTAPI _app_logthread (
 	if (!ptr_app)
 		ptr_app = _app_getappitem (ptr_log->app_hash);
 
-	is_notificationenabled = _r_config_getboolean (L"IsNotificationsEnabled", TRUE, NULL);
-	is_loguienabled = _r_config_getboolean (L"IsLogUiEnabled", FALSE, NULL);
-	is_logenabled = _r_config_getboolean (L"IsLogEnabled", FALSE, NULL);
-	is_exludeallow = !(ptr_log->is_allow && _r_config_getboolean (L"IsExcludeClassifyAllow", TRUE, NULL));
-	is_exludestealth = !(ptr_log->is_system && _r_config_getboolean (L"IsExcludeStealth", TRUE, NULL));
-	is_exludeblocklist = !(ptr_log->is_blocklist && _r_config_getboolean (L"IsExcludeBlocklist", TRUE, NULL)) && !(ptr_log->is_custom && _r_config_getboolean (L"IsExcludeCustomRules", TRUE, NULL));
+	is_notificationenabled = _r_config_getboolean_ex(L"IsNotificationsEnabled", TRUE, NULL);
+	is_loguienabled = _r_config_getboolean_ex(L"IsLogUiEnabled", FALSE, NULL);
+	is_logenabled = _r_config_getboolean_ex(L"IsLogEnabled", FALSE, NULL);
+	is_exludeallow = !(ptr_log->is_allow && _r_config_getboolean_ex(L"IsExcludeClassifyAllow", TRUE, NULL));
+	is_exludestealth = !(ptr_log->is_system && _r_config_getboolean_ex(L"IsExcludeStealth", TRUE, NULL));
+	is_exludeblocklist = !(ptr_log->is_blocklist && _r_config_getboolean_ex(L"IsExcludeBlocklist", TRUE, NULL)) && !(ptr_log->is_custom && _r_config_getboolean_ex(L"IsExcludeCustomRules", TRUE, NULL));
 
 	if ((is_logenabled || is_loguienabled || is_notificationenabled) && is_exludestealth && is_exludeallow)
 	{

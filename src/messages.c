@@ -20,15 +20,15 @@ VOID _app_message_initialize (
 
 	if (hmenu)
 	{
-		if (_r_config_getboolean (L"IsInternalRulesDisabled", FALSE, NULL))
+		if (_r_config_getboolean_ex(L"IsInternalRulesDisabled", FALSE, NULL))
 			_r_menu_enableitem (hmenu, 4, FALSE, FALSE);
 
-		_r_menu_checkitem (hmenu, IDM_ALWAYSONTOP_CHK, 0, MF_BYCOMMAND, _r_config_getboolean (L"AlwaysOnTop", FALSE, NULL));
-		_r_menu_checkitem (hmenu, IDM_AUTOSIZECOLUMNS_CHK, 0, MF_BYCOMMAND, _r_config_getboolean (L"AutoSizeColumns", TRUE, NULL));
-		_r_menu_checkitem (hmenu, IDM_SHOWFILENAMESONLY_CHK, 0, MF_BYCOMMAND, _r_config_getboolean (L"ShowFilenames", TRUE, NULL));
-		_r_menu_checkitem (hmenu, IDM_SHOWSEARCHBAR_CHK, 0, MF_BYCOMMAND, _r_config_getboolean (L"IsShowSearchBar", TRUE, NULL));
+		_r_menu_checkitem (hmenu, IDM_ALWAYSONTOP_CHK, 0, MF_BYCOMMAND, _r_config_getboolean_ex(L"AlwaysOnTop", FALSE, NULL));
+		_r_menu_checkitem (hmenu, IDM_AUTOSIZECOLUMNS_CHK, 0, MF_BYCOMMAND, _r_config_getboolean_ex(L"AutoSizeColumns", TRUE, NULL));
+		_r_menu_checkitem (hmenu, IDM_SHOWFILENAMESONLY_CHK, 0, MF_BYCOMMAND, _r_config_getboolean_ex(L"ShowFilenames", TRUE, NULL));
+		_r_menu_checkitem (hmenu, IDM_SHOWSEARCHBAR_CHK, 0, MF_BYCOMMAND, _r_config_getboolean_ex(L"IsShowSearchBar", TRUE, NULL));
 
-		view_type = _r_calc_clamp (_r_config_getlong (L"ViewType", LV_VIEW_DETAILS, NULL), LV_VIEW_ICON, LV_VIEW_MAX);
+		view_type = _r_calc_clamp (_r_config_getlong_ex(L"ViewType", LV_VIEW_DETAILS, NULL), LV_VIEW_ICON, LV_VIEW_MAX);
 
 		if (view_type == LV_VIEW_ICON)
 		{
@@ -45,7 +45,7 @@ VOID _app_message_initialize (
 
 		_r_menu_checkitem (hmenu, IDM_VIEW_DETAILS, IDM_VIEW_TILE, MF_BYCOMMAND, menu_id);
 
-		icon_size = _r_calc_clamp (_r_config_getlong (L"IconSize", SHIL_SMALL, NULL), SHIL_LARGE, SHIL_LAST);
+		icon_size = _r_calc_clamp (_r_config_getlong_ex(L"IconSize", SHIL_SMALL, NULL), SHIL_LARGE, SHIL_LAST);
 
 		if (icon_size == SHIL_EXTRALARGE)
 		{
@@ -61,49 +61,49 @@ VOID _app_message_initialize (
 		}
 
 		_r_menu_checkitem (hmenu, IDM_SIZE_SMALL, IDM_SIZE_EXTRALARGE, MF_BYCOMMAND, menu_id);
-		_r_menu_checkitem (hmenu, IDM_ICONSISHIDDEN, 0, MF_BYCOMMAND, _r_config_getboolean (L"IsIconsHidden", FALSE, NULL));
+		_r_menu_checkitem (hmenu, IDM_ICONSISHIDDEN, 0, MF_BYCOMMAND, _r_config_getboolean_ex(L"IsIconsHidden", FALSE, NULL));
 		_r_menu_checkitem (hmenu, IDM_USEDARKTHEME_CHK, 0, MF_BYCOMMAND, _r_theme_isenabled ());
 		_r_menu_checkitem (hmenu, IDM_LOADONSTARTUP_CHK, 0, MF_BYCOMMAND, _r_autorun_isenabled ());
-		_r_menu_checkitem (hmenu, IDM_STARTMINIMIZED_CHK, 0, MF_BYCOMMAND, _r_config_getboolean (L"IsStartMinimized", FALSE, NULL));
+		_r_menu_checkitem (hmenu, IDM_STARTMINIMIZED_CHK, 0, MF_BYCOMMAND, _r_config_getboolean_ex(L"IsStartMinimized", FALSE, NULL));
 		_r_menu_checkitem (hmenu, IDM_SKIPUACWARNING_CHK, 0, MF_BYCOMMAND, _r_skipuac_isenabled ());
 		_r_menu_checkitem (hmenu, IDM_CHECKUPDATES_CHK, 0, MF_BYCOMMAND, _r_update_isenabled (FALSE));
-		_r_menu_checkitem (hmenu, IDM_RULE_BLOCKOUTBOUND, 0, MF_BYCOMMAND, _r_config_getboolean (L"BlockOutboundConnections", TRUE, NULL));
-		_r_menu_checkitem (hmenu, IDM_RULE_BLOCKINBOUND, 0, MF_BYCOMMAND, _r_config_getboolean (L"BlockInboundConnections", TRUE, NULL));
-		_r_menu_checkitem (hmenu, IDM_RULE_ALLOWLOOPBACK, 0, MF_BYCOMMAND, _r_config_getboolean (L"AllowLoopbackConnections", TRUE, NULL));
-		_r_menu_checkitem (hmenu, IDM_RULE_ALLOW6TO4, 0, MF_BYCOMMAND, _r_config_getboolean (L"AllowIPv6", TRUE, NULL));
+		_r_menu_checkitem (hmenu, IDM_RULE_BLOCKOUTBOUND, 0, MF_BYCOMMAND, _r_config_getboolean_ex(L"BlockOutboundConnections", TRUE, NULL));
+		_r_menu_checkitem (hmenu, IDM_RULE_BLOCKINBOUND, 0, MF_BYCOMMAND, _r_config_getboolean_ex(L"BlockInboundConnections", TRUE, NULL));
+		_r_menu_checkitem (hmenu, IDM_RULE_ALLOWLOOPBACK, 0, MF_BYCOMMAND, _r_config_getboolean_ex(L"AllowLoopbackConnections", TRUE, NULL));
+		_r_menu_checkitem (hmenu, IDM_RULE_ALLOW6TO4, 0, MF_BYCOMMAND, _r_config_getboolean_ex(L"AllowIPv6", TRUE, NULL));
 		_r_menu_checkitem (hmenu, IDM_RULE_ALLOWWINDOWSUPDATE, 0, MF_BYCOMMAND, _app_wufixenabled ());
 
 		if (_r_sys_isosversionlower (WINDOWS_10))
 			_r_menu_enableitem (hmenu, IDM_RULE_ALLOWWINDOWSUPDATE, FALSE, FALSE);
 
-		_r_menu_checkitem (hmenu, IDM_PROFILETYPE_PLAIN, IDM_PROFILETYPE_ENCRYPTED, MF_BYCOMMAND, IDM_PROFILETYPE_PLAIN + _r_calc_clamp (_r_config_getlong (L"ProfileType", 0, NULL), 0, 2));
+		_r_menu_checkitem (hmenu, IDM_PROFILETYPE_PLAIN, IDM_PROFILETYPE_ENCRYPTED, MF_BYCOMMAND, IDM_PROFILETYPE_PLAIN + _r_calc_clamp (_r_config_getlong_ex(L"ProfileType", 0, NULL), 0, 2));
 
-		is_enabled = _r_config_getboolean (L"IsHashesEnabled", FALSE, NULL);
+		is_enabled = _r_config_getboolean_ex(L"IsHashesEnabled", FALSE, NULL);
 
-		_r_menu_checkitem (hmenu, IDM_USECERTIFICATES_CHK, 0, MF_BYCOMMAND, _r_config_getboolean (L"IsCertificatesEnabled", TRUE, NULL));
-		_r_menu_checkitem (hmenu, IDM_KEEPUNUSED_CHK, 0, MF_BYCOMMAND, _r_config_getboolean (L"IsKeepUnusedApps", TRUE, NULL));
+		_r_menu_checkitem (hmenu, IDM_USECERTIFICATES_CHK, 0, MF_BYCOMMAND, _r_config_getboolean_ex(L"IsCertificatesEnabled", TRUE, NULL));
+		_r_menu_checkitem (hmenu, IDM_KEEPUNUSED_CHK, 0, MF_BYCOMMAND, _r_config_getboolean_ex(L"IsKeepUnusedApps", TRUE, NULL));
 		_r_menu_checkitem (hmenu, IDM_USEHASHES_CHK, 0, MF_BYCOMMAND, is_enabled);
-		_r_menu_checkitem (hmenu, IDM_USENETWORKRESOLUTION_CHK, 0, MF_BYCOMMAND, _r_config_getboolean (L"IsNetworkResolutionsEnabled", TRUE, NULL));
-		_r_menu_checkitem (hmenu, IDM_USEAPPMONITOR_CHK, 0, MF_BYCOMMAND, _r_config_getboolean (L"IsEnableAppMonitor", FALSE, NULL));
+		_r_menu_checkitem (hmenu, IDM_USENETWORKRESOLUTION_CHK, 0, MF_BYCOMMAND, _r_config_getboolean_ex(L"IsNetworkResolutionsEnabled", TRUE, NULL));
+		_r_menu_checkitem (hmenu, IDM_USEAPPMONITOR_CHK, 0, MF_BYCOMMAND, _r_config_getboolean_ex(L"IsEnableAppMonitor", FALSE, NULL));
 
 		_r_menu_enableitem (hmenu, IDM_USEAPPMONITOR_CHK, FALSE, is_enabled);
 
-		menu_id = (IDM_BLOCKLIST_SPY_DISABLE + _r_calc_clamp (_r_config_getlong (L"BlocklistSpyState", 2, NULL), 0, 2));
+		menu_id = (IDM_BLOCKLIST_SPY_DISABLE + _r_calc_clamp (_r_config_getlong_ex(L"BlocklistSpyState", 2, NULL), 0, 2));
 
 		_r_menu_checkitem (hmenu, IDM_BLOCKLIST_SPY_DISABLE, IDM_BLOCKLIST_SPY_BLOCK, MF_BYCOMMAND, menu_id);
 
-		menu_id = (IDM_BLOCKLIST_UPDATE_DISABLE + _r_calc_clamp (_r_config_getlong (L"BlocklistUpdateState", 0, NULL), 0, 2));
+		menu_id = (IDM_BLOCKLIST_UPDATE_DISABLE + _r_calc_clamp (_r_config_getlong_ex(L"BlocklistUpdateState", 0, NULL), 0, 2));
 
 		_r_menu_checkitem (hmenu, IDM_BLOCKLIST_UPDATE_DISABLE, IDM_BLOCKLIST_UPDATE_BLOCK, MF_BYCOMMAND, menu_id);
 
-		menu_id = (IDM_BLOCKLIST_EXTRA_DISABLE + _r_calc_clamp (_r_config_getlong (L"BlocklistExtraState", 0, NULL), 0, 2));
+		menu_id = (IDM_BLOCKLIST_EXTRA_DISABLE + _r_calc_clamp (_r_config_getlong_ex(L"BlocklistExtraState", 0, NULL), 0, 2));
 
 		_r_menu_checkitem (hmenu, IDM_BLOCKLIST_EXTRA_DISABLE, IDM_BLOCKLIST_EXTRA_BLOCK, MF_BYCOMMAND, menu_id);
 	}
 
-	_r_toolbar_pressbutton (config.hrebar, IDC_TOOLBAR, IDM_TRAY_ENABLENOTIFICATIONS_CHK, _r_config_getboolean (L"IsNotificationsEnabled", TRUE, NULL));
-	_r_toolbar_pressbutton (config.hrebar, IDC_TOOLBAR, IDM_TRAY_ENABLELOG_CHK, _r_config_getboolean (L"IsLogEnabled", FALSE, NULL));
-	_r_toolbar_pressbutton (config.hrebar, IDC_TOOLBAR, IDM_TRAY_ENABLEUILOG_CHK, _r_config_getboolean (L"IsLogUiEnabled", FALSE, NULL));
+	_r_toolbar_pressbutton (config.hrebar, IDC_TOOLBAR, IDM_TRAY_ENABLENOTIFICATIONS_CHK, _r_config_getboolean_ex(L"IsNotificationsEnabled", TRUE, NULL));
+	_r_toolbar_pressbutton (config.hrebar, IDC_TOOLBAR, IDM_TRAY_ENABLELOG_CHK, _r_config_getboolean_ex(L"IsLogEnabled", FALSE, NULL));
+	_r_toolbar_pressbutton (config.hrebar, IDC_TOOLBAR, IDM_TRAY_ENABLEUILOG_CHK, _r_config_getboolean_ex(L"IsLogUiEnabled", FALSE, NULL));
 }
 
 VOID _app_message_localize (
@@ -512,7 +512,7 @@ VOID _app_generate_timerscontrol (
 	{
 		timestamp = timer_array[i];
 
-		string = _r_format_interval (timestamp);
+		string = _r_format_interval (timestamp, FALSE);
 
 		index = (ULONG)(IDX_TIMER + i);
 
@@ -893,20 +893,20 @@ VOID _app_message_traycontextmenu (
 	_r_menu_setitemtext (hsubmenu, IDM_TRAY_WEBSITE, FALSE, _r_locale_getstring (IDS_WEBSITE));
 	_r_menu_setitemtext (hsubmenu, IDM_TRAY_ABOUT, FALSE, _r_locale_getstring (IDS_ABOUT));
 	_r_menu_setitemtext (hsubmenu, IDM_TRAY_EXIT, FALSE, _r_locale_getstring (IDS_EXIT));
-	_r_menu_checkitem (hsubmenu, IDM_TRAY_ENABLENOTIFICATIONS_CHK, 0, MF_BYCOMMAND, _r_config_getboolean (L"IsNotificationsEnabled", TRUE, NULL));
-	_r_menu_checkitem (hsubmenu, IDM_TRAY_ENABLENOTIFICATIONSSOUND_CHK, 0, MF_BYCOMMAND, _r_config_getboolean (L"IsNotificationsSound", TRUE, NULL));
-	_r_menu_checkitem (hsubmenu, IDM_TRAY_NOTIFICATIONFULLSCREENSILENTMODE_CHK, 0, MF_BYCOMMAND, _r_config_getboolean (L"IsNotificationsFullscreenSilentMode", TRUE, NULL));
-	_r_menu_checkitem (hsubmenu, IDM_TRAY_NOTIFICATIONONTRAY_CHK, 0, MF_BYCOMMAND, _r_config_getboolean (L"IsNotificationsOnTray", FALSE, NULL));
-	_r_menu_checkitem (hsubmenu, IDM_TRAY_ENABLELOG_CHK, 0, MF_BYCOMMAND, _r_config_getboolean (L"IsLogEnabled", FALSE, NULL));
-	_r_menu_checkitem (hsubmenu, IDM_TRAY_ENABLEUILOG_CHK, 0, MF_BYCOMMAND, _r_config_getboolean (L"IsLogUiEnabled", FALSE, NULL));
+	_r_menu_checkitem (hsubmenu, IDM_TRAY_ENABLENOTIFICATIONS_CHK, 0, MF_BYCOMMAND, _r_config_getboolean_ex(L"IsNotificationsEnabled", TRUE, NULL));
+	_r_menu_checkitem (hsubmenu, IDM_TRAY_ENABLENOTIFICATIONSSOUND_CHK, 0, MF_BYCOMMAND, _r_config_getboolean_ex(L"IsNotificationsSound", TRUE, NULL));
+	_r_menu_checkitem (hsubmenu, IDM_TRAY_NOTIFICATIONFULLSCREENSILENTMODE_CHK, 0, MF_BYCOMMAND, _r_config_getboolean_ex(L"IsNotificationsFullscreenSilentMode", TRUE, NULL));
+	_r_menu_checkitem (hsubmenu, IDM_TRAY_NOTIFICATIONONTRAY_CHK, 0, MF_BYCOMMAND, _r_config_getboolean_ex(L"IsNotificationsOnTray", FALSE, NULL));
+	_r_menu_checkitem (hsubmenu, IDM_TRAY_ENABLELOG_CHK, 0, MF_BYCOMMAND, _r_config_getboolean_ex(L"IsLogEnabled", FALSE, NULL));
+	_r_menu_checkitem (hsubmenu, IDM_TRAY_ENABLEUILOG_CHK, 0, MF_BYCOMMAND, _r_config_getboolean_ex(L"IsLogUiEnabled", FALSE, NULL));
 
-	if (!_r_config_getboolean (L"IsNotificationsEnabled", TRUE, NULL))
+	if (!_r_config_getboolean_ex(L"IsNotificationsEnabled", TRUE, NULL))
 	{
 		_r_menu_enableitem (hsubmenu, IDM_TRAY_ENABLENOTIFICATIONSSOUND_CHK, FALSE, FALSE);
 		_r_menu_enableitem (hsubmenu, IDM_TRAY_NOTIFICATIONFULLSCREENSILENTMODE_CHK, FALSE, FALSE);
 		_r_menu_enableitem (hsubmenu, IDM_TRAY_NOTIFICATIONONTRAY_CHK, FALSE, FALSE);
 	}
-	else if (!_r_config_getboolean (L"IsNotificationsSound", TRUE, NULL))
+	else if (!_r_config_getboolean_ex(L"IsNotificationsSound", TRUE, NULL))
 	{
 		_r_menu_enableitem (hsubmenu, IDM_TRAY_NOTIFICATIONFULLSCREENSILENTMODE_CHK, FALSE, FALSE);
 	}
@@ -992,7 +992,7 @@ LONG_PTR _app_message_custdraw (
 			if (!lpnmlv->nmcd.lItemlParam)
 				return CDRF_DODEFAULT;
 
-			if (!_r_config_getboolean (L"IsEnableHighlighting", TRUE, NULL))
+			if (!_r_config_getboolean_ex(L"IsEnableHighlighting", TRUE, NULL))
 				return CDRF_DODEFAULT;
 
 			switch (listview_id)
@@ -1772,7 +1772,7 @@ VOID _app_command_idtorules (
 	{
 		rules = _r_obj_createlist (0x10, NULL);
 
-		_r_obj_addlistitem (rules, ptr_rule, NULL);
+		_r_obj_addlistitem_ex(rules, ptr_rule, NULL);
 
 		_wfp_createrulefilters (_wfp_getenginehandle (), rules, DBG_ARG, FALSE);
 
@@ -1821,7 +1821,7 @@ VOID _app_command_idtotimers (
 			{
 				_app_timer_set (hwnd, ptr_app, seconds);
 
-				_r_obj_addlistitem (rules, ptr_app, NULL);
+				_r_obj_addlistitem_ex(rules, ptr_app, NULL);
 			}
 		}
 
@@ -1845,7 +1845,7 @@ VOID _app_command_logshow (
 	INT item_count;
 	NTSTATUS status;
 
-	if (_r_config_getboolean (L"IsLogUiEnabled", FALSE, NULL))
+	if (_r_config_getboolean_ex(L"IsLogUiEnabled", FALSE, NULL))
 	{
 		item_count = _r_listview_getitemcount (hwnd, IDC_LOG);
 
@@ -2105,7 +2105,7 @@ VOID _app_command_checkbox (
 				_app_setappiteminfo (hwnd, tab_context->listview_id, item_id, ptr_app);
 				_app_listview_unlock (hwnd, tab_context->listview_id);
 
-				_r_obj_addlistitem (rules, ptr_app, NULL);
+				_r_obj_addlistitem_ex(rules, ptr_app, NULL);
 
 				is_changed = TRUE;
 
@@ -2138,7 +2138,7 @@ VOID _app_command_checkbox (
 				_app_setruleiteminfo (hwnd, tab_context->listview_id, item_id, ptr_rule, TRUE);
 				_app_listview_unlock (hwnd, tab_context->listview_id);
 
-				_r_obj_addlistitem (rules, ptr_rule, NULL);
+				_r_obj_addlistitem_ex(rules, ptr_rule, NULL);
 
 				is_changed = TRUE;
 
@@ -2582,7 +2582,7 @@ VOID _app_command_openeditor (
 	if (context)
 	{
 		_r_queuedlock_acquireexclusive (&lock_rules);
-		_r_obj_addlistitem (rules_list, _r_obj_reference (ptr_rule), &id_code);
+		_r_obj_addlistitem_ex(rules_list, _r_obj_reference (ptr_rule), &id_code);
 		_r_queuedlock_releaseexclusive (&lock_rules);
 
 		if (id_code != SIZE_MAX)
@@ -2784,7 +2784,7 @@ VOID _app_command_purgeunused (
 		if (!_r_obj_isempty (ptr_app->guids))
 			_r_obj_addarrayitems (guids, ptr_app->guids->items, ptr_app->guids->count);
 
-		_r_obj_addlistitem (apps_list, ptr_app, NULL);
+		_r_obj_addlistitem_ex(apps_list, ptr_app, NULL);
 
 		string = _app_getapppath (ptr_app);
 
@@ -2869,7 +2869,7 @@ VOID _app_command_purgetimers (
 	{
 		if (_app_istimerset (ptr_app))
 		{
-			_r_obj_addlistitem (apps_list, ptr_app, NULL);
+			_r_obj_addlistitem_ex(apps_list, ptr_app, NULL);
 
 			path = _app_getapppath (ptr_app);
 
@@ -2879,7 +2879,7 @@ VOID _app_command_purgetimers (
 
 				_r_obj_appendstringbuilder2 (&sb, &path->sr);
 
-				string = _r_format_interval (ptr_app->timer - _r_unixtime_now ());
+				string = _r_format_interval (ptr_app->timer - _r_unixtime_now (), FALSE);
 
 				if (string)
 				{
@@ -2948,12 +2948,12 @@ VOID _app_command_selectfont (
 
 	dpi_value = _r_dc_getwindowdpi (hwnd);
 
-	_r_config_getfont (L"Font", &lf, dpi_value, NULL);
+	_r_config_getfont_ex(L"Font", &lf, dpi_value, NULL);
 
 	if (!ChooseFontW (&cf))
 		return;
 
-	_r_config_setfont (L"Font", &lf, dpi_value, NULL);
+	_r_config_setfont_ex(L"Font", &lf, dpi_value, NULL);
 
 	_app_listview_loadfont (dpi_value, TRUE);
 	_app_listview_updateby_id (hwnd, DATA_LISTVIEW_CURRENT, PR_UPDATE_TYPE | PR_UPDATE_FORCE);

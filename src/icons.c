@@ -115,7 +115,7 @@ HICON _app_icons_getsafeapp_hicon (
 	if (_r_obj_isstringempty (ptr_app->real_path))
 		return NULL;
 
-	if (_r_config_getboolean (L"IsIconsHidden", FALSE, NULL) || !_app_isappvalidbinary (ptr_app->real_path))
+	if (_r_config_getboolean_ex(L"IsIconsHidden", FALSE, NULL) || !_app_isappvalidbinary (ptr_app->real_path))
 	{
 		hicon = _app_icons_getdefaulttype_hicon (ptr_app->type, icon_info);
 

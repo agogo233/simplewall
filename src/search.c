@@ -136,7 +136,7 @@ VOID _app_search_setvisible (
 	_In_ LONG dpi_value
 )
 {
-	if (_r_config_getboolean (L"IsShowSearchBar", TRUE, NULL))
+	if (_r_config_getboolean_ex(L"IsShowSearchBar", TRUE, NULL))
 	{
 		if (!_r_rebar_isbandexists (hwnd, IDC_REBAR, REBAR_SEARCH_ID))
 			_r_rebar_insertband (hwnd, IDC_REBAR, REBAR_SEARCH_ID, config.hsearchbar, RBBS_VARIABLEHEIGHT | RBBS_NOGRIPPER | RBBS_USECHEVRON, _r_dc_getdpi (180, dpi_value), 20);

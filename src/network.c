@@ -139,7 +139,7 @@ VOID _app_network_initialize (
 	PITEM_NETWORK_CONTEXT network_context;
 	R_ENVIRONMENT environment;
 
-	if (!_r_config_getboolean (L"IsNetworkMonitorEnabled", TRUE, NULL))
+	if (!_r_config_getboolean_ex(L"IsNetworkMonitorEnabled", TRUE, NULL))
 		return;
 
 	network_context = _app_network_getcontext ();
@@ -757,7 +757,7 @@ VOID _app_network_printlistviewtable (
 	INT item_count;
 	BOOLEAN is_highlight = FALSE, is_refresh = FALSE;
 
-	if (_r_config_getboolean (L"IsEnableHighlighting", TRUE, NULL) && _r_config_getboolean (L"IsHighlightConnection", TRUE, L"colors"))
+	if (_r_config_getboolean_ex(L"IsEnableHighlighting", TRUE, NULL) && _r_config_getboolean_ex(L"IsHighlightConnection", TRUE, L"colors"))
 		is_highlight = TRUE;
 
 	// add new connections into listview

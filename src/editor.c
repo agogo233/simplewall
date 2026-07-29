@@ -1768,7 +1768,7 @@ INT_PTR CALLBACK EditorProc (
 
 						rules = _r_obj_createlist (1, NULL);
 
-						_r_obj_addlistitem (rules, context->ptr_rule, NULL);
+						_r_obj_addlistitem_ex(rules, context->ptr_rule, NULL);
 					}
 					else
 					{
@@ -1777,7 +1777,7 @@ INT_PTR CALLBACK EditorProc (
 
 						rules = _r_obj_createlist (1, NULL);
 
-						_r_obj_addlistitem (rules, context->ptr_app, NULL);
+						_r_obj_addlistitem_ex(rules, context->ptr_app, NULL);
 
 						// comment
 						string = _r_ctrl_getstring (hpage_general, IDC_APP_COMMENT_ID);

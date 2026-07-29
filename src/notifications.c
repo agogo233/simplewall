@@ -91,7 +91,7 @@ BOOLEAN _app_notify_command (
 				_app_listview_updateitemby_param (hmain, app_hash, TRUE);
 		}
 
-		_r_obj_addlistitem (rules, ptr_app, NULL);
+		_r_obj_addlistitem_ex(rules, ptr_app, NULL);
 	}
 	else if (button_id == IDC_NEXT_BTN)
 	{
@@ -126,7 +126,7 @@ BOOLEAN _app_notify_addobject (
 {
 	LONG64 current_time, notification_timeout;
 
-	notification_timeout = _r_config_getlong64 (L"NotificationsTimeout", NOTIFY_TIMEOUT_DEFAULT, NULL);
+	notification_timeout = _r_config_getlong64_ex(L"NotificationsTimeout", NOTIFY_TIMEOUT_DEFAULT, NULL);
 	current_time = _r_unixtime_now ();
 
 	// check for last display time
@@ -139,7 +139,7 @@ BOOLEAN _app_notify_addobject (
 
 	if (_r_wnd_sendmessage (hwnd, 0, WM_NOTIFICATION, 0, (LPARAM)ptr_app->notification))
 	{
-		if (_r_config_getboolean (L"IsNotificationsSound", TRUE, NULL) && (!_r_config_getboolean (L"IsNotificationsFullscreenSilentMode", TRUE, NULL) || !_r_wnd_isfullscreenmode ()))
+		if (_r_config_getboolean_ex(L"IsNotificationsSound", TRUE, NULL) && (!_r_config_getboolean_ex(L"IsNotificationsFullscreenSilentMode", TRUE, NULL) || !_r_wnd_isfullscreenmode ()))
 			_app_notify_playsound ();
 
 		return TRUE;
@@ -537,7 +537,7 @@ VOID _app_notify_refresh (
 {
 	PITEM_LOG ptr_log;
 
-	if (!_r_wnd_isvisible (hwnd, TRUE) || !_r_config_getboolean (L"IsNotificationsEnabled", TRUE, NULL))
+	if (!_r_wnd_isvisible (hwnd, TRUE) || !_r_config_getboolean_ex(L"IsNotificationsEnabled", TRUE, NULL))
 	{
 		DestroyWindow (hwnd);
 		return;
@@ -579,7 +579,7 @@ VOID _app_notify_setposition (
 		return;
 	}
 
-	if (_r_config_getboolean (L"IsNotificationsOnTray", FALSE, NULL))
+	if (_r_config_getboolean_ex(L"IsNotificationsOnTray", FALSE, NULL))
 	{
 		monitor_info.cbSize = sizeof (MONITORINFO);
 
@@ -1210,7 +1210,7 @@ INT_PTR CALLBACK NotificationProc (
 						_r_obj_addhashtableitem (ptr_rule->apps, app_hash, NULL);
 
 						_r_queuedlock_acquireexclusive (&lock_rules);
-						_r_obj_addlistitem (rules_list, ptr_rule, &rule_idx);
+						_r_obj_addlistitem_ex(rules_list, ptr_rule, &rule_idx);
 						_r_queuedlock_releaseexclusive (&lock_rules);
 
 						if (hmain)
@@ -1259,7 +1259,7 @@ INT_PTR CALLBACK NotificationProc (
 					{
 						rules = _r_obj_createlist (0x02, NULL);
 
-						_r_obj_addlistitem (rules, ptr_rule, NULL);
+						_r_obj_addlistitem_ex(rules, ptr_rule, NULL);
 
 						_wfp_createrulefilters (_wfp_getenginehandle (), rules, DBG_ARG, FALSE);
 
@@ -1392,7 +1392,7 @@ INT_PTR CALLBACK NotificationProc (
 					if (context)
 					{
 						_r_queuedlock_acquireexclusive (&lock_rules);
-						_r_obj_addlistitem (rules_list, _r_obj_reference (ptr_rule), &rule_idx);
+						_r_obj_addlistitem_ex(rules_list, _r_obj_reference (ptr_rule), &rule_idx);
 						_r_queuedlock_releaseexclusive (&lock_rules);
 
 						hmain = _r_app_gethwnd ();

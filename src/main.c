@@ -61,7 +61,7 @@ BOOLEAN _app_installmessage (
 	tdc.pfCallback = &_r_msg_callback;
 	tdc.nDefaultButton = IDYES;
 
-	if (_r_config_getboolean (L"WF_State", TRUE, NULL))
+	if (_r_config_getboolean_ex(L"WF_State", TRUE, NULL))
 		tdc.dwFlags |= TDF_VERIFICATION_FLAG_CHECKED;
 
 	tdc.pButtons = td_buttons;
@@ -156,7 +156,7 @@ VOID _app_config_apply (
 		case IDC_STARTMINIMIZED_CHK:
 		case IDM_STARTMINIMIZED_CHK:
 		{
-			new_val = !_r_config_getboolean (L"IsStartMinimized", FALSE, NULL);
+			new_val = !_r_config_getboolean_ex(L"IsStartMinimized", FALSE, NULL);
 			break;
 		}
 
@@ -177,28 +177,28 @@ VOID _app_config_apply (
 		case IDC_RULE_BLOCKOUTBOUND:
 		case IDM_RULE_BLOCKOUTBOUND:
 		{
-			new_val = !_r_config_getboolean (L"BlockOutboundConnections", TRUE, NULL);
+			new_val = !_r_config_getboolean_ex(L"BlockOutboundConnections", TRUE, NULL);
 			break;
 		}
 
 		case IDC_RULE_BLOCKINBOUND:
 		case IDM_RULE_BLOCKINBOUND:
 		{
-			new_val = !_r_config_getboolean (L"BlockInboundConnections", TRUE, NULL);
+			new_val = !_r_config_getboolean_ex(L"BlockInboundConnections", TRUE, NULL);
 			break;
 		}
 
 		case IDC_RULE_ALLOWLOOPBACK:
 		case IDM_RULE_ALLOWLOOPBACK:
 		{
-			new_val = !_r_config_getboolean (L"AllowLoopbackConnections", TRUE, NULL);
+			new_val = !_r_config_getboolean_ex(L"AllowLoopbackConnections", TRUE, NULL);
 			break;
 		}
 
 		case IDC_RULE_ALLOW6TO4:
 		case IDM_RULE_ALLOW6TO4:
 		{
-			new_val = !_r_config_getboolean (L"AllowIPv6", TRUE, NULL);
+			new_val = !_r_config_getboolean_ex(L"AllowIPv6", TRUE, NULL);
 			break;
 		}
 
@@ -210,46 +210,46 @@ VOID _app_config_apply (
 
 		case IDC_USESTEALTHMODE_CHK:
 		{
-			new_val = !_r_config_getboolean (L"UseStealthMode", TRUE, NULL);
+			new_val = !_r_config_getboolean_ex(L"UseStealthMode", TRUE, NULL);
 			break;
 		}
 
 		case IDC_USECERTIFICATES_CHK:
 		case IDM_USECERTIFICATES_CHK:
 		{
-			new_val = !_r_config_getboolean (L"IsCertificatesEnabled", TRUE, NULL);
+			new_val = !_r_config_getboolean_ex(L"IsCertificatesEnabled", TRUE, NULL);
 			break;
 		}
 
 		case IDM_KEEPUNUSED_CHK:
 		{
-			new_val = !_r_config_getboolean (L"IsKeepUnusedApps", TRUE, NULL);
+			new_val = !_r_config_getboolean_ex(L"IsKeepUnusedApps", TRUE, NULL);
 			break;
 		}
 
 		case IDC_USEHASHES_CHK:
 		case IDM_USEHASHES_CHK:
 		{
-			new_val = !_r_config_getboolean (L"IsHashesEnabled", FALSE, NULL);
+			new_val = !_r_config_getboolean_ex(L"IsHashesEnabled", FALSE, NULL);
 			break;
 		}
 
 		case IDC_INSTALLBOOTTIMEFILTERS_CHK:
 		{
-			new_val = !_r_config_getboolean (L"InstallBoottimeFilters", TRUE, NULL);
+			new_val = !_r_config_getboolean_ex(L"InstallBoottimeFilters", TRUE, NULL);
 			break;
 		}
 
 		case IDC_USENETWORKRESOLUTION_CHK:
 		case IDM_USENETWORKRESOLUTION_CHK:
 		{
-			new_val = !_r_config_getboolean (L"IsNetworkResolutionsEnabled", TRUE, NULL);
+			new_val = !_r_config_getboolean_ex(L"IsNetworkResolutionsEnabled", TRUE, NULL);
 			break;
 		}
 
 		case IDM_USEAPPMONITOR_CHK:
 		{
-			new_val = !_r_config_getboolean (L"IsEnableAppMonitor", FALSE, NULL);
+			new_val = !_r_config_getboolean_ex(L"IsEnableAppMonitor", FALSE, NULL);
 			break;
 		}
 
@@ -567,13 +567,13 @@ INT_PTR CALLBACK SettingsProc (
 			{
 				case IDD_SETTINGS_GENERAL:
 				{
-					_r_button_setcheck (hwnd, IDC_ALWAYSONTOP_CHK, _r_config_getboolean (L"AlwaysOnTop", FALSE, NULL));
+					_r_button_setcheck (hwnd, IDC_ALWAYSONTOP_CHK, _r_config_getboolean_ex(L"AlwaysOnTop", FALSE, NULL));
 
 #if defined(APP_HAVE_AUTORUN)
 					_r_button_setcheck (hwnd, IDC_LOADONSTARTUP_CHK, _r_autorun_isenabled ());
 #endif // APP_HAVE_AUTORUN
 
-					_r_button_setcheck (hwnd, IDC_STARTMINIMIZED_CHK, _r_config_getboolean (L"IsStartMinimized", FALSE, NULL));
+					_r_button_setcheck (hwnd, IDC_STARTMINIMIZED_CHK, _r_config_getboolean_ex(L"IsStartMinimized", FALSE, NULL));
 
 #if defined(APP_HAVE_SKIPUAC)
 					_r_button_setcheck (hwnd, IDC_SKIPUACWARNING_CHK, _r_skipuac_isenabled ());
@@ -590,15 +590,15 @@ INT_PTR CALLBACK SettingsProc (
 				{
 					HWND htip;
 
-					_r_button_setcheck (hwnd, IDC_RULE_BLOCKOUTBOUND, _r_config_getboolean (L"BlockOutboundConnections", TRUE, NULL));
-					_r_button_setcheck (hwnd, IDC_RULE_BLOCKINBOUND, _r_config_getboolean (L"BlockInboundConnections", TRUE, NULL));
-					_r_button_setcheck (hwnd, IDC_RULE_ALLOWLOOPBACK, _r_config_getboolean (L"AllowLoopbackConnections", TRUE, NULL));
-					_r_button_setcheck (hwnd, IDC_RULE_ALLOW6TO4, _r_config_getboolean (L"AllowIPv6", TRUE, NULL));
-					_r_button_setcheck (hwnd, IDC_USESTEALTHMODE_CHK, _r_config_getboolean (L"UseStealthMode", TRUE, NULL));
-					_r_button_setcheck (hwnd, IDC_INSTALLBOOTTIMEFILTERS_CHK, _r_config_getboolean (L"InstallBoottimeFilters", TRUE, NULL));
-					_r_button_setcheck (hwnd, IDC_USECERTIFICATES_CHK, _r_config_getboolean (L"IsCertificatesEnabled", TRUE, NULL));
-					_r_button_setcheck (hwnd, IDC_USEHASHES_CHK, _r_config_getboolean (L"IsHashesEnabled", FALSE, NULL));
-					_r_button_setcheck (hwnd, IDC_USENETWORKRESOLUTION_CHK, _r_config_getboolean (L"IsNetworkResolutionsEnabled", TRUE, NULL));
+					_r_button_setcheck (hwnd, IDC_RULE_BLOCKOUTBOUND, _r_config_getboolean_ex(L"BlockOutboundConnections", TRUE, NULL));
+					_r_button_setcheck (hwnd, IDC_RULE_BLOCKINBOUND, _r_config_getboolean_ex(L"BlockInboundConnections", TRUE, NULL));
+					_r_button_setcheck (hwnd, IDC_RULE_ALLOWLOOPBACK, _r_config_getboolean_ex(L"AllowLoopbackConnections", TRUE, NULL));
+					_r_button_setcheck (hwnd, IDC_RULE_ALLOW6TO4, _r_config_getboolean_ex(L"AllowIPv6", TRUE, NULL));
+					_r_button_setcheck (hwnd, IDC_USESTEALTHMODE_CHK, _r_config_getboolean_ex(L"UseStealthMode", TRUE, NULL));
+					_r_button_setcheck (hwnd, IDC_INSTALLBOOTTIMEFILTERS_CHK, _r_config_getboolean_ex(L"InstallBoottimeFilters", TRUE, NULL));
+					_r_button_setcheck (hwnd, IDC_USECERTIFICATES_CHK, _r_config_getboolean_ex(L"IsCertificatesEnabled", TRUE, NULL));
+					_r_button_setcheck (hwnd, IDC_USEHASHES_CHK, _r_config_getboolean_ex(L"IsHashesEnabled", FALSE, NULL));
+					_r_button_setcheck (hwnd, IDC_USENETWORKRESOLUTION_CHK, _r_config_getboolean_ex(L"IsNetworkResolutionsEnabled", TRUE, NULL));
 
 					htip = _r_tooltip_create (hwnd);
 
@@ -620,17 +620,17 @@ INT_PTR CALLBACK SettingsProc (
 				{
 					_r_button_checkradio (
 						hwnd,
-						IDC_BLOCKLIST_SPY_DISABLE, IDC_BLOCKLIST_SPY_BLOCK, IDC_BLOCKLIST_SPY_DISABLE + _r_calc_clamp (_r_config_getlong (L"BlocklistSpyState", 2, NULL), 0, 2)
+						IDC_BLOCKLIST_SPY_DISABLE, IDC_BLOCKLIST_SPY_BLOCK, IDC_BLOCKLIST_SPY_DISABLE + _r_calc_clamp (_r_config_getlong_ex(L"BlocklistSpyState", 2, NULL), 0, 2)
 					);
 
 					_r_button_checkradio (
 						hwnd,
-						IDC_BLOCKLIST_UPDATE_DISABLE, IDC_BLOCKLIST_UPDATE_BLOCK, IDC_BLOCKLIST_UPDATE_DISABLE + _r_calc_clamp (_r_config_getlong (L"BlocklistUpdateState", 0, NULL), 0, 2)
+						IDC_BLOCKLIST_UPDATE_DISABLE, IDC_BLOCKLIST_UPDATE_BLOCK, IDC_BLOCKLIST_UPDATE_DISABLE + _r_calc_clamp (_r_config_getlong_ex(L"BlocklistUpdateState", 0, NULL), 0, 2)
 					);
 
 					_r_button_checkradio (
 						hwnd,
-						IDC_BLOCKLIST_EXTRA_DISABLE, IDC_BLOCKLIST_EXTRA_BLOCK, IDC_BLOCKLIST_EXTRA_DISABLE + _r_calc_clamp (_r_config_getlong (L"BlocklistExtraState", 0, NULL), 0, 2)
+						IDC_BLOCKLIST_EXTRA_DISABLE, IDC_BLOCKLIST_EXTRA_BLOCK, IDC_BLOCKLIST_EXTRA_DISABLE + _r_calc_clamp (_r_config_getlong_ex(L"BlocklistExtraState", 0, NULL), 0, 2)
 					);
 
 					break;
@@ -638,11 +638,11 @@ INT_PTR CALLBACK SettingsProc (
 
 				case IDD_SETTINGS_INTERFACE:
 				{
-					_r_button_setcheck (hwnd, IDC_CONFIRMEXIT_CHK, _r_config_getboolean (L"ConfirmExit2", TRUE, NULL));
-					_r_button_setcheck (hwnd, IDC_CONFIRMEXITTIMER_CHK, _r_config_getboolean (L"ConfirmExitTimer", TRUE, NULL));
-					_r_button_setcheck (hwnd, IDC_CONFIRMLOGCLEAR_CHK, _r_config_getboolean (L"ConfirmLogClear", TRUE, NULL));
-					_r_button_setcheck (hwnd, IDC_CONFIRMALLOW_CHK, _r_config_getboolean (L"ConfirmAllow", TRUE, NULL));
-					_r_button_setcheck (hwnd, IDC_TRAYICONSINGLECLICK_CHK, _r_config_getboolean (L"IsTrayIconSingleClick", TRUE, NULL));
+					_r_button_setcheck (hwnd, IDC_CONFIRMEXIT_CHK, _r_config_getboolean_ex(L"ConfirmExit2", TRUE, NULL));
+					_r_button_setcheck (hwnd, IDC_CONFIRMEXITTIMER_CHK, _r_config_getboolean_ex(L"ConfirmExitTimer", TRUE, NULL));
+					_r_button_setcheck (hwnd, IDC_CONFIRMLOGCLEAR_CHK, _r_config_getboolean_ex(L"ConfirmLogClear", TRUE, NULL));
+					_r_button_setcheck (hwnd, IDC_CONFIRMALLOW_CHK, _r_config_getboolean_ex(L"ConfirmAllow", TRUE, NULL));
+					_r_button_setcheck (hwnd, IDC_TRAYICONSINGLECLICK_CHK, _r_config_getboolean_ex(L"IsTrayIconSingleClick", TRUE, NULL));
 
 					break;
 				}
@@ -673,7 +673,7 @@ INT_PTR CALLBACK SettingsProc (
 						ptr_clr->new_clr = _r_config_getulong (ptr_clr->config_value->buffer, ptr_clr->default_clr, L"colors");
 
 						_r_listview_additem (hwnd, IDC_COLORS, item_id, _r_locale_getstring (ptr_clr->locale_id), icon_id, I_GROUPIDNONE, (LPARAM)ptr_clr);
-						_r_listview_setitemcheck (hwnd, IDC_COLORS, item_id, _r_config_getboolean (ptr_clr->config_name->buffer, ptr_clr->is_enabled, L"colors"));
+						_r_listview_setitemcheck (hwnd, IDC_COLORS, item_id, _r_config_getboolean_ex(ptr_clr->config_name->buffer, ptr_clr->is_enabled, L"colors"));
 
 						item_id += 1;
 					}
@@ -685,10 +685,10 @@ INT_PTR CALLBACK SettingsProc (
 
 				case IDD_SETTINGS_NOTIFICATIONS:
 				{
-					_r_button_setcheck (hwnd, IDC_ENABLENOTIFICATIONS_CHK, _r_config_getboolean (L"IsNotificationsEnabled", TRUE, NULL));
-					_r_button_setcheck (hwnd, IDC_NOTIFICATIONSOUND_CHK, _r_config_getboolean (L"IsNotificationsSound", TRUE, NULL));
-					_r_button_setcheck (hwnd, IDC_NOTIFICATIONFULLSCREENSILENTMODE_CHK, _r_config_getboolean (L"IsNotificationsFullscreenSilentMode", TRUE, NULL));
-					_r_button_setcheck (hwnd, IDC_NOTIFICATIONONTRAY_CHK, _r_config_getboolean (L"IsNotificationsOnTray", FALSE, NULL));
+					_r_button_setcheck (hwnd, IDC_ENABLENOTIFICATIONS_CHK, _r_config_getboolean_ex(L"IsNotificationsEnabled", TRUE, NULL));
+					_r_button_setcheck (hwnd, IDC_NOTIFICATIONSOUND_CHK, _r_config_getboolean_ex(L"IsNotificationsSound", TRUE, NULL));
+					_r_button_setcheck (hwnd, IDC_NOTIFICATIONFULLSCREENSILENTMODE_CHK, _r_config_getboolean_ex(L"IsNotificationsFullscreenSilentMode", TRUE, NULL));
+					_r_button_setcheck (hwnd, IDC_NOTIFICATIONONTRAY_CHK, _r_config_getboolean_ex(L"IsNotificationsOnTray", FALSE, NULL));
 
 					_r_updown_setrange (hwnd, IDC_NOTIFICATIONTIMEOUT, 0, _r_calc_days2seconds (7));
 					_r_updown_setvalue (hwnd, IDC_NOTIFICATIONTIMEOUT, _r_config_getulong (L"NotificationsTimeout", NOTIFY_TIMEOUT_DEFAULT, NULL));
@@ -702,7 +702,7 @@ INT_PTR CALLBACK SettingsProc (
 				{
 					PR_STRING path;
 
-					_r_button_setcheck (hwnd, IDC_ENABLELOG_CHK, _r_config_getboolean (L"IsLogEnabled", FALSE, NULL));
+					_r_button_setcheck (hwnd, IDC_ENABLELOG_CHK, _r_config_getboolean_ex(L"IsLogEnabled", FALSE, NULL));
 
 					path = _app_getlogpath ();
 
@@ -727,7 +727,7 @@ INT_PTR CALLBACK SettingsProc (
 					_r_updown_setrange (hwnd, IDC_LOGSIZELIMIT, 64, _r_calc_kilobytes2bytes (512));
 					_r_updown_setvalue (hwnd, IDC_LOGSIZELIMIT, _r_config_getulong (L"LogSizeLimitKb", LOG_SIZE_LIMIT_DEFAULT, NULL));
 
-					_r_button_setcheck (hwnd, IDC_ENABLEUILOG_CHK, _r_config_getboolean (L"IsLogUiEnabled", FALSE, NULL));
+					_r_button_setcheck (hwnd, IDC_ENABLEUILOG_CHK, _r_config_getboolean_ex(L"IsLogUiEnabled", FALSE, NULL));
 
 					_r_wnd_sendcommand (hwnd, IDC_ENABLELOG_CHK, WM_APP);
 
@@ -736,11 +736,11 @@ INT_PTR CALLBACK SettingsProc (
 
 				case IDD_SETTINGS_EXCLUDE:
 				{
-					_r_button_setcheck (hwnd, IDC_EXCLUDEBLOCKLIST_CHK, _r_config_getboolean (L"IsExcludeBlocklist", TRUE, NULL));
-					_r_button_setcheck (hwnd, IDC_EXCLUDECUSTOM_CHK, _r_config_getboolean (L"IsExcludeCustomRules", TRUE, NULL));
-					_r_button_setcheck (hwnd, IDC_EXCLUDEINBOUND_CHK, _r_config_getboolean (L"IsExcludeInbound", FALSE, NULL));
-					_r_button_setcheck (hwnd, IDC_EXCLUDESTEALTH_CHK, _r_config_getboolean (L"IsExcludeStealth", TRUE, NULL));
-					_r_button_setcheck (hwnd, IDC_EXCLUDECLASSIFYALLOW_CHK, _r_config_getboolean (L"IsExcludeClassifyAllow", TRUE, NULL));
+					_r_button_setcheck (hwnd, IDC_EXCLUDEBLOCKLIST_CHK, _r_config_getboolean_ex(L"IsExcludeBlocklist", TRUE, NULL));
+					_r_button_setcheck (hwnd, IDC_EXCLUDECUSTOM_CHK, _r_config_getboolean_ex(L"IsExcludeCustomRules", TRUE, NULL));
+					_r_button_setcheck (hwnd, IDC_EXCLUDEINBOUND_CHK, _r_config_getboolean_ex(L"IsExcludeInbound", FALSE, NULL));
+					_r_button_setcheck (hwnd, IDC_EXCLUDESTEALTH_CHK, _r_config_getboolean_ex(L"IsExcludeStealth", TRUE, NULL));
+					_r_button_setcheck (hwnd, IDC_EXCLUDECLASSIFYALLOW_CHK, _r_config_getboolean_ex(L"IsExcludeClassifyAllow", TRUE, NULL));
 
 					// win8+
 					if (_r_sys_isosversionlower (WINDOWS_8))
@@ -1297,7 +1297,7 @@ INT_PTR CALLBACK SettingsProc (
 						{
 							_r_config_setstringexpand (L"LogPath", log_path->buffer, NULL);
 
-							if (_r_config_getboolean (L"IsLogEnabled", FALSE, NULL))
+							if (_r_config_getboolean_ex(L"IsLogEnabled", FALSE, NULL))
 								_app_loginit (TRUE);
 
 							_r_obj_dereference (log_path);
@@ -1340,7 +1340,7 @@ INT_PTR CALLBACK SettingsProc (
 								_r_config_setstringexpand (L"LogPath", path->buffer, NULL);
 								_r_ctrl_setstring (hwnd, IDC_LOGPATH, path->buffer);
 
-								_app_loginit (_r_config_getboolean (L"IsLogEnabled", FALSE, NULL));
+								_app_loginit (_r_config_getboolean_ex(L"IsLogEnabled", FALSE, NULL));
 
 								_r_obj_dereference (path);
 							}
@@ -1465,7 +1465,7 @@ INT_PTR CALLBACK SettingsProc (
 					is_postmessage = (lparam == WM_APP);
 					is_checked = _r_button_ischecked (hwnd, ctrl_id);
 
-					_r_button_setcheck (hwnd, IDC_NOTIFICATIONFULLSCREENSILENTMODE_CHK, _r_config_getboolean (L"IsNotificationsFullscreenSilentMode", TRUE, NULL));
+					_r_button_setcheck (hwnd, IDC_NOTIFICATIONFULLSCREENSILENTMODE_CHK, _r_config_getboolean_ex(L"IsNotificationsFullscreenSilentMode", TRUE, NULL));
 
 					if (!is_postmessage)
 						_r_config_setboolean (L"IsNotificationsSound", is_checked, NULL);
@@ -1577,7 +1577,7 @@ VOID _app_addwindowtabs (
 		_r_tab_additem (hwnd, IDC_TAB, INT_ERROR, L"", I_DEFAULT, (LPARAM)context);
 	}
 
-	if (!_r_config_getboolean (L"IsInternalRulesDisabled", FALSE, NULL))
+	if (!_r_config_getboolean_ex(L"IsInternalRulesDisabled", FALSE, NULL))
 	{
 		// rules blocklist tab
 		context = (PITEM_TAB_CONTEXT)_r_mem_allocate (sizeof (ITEM_TAB_CONTEXT));
@@ -1930,7 +1930,7 @@ INT_PTR CALLBACK DlgProc (
 			_r_settings_addpage (IDD_SETTINGS_HIGHLIGHTING, IDS_TITLE_HIGHLIGHTING);
 			_r_settings_addpage (IDD_SETTINGS_RULES, IDS_TRAY_RULES);
 
-			if (!_r_config_getboolean (L"IsInternalRulesDisabled", FALSE, NULL))
+			if (!_r_config_getboolean_ex(L"IsInternalRulesDisabled", FALSE, NULL))
 				_r_settings_addpage (IDD_SETTINGS_BLOCKLIST, IDS_TRAY_BLOCKLIST_RULES);
 
 			// dropped packets logging (win7+)
@@ -1939,7 +1939,7 @@ INT_PTR CALLBACK DlgProc (
 			_r_settings_addpage (IDD_SETTINGS_EXCLUDE, IDS_TITLE_EXCLUDE);
 
 			// add blocklist to update
-			if (!_r_config_getboolean (L"IsInternalRulesDisabled", FALSE, NULL))
+			if (!_r_config_getboolean_ex(L"IsInternalRulesDisabled", FALSE, NULL))
 			{
 				_r_str_fromlong64 (internal_profile_version, RTL_NUMBER_OF (internal_profile_version), profile_info.profile_internal_timestamp);
 
@@ -1949,7 +1949,7 @@ INT_PTR CALLBACK DlgProc (
 			_app_network_initialize (hwnd);
 
 			// initialize tab
-			_app_settab_id (hwnd, _r_config_getlong (L"CurrentTab", IDC_APPS_PROFILE, NULL));
+			_app_settab_id (hwnd, _r_config_getlong_ex(L"CurrentTab", IDC_APPS_PROFILE, NULL));
 
 			_app_fileloggingenable ();
 
@@ -2029,7 +2029,7 @@ INT_PTR CALLBACK DlgProc (
 
 				case WM_LBUTTONUP:
 				{
-					if (_r_config_getboolean (L"IsTrayIconSingleClick", TRUE, NULL))
+					if (_r_config_getboolean_ex(L"IsTrayIconSingleClick", TRUE, NULL))
 					{
 						_r_wnd_toggle (hwnd, FALSE);
 					}
@@ -2043,7 +2043,7 @@ INT_PTR CALLBACK DlgProc (
 
 				case WM_LBUTTONDBLCLK:
 				{
-					if (!_r_config_getboolean (L"IsTrayIconSingleClick", TRUE, NULL))
+					if (!_r_config_getboolean_ex(L"IsTrayIconSingleClick", TRUE, NULL))
 						_r_wnd_toggle (hwnd, FALSE);
 
 					break;
@@ -2485,7 +2485,7 @@ INT_PTR CALLBACK DlgProc (
 								{
 									rules = _r_obj_createlist (1, NULL);
 
-									_r_obj_addlistitem (rules, ptr_app, NULL);
+									_r_obj_addlistitem_ex(rules, ptr_app, NULL);
 
 									_wfp_createappfilters (_wfp_getenginehandle (), rules, DBG_ARG, FALSE);
 
@@ -2518,7 +2518,7 @@ INT_PTR CALLBACK DlgProc (
 								{
 									rules = _r_obj_createlist (1, NULL);
 
-									_r_obj_addlistitem (rules, ptr_rule, NULL);
+									_r_obj_addlistitem_ex(rules, ptr_rule, NULL);
 
 									_wfp_createrulefilters (_wfp_getenginehandle (), rules, DBG_ARG, FALSE);
 

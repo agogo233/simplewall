@@ -629,7 +629,7 @@ PR_STRING _app_getappdisplayname (
 		}
 	}
 
-	if ((is_shortened || _r_config_getboolean (L"ShowFilenames", TRUE, NULL)) && !_r_obj_isstringempty (ptr_app->short_name))
+	if ((is_shortened || _r_config_getboolean_ex(L"ShowFilenames", TRUE, NULL)) && !_r_obj_isstringempty (ptr_app->short_name))
 		return _r_obj_reference (ptr_app->short_name);
 
 	if (!_r_obj_isstringempty (ptr_app->real_path))
@@ -660,7 +660,7 @@ PR_STRING _app_getapppath (
 	if (ptr_app->real_path)
 		_r_obj_movereference ((PVOID_PTR)&path, _r_obj_reference (ptr_app->real_path));
 
-	if (path && _r_config_getboolean (L"IsShortPath", TRUE, NULL))
+	if (path && _r_config_getboolean_ex(L"IsShortPath", TRUE, NULL))
 	{
 		string = _r_str_environmentunexpandstring (&path->sr);
 
@@ -678,7 +678,7 @@ VOID _app_getfileicon (
 {
 	LONG icon_id = 0;
 
-	if (_r_config_getboolean (L"IsIconsHidden", FALSE, NULL) || !_app_isappvalidbinary (ptr_app_info->path))
+	if (_r_config_getboolean_ex(L"IsIconsHidden", FALSE, NULL) || !_app_isappvalidbinary (ptr_app_info->path))
 	{
 		_app_icons_loadfromfile (NULL, ptr_app_info->type, &icon_id, NULL, TRUE);
 	}
@@ -860,7 +860,7 @@ LONG _app_verifyfromfile (
 		return STATUS_INVALID_PARAMETER;
 	}
 
-	if (_r_config_getboolean (L"IsOCSPEnabled", FALSE, NULL))
+	if (_r_config_getboolean_ex(L"IsOCSPEnabled", FALSE, NULL))
 	{
 		trust_data.fdwRevocationChecks = WTD_REVOKE_WHOLECHAIN;
 		trust_data.dwProvFlags = WTD_SAFER_FLAG;
@@ -1599,7 +1599,7 @@ PR_STRING _app_resolveaddress_interlocked (
 
 VOID _app_fileloggingenable ()
 {
-	if (_r_config_getboolean (L"IsEnableAppMonitor", FALSE, NULL))
+	if (_r_config_getboolean_ex(L"IsEnableAppMonitor", FALSE, NULL))
 	{
 		// TODO! rewrite this and watch FS changes through NtNotifyChangeDirectoryFile, then read file hash!
 		if (NT_SUCCESS (_r_sys_createthread (&config.hmonitor_thread, NtCurrentProcess (), &_app_timercallback, NULL, NULL, L"FileMonitor")))
@@ -1757,14 +1757,14 @@ VOID NTAPI _app_queue_fileinformation (
 	_app_getfileicon (ptr_app_info);
 
 	// query certificate information
-	if (_r_config_getboolean (L"IsCertificatesEnabled", TRUE, NULL))
+	if (_r_config_getboolean_ex(L"IsCertificatesEnabled", TRUE, NULL))
 		_app_getfilesignatureinfo (ptr_app_info, hfile);
 
 	// query version info
 	_app_getfileversioninfo (ptr_app_info);
 
 	// query sha256 info
-	if (_r_config_getboolean (L"IsHashesEnabled", FALSE, NULL))
+	if (_r_config_getboolean_ex(L"IsHashesEnabled", FALSE, NULL))
 		_app_getfilehashinfo (hfile, ptr_app_info->app_hash);
 
 	// redraw listview
@@ -1798,14 +1798,14 @@ VOID NTAPI _app_queue_notifyinformation (
 	ptr_log = (PITEM_LOG)context->base_address;
 
 	// query notification host name
-	if (_r_config_getboolean (L"IsNetworkResolutionsEnabled", TRUE, NULL))
+	if (_r_config_getboolean_ex(L"IsNetworkResolutionsEnabled", TRUE, NULL))
 	{
 		host_str = _app_resolveaddress_interlocked ((volatile PVOID_PTR)&ptr_log->remote_host_str, ptr_log->af, &ptr_log->remote_addr, TRUE);
 		host_str = _r_obj_reference (host_str);
 	}
 
 	// query signature
-	if (_r_config_getboolean (L"IsCertificatesEnabled", TRUE, NULL))
+	if (_r_config_getboolean_ex(L"IsCertificatesEnabled", TRUE, NULL))
 	{
 		ptr_app_info = _app_getappinfobyhash2 (ptr_log->app_hash);
 
@@ -1921,7 +1921,7 @@ VOID NTAPI _app_queue_resolveinformation (
 
 	context = (PITEM_CONTEXT)arglist;
 
-	is_resolutionenabled = _r_config_getboolean (L"IsNetworkResolutionsEnabled", TRUE, NULL);
+	is_resolutionenabled = _r_config_getboolean_ex(L"IsNetworkResolutionsEnabled", TRUE, NULL);
 
 	switch (context->listview_id)
 	{
@@ -1959,7 +1959,7 @@ VOID NTAPI _app_queue_resolveinformation (
 
 BOOLEAN _app_wufixenabled ()
 {
-	if (!_r_config_getboolean (L"IsWUFixEnabled", FALSE, NULL))
+	if (!_r_config_getboolean_ex(L"IsWUFixEnabled", FALSE, NULL))
 		return FALSE;
 
 	return _r_fs_isexists (&config.wusvc_path->sr);
@@ -2061,7 +2061,7 @@ VOID _app_wufixenable (
 
 			rules = _r_obj_createlist (0x02, NULL);
 
-			_r_obj_addlistitem (rules, ptr_app, NULL);
+			_r_obj_addlistitem_ex(rules, ptr_app, NULL);
 
 			_wfp_createappfilters (_wfp_getenginehandle (), rules, DBG_ARG, FALSE);
 

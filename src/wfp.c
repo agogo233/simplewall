@@ -272,7 +272,7 @@ BOOLEAN _wfp_initialize (
 			sublayer.displayData.description = _r_app_getname ();
 			sublayer.providerKey = (LPGUID)&GUID_WfpProvider;
 			sublayer.subLayerKey = GUID_WfpSublayer;
-			sublayer.weight = (UINT16)_r_config_getlong (L"SublayerWeight", FWW_SUBLAYER, NULL);
+			sublayer.weight = (UINT16)_r_config_getlong_ex(L"SublayerWeight", FWW_SUBLAYER, NULL);
 
 			if (!config.is_filterstemporary)
 				sublayer.flags = FWPM_SUBLAYER_FLAG_PERSISTENT;
@@ -357,7 +357,7 @@ BOOLEAN _wfp_initialize (
 	}
 
 	// enables inbound or forward packet queuing independently. when enabled, the system is able to evenly distribute cpu load to multiple cpus for site-to-site ipsec tunnel scenarios. (win8+)
-	if (_r_sys_isosversiongreaterorequal (WINDOWS_8) && _r_config_getboolean (L"IsPacketQueuingEnabled", TRUE, NULL))
+	if (_r_sys_isosversiongreaterorequal (WINDOWS_8) && _r_config_getboolean_ex(L"IsPacketQueuingEnabled", TRUE, NULL))
 	{
 		RtlZeroMemory (&val, sizeof (FWP_VALUE0));
 
@@ -533,7 +533,7 @@ VOID _wfp_installfilters (
 	while (_r_obj_enumhashtablepointer (apps_table, (PVOID_PTR)&ptr_app, NULL, &enum_key))
 	{
 		if (ptr_app->is_enabled)
-			_r_obj_addlistitem (rules, _r_obj_reference (ptr_app), NULL);
+			_r_obj_addlistitem_ex(rules, _r_obj_reference (ptr_app), NULL);
 	}
 
 	_r_queuedlock_releaseshared (&lock_apps);
@@ -553,7 +553,7 @@ VOID _wfp_installfilters (
 		ptr_rule = (PITEM_RULE)_r_obj_getlistitem (rules_list, i);
 
 		if (ptr_rule && ptr_rule->is_enabled)
-			_r_obj_addlistitem (rules, _r_obj_reference (ptr_rule), NULL);
+			_r_obj_addlistitem_ex(rules, _r_obj_reference (ptr_rule), NULL);
 	}
 
 	_r_queuedlock_releaseshared (&lock_rules);
@@ -1589,7 +1589,7 @@ BOOLEAN _wfp_createglobalfilters (
 	}
 
 	// add loopback connections permission
-	if (_r_config_getboolean (L"AllowLoopbackConnections", TRUE, NULL))
+	if (_r_config_getboolean_ex(L"AllowLoopbackConnections", TRUE, NULL))
 	{
 		// match all loopback (localhost) traffic
 		fwfc[0].fieldKey = FWPM_CONDITION_FLAGS;
@@ -1652,7 +1652,7 @@ BOOLEAN _wfp_createglobalfilters (
 	// firewall service rules
 	// https://www.iana.org/assignments/icmpv6-parameters/icmpv6-parameters.xhtml
 	// https://learn.microsoft.com/ru-ru/previous-versions/windows/embedded/gg462153(v=winembedded.80)
-	if (_r_config_getboolean (L"AllowIPv6", TRUE, NULL))
+	if (_r_config_getboolean_ex(L"AllowIPv6", TRUE, NULL))
 	{
 		// allows 6to4 tunneling, which enables ipv6 to run over an ipv4 network
 		fwfc[0].fieldKey = FWPM_CONDITION_IP_PROTOCOL;
@@ -1688,7 +1688,7 @@ BOOLEAN _wfp_createglobalfilters (
 
 	// prevent port scanning using stealth discards and silent drops
 	// https://learn.microsoft.com/ru-ru/windows/win32/fwp/preventing-port-scanning
-	if (_r_config_getboolean (L"UseStealthMode", TRUE, NULL))
+	if (_r_config_getboolean_ex(L"UseStealthMode", TRUE, NULL))
 	{
 		// blocks udp port scanners
 		fwfc[0].fieldKey = FWPM_CONDITION_FLAGS;
@@ -1741,7 +1741,7 @@ BOOLEAN _wfp_createglobalfilters (
 	}
 
 	// install boot-time filters (enforced at boot-time, even before BFE service starts)
-	if (_r_config_getboolean (L"InstallBoottimeFilters", TRUE, NULL) && !config.is_filterstemporary)
+	if (_r_config_getboolean_ex(L"InstallBoottimeFilters", TRUE, NULL) && !config.is_filterstemporary)
 	{
 		fwfc[0].fieldKey = FWPM_CONDITION_FLAGS;
 		fwfc[0].matchType = FWP_MATCH_FLAGS_ALL_SET;
@@ -1781,7 +1781,7 @@ BOOLEAN _wfp_createglobalfilters (
 		_wfp_createfilter (engine_handle, DATA_FILTER_GENERAL, FWN_BOOTTIME, fwfc, 1, &FWPM_LAYER_IPFORWARD_V6, NULL, FWW_APP, FWP_ACTION_BLOCK, FWPM_FILTER_FLAG_BOOTTIME, filter_ids);
 	}
 
-	action = _r_config_getboolean (L"BlockOutboundConnections", TRUE, NULL) ? FWP_ACTION_BLOCK : FWP_ACTION_PERMIT;
+	action = _r_config_getboolean_ex(L"BlockOutboundConnections", TRUE, NULL) ? FWP_ACTION_BLOCK : FWP_ACTION_PERMIT;
 
 	// block outbound connection
 	if (action == FWP_ACTION_BLOCK)
@@ -1824,7 +1824,7 @@ BOOLEAN _wfp_createglobalfilters (
 	_wfp_createfilter (engine_handle, DATA_FILTER_GENERAL, FWN_BLOCK_CONNECTION, NULL, 0, &FWPM_LAYER_ALE_AUTH_CONNECT_V6, NULL, FWW_LOWEST, action, 0, filter_ids);
 
 	// block inbound connections
-	action = (_r_config_getboolean (L"UseStealthMode", TRUE, NULL) || _r_config_getboolean (L"BlockInboundConnections", TRUE, NULL)) ? FWP_ACTION_BLOCK : FWP_ACTION_PERMIT;
+	action = (_r_config_getboolean_ex(L"UseStealthMode", TRUE, NULL) || _r_config_getboolean_ex(L"BlockInboundConnections", TRUE, NULL)) ? FWP_ACTION_BLOCK : FWP_ACTION_PERMIT;
 
 	_wfp_createfilter (engine_handle, DATA_FILTER_GENERAL, FWN_BLOCK_RECVACCEPT, NULL, 0, &FWPM_LAYER_ALE_AUTH_RECV_ACCEPT_V4, NULL, FWW_LOWEST, action, 0, filter_ids);
 	_wfp_createfilter (engine_handle, DATA_FILTER_GENERAL, FWN_BLOCK_RECVACCEPT, NULL, 0, &FWPM_LAYER_ALE_AUTH_RECV_ACCEPT_V6, NULL, FWW_LOWEST, action, 0, filter_ids);
@@ -2038,7 +2038,7 @@ VOID NTAPI _wfp_applythread (
 		_wfp_logsubscribe (context->hwnd, engine_handle);
 
 	if (_r_sys_isosversiongreaterorequal (WINDOWS_10))
-		_app_wufixenable (context->hwnd, _r_config_getboolean (L"IsWUFixEnabled", FALSE, NULL));
+		_app_wufixenable (context->hwnd, _r_config_getboolean_ex(L"IsWUFixEnabled", FALSE, NULL));
 
 	_app_restoreinterfacestate (context->hwnd, TRUE);
 	_app_setinterfacestate (context->hwnd, _r_dc_getwindowdpi (context->hwnd));

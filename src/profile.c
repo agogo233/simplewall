@@ -710,7 +710,7 @@ COLORREF _app_getappcolor (
 
 	if (ptr_app && !is_networklist)
 	{
-		if (_r_config_getboolean (L"IsHighlightInvalid", TRUE, L"colors") && !_app_isappexists (ptr_app))
+		if (_r_config_getboolean_ex(L"IsHighlightInvalid", TRUE, L"colors") && !_app_isappexists (ptr_app))
 		{
 			color_hash = config.color_invalid;
 
@@ -718,14 +718,14 @@ COLORREF _app_getappcolor (
 		}
 	}
 
-	if (_r_config_getboolean (L"IsHighlightConnection", TRUE, L"colors") && is_validconnection)
+	if (_r_config_getboolean_ex(L"IsHighlightConnection", TRUE, L"colors") && is_validconnection)
 	{
 		color_hash = config.color_network;
 
 		goto CleanupExit;
 	}
 
-	if (_r_config_getboolean (L"IsHighlightSigned", TRUE, L"colors") && _app_isappsigned (app_hash))
+	if (_r_config_getboolean_ex(L"IsHighlightSigned", TRUE, L"colors") && _app_isappsigned (app_hash))
 	{
 		color_hash = config.color_signed;
 
@@ -734,21 +734,21 @@ COLORREF _app_getappcolor (
 
 	if (ptr_app)
 	{
-		if (!is_profilelist && (_r_config_getboolean (L"IsHighlightSpecial", TRUE, L"colors") && _app_isapphaverule (app_hash, FALSE)))
+		if (!is_profilelist && (_r_config_getboolean_ex(L"IsHighlightSpecial", TRUE, L"colors") && _app_isapphaverule (app_hash, FALSE)))
 		{
 			color_hash = config.color_special;
 
 			goto CleanupExit;
 		}
 
-		if (_r_config_getboolean (L"IsHighlightPico", TRUE, L"colors") && ptr_app->type == DATA_APP_PICO)
+		if (_r_config_getboolean_ex(L"IsHighlightPico", TRUE, L"colors") && ptr_app->type == DATA_APP_PICO)
 		{
 			color_hash = config.color_pico;
 
 			goto CleanupExit;
 		}
 
-		if (_r_config_getboolean (L"IsHighlightUndelete", TRUE, L"colors") && ptr_app->is_undeletable)
+		if (_r_config_getboolean_ex(L"IsHighlightUndelete", TRUE, L"colors") && ptr_app->is_undeletable)
 		{
 			color_hash = config.color_nonremovable;
 
@@ -756,7 +756,7 @@ COLORREF _app_getappcolor (
 		}
 	}
 
-	if (_r_config_getboolean (L"IsHighlightSystem", TRUE, L"colors") && is_systemapp)
+	if (_r_config_getboolean_ex(L"IsHighlightSystem", TRUE, L"colors") && is_systemapp)
 	{
 		color_hash = config.color_system;
 
@@ -888,11 +888,11 @@ COLORREF _app_getrulecolor (
 	if (!ptr_rule)
 		return 0;
 
-	if (_r_config_getboolean (L"IsHighlightInvalid", TRUE, L"colors") && ptr_rule->is_enabled && ptr_rule->is_haveerrors)
+	if (_r_config_getboolean_ex(L"IsHighlightInvalid", TRUE, L"colors") && ptr_rule->is_enabled && ptr_rule->is_haveerrors)
 	{
 		color_hash = config.color_invalid;
 	}
-	else if (_r_config_getboolean (L"IsHighlightSpecial", TRUE, L"colors") && (ptr_rule->is_fordriver || ptr_rule->is_forservice || !_r_obj_isempty (ptr_rule->apps)))
+	else if (_r_config_getboolean_ex(L"IsHighlightSpecial", TRUE, L"colors") && (ptr_rule->is_fordriver || ptr_rule->is_forservice || !_r_obj_isempty (ptr_rule->apps)))
 	{
 		color_hash = config.color_special;
 	}
@@ -1082,7 +1082,7 @@ VOID _app_ruleblocklistset (
 			_app_listview_updateitemby_param (hwnd, i, FALSE);
 
 		if (is_instantapply)
-			_r_obj_addlistitem (rules, _r_obj_reference (ptr_rule), NULL); // dereference later!
+			_r_obj_addlistitem_ex(rules, _r_obj_reference (ptr_rule), NULL); // dereference later!
 	}
 
 	_r_queuedlock_releaseshared (&lock_rules);
@@ -1502,7 +1502,7 @@ VOID _app_profile_load_fallback ()
 	}
 
 	// disable deletion for this shit ;)
-	if (!_r_config_getboolean (L"IsInternalRulesDisabled", FALSE, NULL))
+	if (!_r_config_getboolean_ex(L"IsInternalRulesDisabled", FALSE, NULL))
 	{
 		if (!_app_isappfound (config.ntoskrnl_hash) && !_r_obj_isstringempty (config.system_path))
 		{
@@ -1689,7 +1689,7 @@ CleanupExit:
 	if (is_update)
 	{
 		// load internal rules!
-		if (!_r_config_getboolean (L"IsInternalRulesDisabled", FALSE, NULL))
+		if (!_r_config_getboolean_ex(L"IsInternalRulesDisabled", FALSE, NULL))
 			_app_profile_load_internal (hwnd, profile_info.profile_path_internal, MAKEINTRESOURCE (IDR_PROFILE_INTERNAL), &profile_info.profile_internal_timestamp);
 
 		_app_profile_load_fallback ();
@@ -1730,12 +1730,12 @@ NTSTATUS _app_profile_save (
 
 	timestamp = _r_unixtime_now ();
 
-	if (_r_config_getboolean (L"IsBackupProfile", TRUE, NULL))
+	if (_r_config_getboolean_ex(L"IsBackupProfile", TRUE, NULL))
 	{
 		if (!_r_fs_isexists (&profile_info.profile_path_backup->sr))
 			is_backuprequired = TRUE;
 
-		if (!is_backuprequired && (timestamp - _r_config_getlong64 (L"BackupTimestamp", 0, NULL) >= _r_config_getlong64 (L"BackupPeriod", BACKUP_HOURS_PERIOD, NULL)))
+		if (!is_backuprequired && (timestamp - _r_config_getlong64_ex(L"BackupTimestamp", 0, NULL) >= _r_config_getlong64_ex(L"BackupPeriod", BACKUP_HOURS_PERIOD, NULL)))
 			is_backuprequired = TRUE;
 	}
 

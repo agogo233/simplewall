@@ -164,7 +164,7 @@ VOID NTAPI _app_timer_callback (
 
 	rules = _r_obj_createlist (0x01, NULL);
 
-	_r_obj_addlistitem (rules, ptr_app, NULL);
+	_r_obj_addlistitem_ex(rules, ptr_app, NULL);
 
 	_wfp_createappfilters (_wfp_getenginehandle (), rules, DBG_ARG, FALSE);
 
@@ -173,9 +173,9 @@ VOID NTAPI _app_timer_callback (
 
 	_app_profile_save (hwnd);
 
-	if (_r_config_getboolean (L"IsNotificationsTimer", TRUE, NULL))
+	if (_r_config_getboolean_ex(L"IsNotificationsTimer", TRUE, NULL))
 	{
-		if (!_r_config_getboolean (L"IsNotificationsSound", TRUE, NULL))
+		if (!_r_config_getboolean_ex(L"IsNotificationsSound", TRUE, NULL))
 			icon_id |= NIIF_NOSOUND;
 
 		display_name = _app_getappdisplayname (ptr_app, TRUE);

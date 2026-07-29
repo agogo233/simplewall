@@ -142,7 +142,7 @@ VOID _app_getapptooltipstring (
 	{
 		if (_app_istimerset (ptr_app))
 		{
-			value = _r_format_interval (ptr_app->timer - _r_unixtime_now ());
+			value = _r_format_interval (ptr_app->timer - _r_unixtime_now (), FALSE);
 
 			if (value)
 			{
@@ -698,7 +698,7 @@ VOID _app_imagelist_init (
 	size_small = _r_dc_getsystemmetrics (SM_CXSMICON, dpi_value);
 	size_large = _r_dc_getsystemmetrics (SM_CXICON, dpi_value);
 
-	size_toolbar = _r_calc_clamp (_r_dc_getdpi (_r_config_getlong (L"ToolbarSize", PR_SIZE_ITEMHEIGHT, NULL), dpi_value), size_small, size_large);
+	size_toolbar = _r_calc_clamp (_r_dc_getdpi (_r_config_getlong_ex(L"ToolbarSize", PR_SIZE_ITEMHEIGHT, NULL), dpi_value), size_small, size_large);
 
 	_r_res_loadimage (&config.hbmp_enable, _r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (IDP_SHIELD_ENABLE), &GUID_ContainerFormatPng, size_small, size_small);
 	_r_res_loadimage (&config.hbmp_disable, _r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (IDP_SHIELD_DISABLE), &GUID_ContainerFormatPng, size_small, size_small);
