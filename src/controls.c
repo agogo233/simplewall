@@ -703,11 +703,11 @@ VOID _app_imagelist_init (
 
 	size_toolbar = _r_calc_clamp (_r_dc_getdpi (_r_config_getlong_ex(L"ToolbarSize", PR_SIZE_ITEMHEIGHT, NULL), dpi_value), size_small, size_large);
 
-	_r_res_loadimage (&config.hbmp_enable, _r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (IDP_SHIELD_ENABLE), &GUID_ContainerFormatPng, size_small, size_small);
-	_r_res_loadimage (&config.hbmp_disable, _r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (IDP_SHIELD_DISABLE), &GUID_ContainerFormatPng, size_small, size_small);
+	_r_res_loadimage (_r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (IDP_SHIELD_ENABLE), &GUID_ContainerFormatPng, size_small, size_small, &config.hbmp_enable);
+	_r_res_loadimage (_r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (IDP_SHIELD_DISABLE), &GUID_ContainerFormatPng, size_small, size_small, &config.hbmp_disable);
 
-	_r_res_loadimage (&config.hbmp_allow, _r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (IDP_ALLOW), &GUID_ContainerFormatPng, size_small, size_small);
-	_r_res_loadimage (&config.hbmp_block, _r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (IDP_BLOCK), &GUID_ContainerFormatPng, size_small, size_small);
+	_r_res_loadimage (_r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (IDP_ALLOW), &GUID_ContainerFormatPng, size_small, size_small, &config.hbmp_allow);
+	_r_res_loadimage (_r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (IDP_BLOCK), &GUID_ContainerFormatPng, size_small, size_small, &config.hbmp_block);
 
 	// toolbar imagelist
 	if (config.himg_toolbar)
