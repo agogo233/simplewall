@@ -476,7 +476,10 @@ BOOLEAN _app_settab_id (
 		tab_context = _app_listview_getcontext (hwnd, i);
 
 		if (tab_context && tab_context->listview_id == page_id)
-			return (_r_tab_selectitem (hwnd, IDC_TAB, i) != INT_ERROR);
+		{
+			_r_tab_selectitem (hwnd, IDC_TAB, i);
+			return TRUE;
+		}
 	}
 
 	if (page_id != IDC_APPS_PROFILE)
@@ -669,7 +672,7 @@ VOID _app_settrayicon (
 	if (current_handle)
 		DestroyIcon (current_handle);
 
-	_r_sys_loadicon (&new_handle, _r_sys_getimagebase (), MAKEINTRESOURCE (icon_id), icon_size);
+	_r_sys_loadicon (_r_sys_getimagebase (), MAKEINTRESOURCE (icon_id), icon_size, &new_handle);
 
 	_r_tray_setinfo (hwnd, &GUID_TrayIcon, new_handle, _r_app_getname ());
 
@@ -709,7 +712,7 @@ VOID _app_imagelist_init (
 	// toolbar imagelist
 	if (config.himg_toolbar)
 	{
-		_r_imagelist_setsize (config.himg_toolbar, size_toolbar, size_toolbar);
+		_r_imagelist_setsize (config.himg_toolbar, size_toolbar);
 	}
 	else
 	{
@@ -720,7 +723,7 @@ VOID _app_imagelist_init (
 	{
 		for (ULONG_PTR i = 0; i < RTL_NUMBER_OF (toolbar_ids); i++)
 		{
-			status = _r_res_loadimage (&hbitmap, _r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (toolbar_ids[i]), &GUID_ContainerFormatPng, size_toolbar, size_toolbar);
+			status = _r_res_loadimage (_r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (toolbar_ids[i]), &GUID_ContainerFormatPng, size_toolbar, size_toolbar, &hbitmap);
 
 			if (NT_SUCCESS (status))
 				_r_imagelist_add (config.himg_toolbar, hbitmap, NULL, NULL);
@@ -733,7 +736,7 @@ VOID _app_imagelist_init (
 	// rules imagelist (small)
 	if (config.himg_rules_small)
 	{
-		_r_imagelist_setsize (config.himg_rules_small, size_small, size_small);
+		_r_imagelist_setsize (config.himg_rules_small, size_small);
 	}
 	else
 	{
@@ -744,7 +747,7 @@ VOID _app_imagelist_init (
 	{
 		for (ULONG_PTR i = 0; i < RTL_NUMBER_OF (rules_ids); i++)
 		{
-			status = _r_res_loadimage (&hbitmap, _r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (rules_ids[i]), &GUID_ContainerFormatPng, size_small, size_small);
+			status = _r_res_loadimage (_r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (rules_ids[i]), &GUID_ContainerFormatPng, size_small, size_small, &hbitmap);
 
 			if (NT_SUCCESS (status))
 				_r_imagelist_add (config.himg_rules_small, hbitmap, NULL, NULL);
@@ -754,7 +757,7 @@ VOID _app_imagelist_init (
 	// rules imagelist (large)
 	if (config.himg_rules_large)
 	{
-		_r_imagelist_setsize (config.himg_rules_large, size_large, size_large);
+		_r_imagelist_setsize (config.himg_rules_large, size_large);
 	}
 	else
 	{
@@ -765,7 +768,7 @@ VOID _app_imagelist_init (
 	{
 		for (ULONG_PTR i = 0; i < RTL_NUMBER_OF (rules_ids); i++)
 		{
-			status = _r_res_loadimage (&hbitmap, _r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (rules_ids[i]), &GUID_ContainerFormatPng, size_large, size_large);
+			status = _r_res_loadimage (_r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (rules_ids[i]), &GUID_ContainerFormatPng, size_large, size_large, &hbitmap);
 
 			if (NT_SUCCESS (status))
 				_r_imagelist_add (config.himg_rules_large, hbitmap, NULL, NULL);

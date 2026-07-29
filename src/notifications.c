@@ -690,11 +690,11 @@ VOID _app_notify_initialize (
 	}
 
 	// load images
-	_r_res_loadimage (&hbmp_rules, _r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (IDP_SETTINGS), &GUID_ContainerFormatPng, icon_small, icon_small);
-	_r_res_loadimage (&hbmp_allow, _r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (IDP_ALLOW), &GUID_ContainerFormatPng, icon_small, icon_small);
-	_r_res_loadimage (&hbmp_block, _r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (IDP_BLOCK), &GUID_ContainerFormatPng, icon_small, icon_small);
-	_r_res_loadimage (&hbmp_cross, _r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (IDP_CROSS), &GUID_ContainerFormatPng, icon_small, icon_small);
-	_r_res_loadimage (&hbmp_next, _r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (IDP_NEXT), &GUID_ContainerFormatPng, icon_small, icon_small);
+	_r_res_loadimage (_r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (IDP_SETTINGS), &GUID_ContainerFormatPng, icon_small, icon_small, &hbmp_rules);
+	_r_res_loadimage (_r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (IDP_ALLOW), &GUID_ContainerFormatPng, icon_small, icon_small, &hbmp_allow);
+	_r_res_loadimage (_r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (IDP_BLOCK), &GUID_ContainerFormatPng, icon_small, icon_small, &hbmp_block);
+	_r_res_loadimage (_r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (IDP_CROSS), &GUID_ContainerFormatPng, icon_small, icon_small, &hbmp_cross);
+	_r_res_loadimage (_r_sys_getimagebase (), L"PNG", MAKEINTRESOURCE (IDP_NEXT), &GUID_ContainerFormatPng, icon_small, icon_small, &hbmp_next);
 
 	// set button configuration
 	if (hbmp_rules)
@@ -860,7 +860,7 @@ INT_PTR CALLBACK NotificationProc (
 
 			_r_obj_dereference (ptr_log);
 
-			_r_theme_initialize (hwnd);
+			_r_theme_initialize (hwnd, TRUE);
 
 			break;
 		}
@@ -1454,7 +1454,7 @@ INT_PTR CALLBACK NotificationProc (
 						}
 						else if (ctrl_id == IDM_SELECT_ALL)
 						{
-							_r_edit_setselection (hedit, 0, 0, -1); // edit control hotkey for "ctrl+a"
+							_r_edit_setselection (hedit, 0, -1); // edit control hotkey for "ctrl+a"
 						}
 					}
 

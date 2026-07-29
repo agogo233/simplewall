@@ -187,7 +187,7 @@ NTSTATUS _app_db_openfromfile (
 	if (db_info->bytes)
 		_r_obj_clearreference ((PVOID_PTR)&db_info->bytes);
 
-	status = _r_fs_openfile (&hfile, &path->sr, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, 0, FALSE);
+	status = _r_fs_openfile (&path->sr, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, 0, FALSE, &hfile);
 
 	if (!NT_SUCCESS (status))
 		return status;
@@ -218,7 +218,7 @@ VOID _app_db_parse_app (
 
 	if (_r_str_findchar (&path->sr, L'%', FALSE) != SIZE_MAX)
 	{
-		status = _r_str_environmentexpandstring (&string, NULL, &path->sr);
+		status = _r_str_environmentexpandstring (NULL, &path->sr, &string);
 
 		if (NT_SUCCESS (status))
 			_r_obj_movereference ((PVOID_PTR)&path, string);
@@ -414,7 +414,7 @@ VOID _app_db_parse_rule (
 		{
 			_r_str_splitatchar (&sr, DIVIDER_APP[0], &first_part, &sr);
 
-			status = _r_str_environmentexpandstring (&path_string, NULL, &first_part);
+			status = _r_str_environmentexpandstring (NULL, &first_part, &path_string);
 
 			if (status != STATUS_SUCCESS)
 				_r_obj_movereference ((PVOID_PTR)&path_string, _r_obj_createstring2 (&first_part));

@@ -108,7 +108,7 @@ BOOLEAN _app_installmessage (
 
 	if (SUCCEEDED (status))
 	{
-		_r_config_setboolean (L"WF_State", is_flagchecked ? TRUE : FALSE, NULL);
+		_r_config_setboolean_ex(L"WF_State", is_flagchecked ? TRUE : FALSE, NULL);
 
 		if (command_id == IDYES)
 		{
@@ -297,7 +297,7 @@ VOID _app_config_apply (
 		case IDC_STARTMINIMIZED_CHK:
 		case IDM_STARTMINIMIZED_CHK:
 		{
-			_r_config_setboolean (L"IsStartMinimized", new_val, NULL);
+			_r_config_setboolean_ex(L"IsStartMinimized", new_val, NULL);
 
 			_r_menu_checkitem (hmenu, IDM_STARTMINIMIZED_CHK, 0, MF_BYCOMMAND, new_val);
 
@@ -332,7 +332,7 @@ VOID _app_config_apply (
 		case IDC_RULE_BLOCKOUTBOUND:
 		case IDM_RULE_BLOCKOUTBOUND:
 		{
-			_r_config_setboolean (L"BlockOutboundConnections", new_val, NULL);
+			_r_config_setboolean_ex(L"BlockOutboundConnections", new_val, NULL);
 
 			_r_menu_checkitem (hmenu, IDM_RULE_BLOCKOUTBOUND, 0, MF_BYCOMMAND, new_val);
 
@@ -342,7 +342,7 @@ VOID _app_config_apply (
 		case IDC_RULE_BLOCKINBOUND:
 		case IDM_RULE_BLOCKINBOUND:
 		{
-			_r_config_setboolean (L"BlockInboundConnections", new_val, NULL);
+			_r_config_setboolean_ex(L"BlockInboundConnections", new_val, NULL);
 
 			_r_menu_checkitem (hmenu, IDM_RULE_BLOCKINBOUND, 0, MF_BYCOMMAND, new_val);
 
@@ -352,7 +352,7 @@ VOID _app_config_apply (
 		case IDC_RULE_ALLOWLOOPBACK:
 		case IDM_RULE_ALLOWLOOPBACK:
 		{
-			_r_config_setboolean (L"AllowLoopbackConnections", new_val, NULL);
+			_r_config_setboolean_ex(L"AllowLoopbackConnections", new_val, NULL);
 
 			_r_menu_checkitem (hmenu, IDM_RULE_ALLOWLOOPBACK, 0, MF_BYCOMMAND, new_val);
 
@@ -362,7 +362,7 @@ VOID _app_config_apply (
 		case IDC_RULE_ALLOW6TO4:
 		case IDM_RULE_ALLOW6TO4:
 		{
-			_r_config_setboolean (L"AllowIPv6", new_val, NULL);
+			_r_config_setboolean_ex(L"AllowIPv6", new_val, NULL);
 
 			_r_menu_checkitem (hmenu, IDM_RULE_ALLOW6TO4, 0, MF_BYCOMMAND, new_val);
 
@@ -371,7 +371,7 @@ VOID _app_config_apply (
 
 		case IDM_RULE_ALLOWWINDOWSUPDATE:
 		{
-			_r_config_setboolean (L"IsWUFixEnabled", new_val, NULL);
+			_r_config_setboolean_ex(L"IsWUFixEnabled", new_val, NULL);
 
 			_r_menu_checkitem (hmenu, IDM_RULE_ALLOWWINDOWSUPDATE, 0, MF_BYCOMMAND, new_val);
 
@@ -380,7 +380,7 @@ VOID _app_config_apply (
 
 		case IDM_PROFILETYPE_PLAIN:
 		{
-			_r_config_setlong (L"ProfileType", 0, NULL);
+			_r_config_setlong_ex(L"ProfileType", 0, NULL);
 
 			_r_menu_checkitem (hmenu, IDM_PROFILETYPE_PLAIN, IDM_PROFILETYPE_ENCRYPTED, MF_BYCOMMAND, IDM_PROFILETYPE_PLAIN);
 
@@ -391,7 +391,7 @@ VOID _app_config_apply (
 
 		case IDM_PROFILETYPE_COMPRESSED:
 		{
-			_r_config_setlong (L"ProfileType", 1, NULL);
+			_r_config_setlong_ex(L"ProfileType", 1, NULL);
 
 			_r_menu_checkitem (hmenu, IDM_PROFILETYPE_PLAIN, IDM_PROFILETYPE_ENCRYPTED, MF_BYCOMMAND, IDM_PROFILETYPE_COMPRESSED);
 
@@ -402,7 +402,7 @@ VOID _app_config_apply (
 
 		case IDM_PROFILETYPE_ENCRYPTED:
 		{
-			_r_config_setlong (L"ProfileType", 2, NULL);
+			_r_config_setlong_ex(L"ProfileType", 2, NULL);
 
 			_r_menu_checkitem (hmenu, IDM_PROFILETYPE_PLAIN, IDM_PROFILETYPE_ENCRYPTED, MF_BYCOMMAND, IDM_PROFILETYPE_ENCRYPTED);
 
@@ -413,13 +413,13 @@ VOID _app_config_apply (
 
 		case IDC_USESTEALTHMODE_CHK:
 		{
-			_r_config_setboolean (L"UseStealthMode", new_val, NULL);
+			_r_config_setboolean_ex(L"UseStealthMode", new_val, NULL);
 			break;
 		}
 
 		case IDC_INSTALLBOOTTIMEFILTERS_CHK:
 		{
-			_r_config_setboolean (L"InstallBoottimeFilters", new_val, NULL);
+			_r_config_setboolean_ex(L"InstallBoottimeFilters", new_val, NULL);
 			break;
 		}
 
@@ -429,7 +429,7 @@ VOID _app_config_apply (
 			PITEM_APP ptr_app = NULL;
 			ULONG_PTR enum_key = 0;
 
-			_r_config_setboolean (L"IsCertificatesEnabled", new_val, NULL);
+			_r_config_setboolean_ex(L"IsCertificatesEnabled", new_val, NULL);
 
 			_r_menu_checkitem (hmenu, IDM_USECERTIFICATES_CHK, 0, MF_BYCOMMAND, new_val);
 
@@ -450,7 +450,7 @@ VOID _app_config_apply (
 
 		case IDM_KEEPUNUSED_CHK:
 		{
-			_r_config_setboolean (L"IsKeepUnusedApps", new_val, NULL);
+			_r_config_setboolean_ex(L"IsKeepUnusedApps", new_val, NULL);
 
 			_r_menu_checkitem (hmenu, IDM_KEEPUNUSED_CHK, 0, MF_BYCOMMAND, new_val);
 
@@ -463,7 +463,7 @@ VOID _app_config_apply (
 			PITEM_APP ptr_app = NULL;
 			ULONG_PTR enum_key = 0;
 
-			_r_config_setboolean (L"IsHashesEnabled", new_val, NULL);
+			_r_config_setboolean_ex(L"IsHashesEnabled", new_val, NULL);
 
 			_r_menu_checkitem (hmenu, IDM_USEHASHES_CHK, 0, MF_BYCOMMAND, new_val);
 			_r_menu_enableitem (hmenu, IDM_USEAPPMONITOR_CHK, FALSE, new_val);
@@ -486,7 +486,7 @@ VOID _app_config_apply (
 		case IDC_USENETWORKRESOLUTION_CHK:
 		case IDM_USENETWORKRESOLUTION_CHK:
 		{
-			_r_config_setboolean (L"IsNetworkResolutionsEnabled", new_val, NULL);
+			_r_config_setboolean_ex(L"IsNetworkResolutionsEnabled", new_val, NULL);
 
 			_r_menu_checkitem (hmenu, IDM_USENETWORKRESOLUTION_CHK, 0, MF_BYCOMMAND, new_val);
 
@@ -495,7 +495,7 @@ VOID _app_config_apply (
 
 		case IDM_USEAPPMONITOR_CHK:
 		{
-			_r_config_setboolean (L"IsEnableAppMonitor", new_val, NULL);
+			_r_config_setboolean_ex(L"IsEnableAppMonitor", new_val, NULL);
 
 			_r_menu_checkitem (hmenu, IDM_USEAPPMONITOR_CHK, 0, MF_BYCOMMAND, new_val);
 
@@ -670,7 +670,7 @@ INT_PTR CALLBACK SettingsProc (
 
 					while (_r_obj_enumhashtable (colors_table, (PVOID_PTR)&ptr_clr, NULL, &enum_key))
 					{
-						ptr_clr->new_clr = _r_config_getulong (ptr_clr->config_value->buffer, ptr_clr->default_clr, L"colors");
+						ptr_clr->new_clr = _r_config_getulong_ex(ptr_clr->config_value->buffer, ptr_clr->default_clr, L"colors");
 
 						_r_listview_additem (hwnd, IDC_COLORS, item_id, _r_locale_getstring (ptr_clr->locale_id), icon_id, I_GROUPIDNONE, (LPARAM)ptr_clr);
 						_r_listview_setitemcheck (hwnd, IDC_COLORS, item_id, _r_config_getboolean_ex(ptr_clr->config_name->buffer, ptr_clr->is_enabled, L"colors"));
@@ -691,7 +691,7 @@ INT_PTR CALLBACK SettingsProc (
 					_r_button_setcheck (hwnd, IDC_NOTIFICATIONONTRAY_CHK, _r_config_getboolean_ex(L"IsNotificationsOnTray", FALSE, NULL));
 
 					_r_updown_setrange (hwnd, IDC_NOTIFICATIONTIMEOUT, 0, _r_calc_days2seconds (7));
-					_r_updown_setvalue (hwnd, IDC_NOTIFICATIONTIMEOUT, _r_config_getulong (L"NotificationsTimeout", NOTIFY_TIMEOUT_DEFAULT, NULL));
+					_r_updown_setvalue (hwnd, IDC_NOTIFICATIONTIMEOUT, _r_config_getulong_ex(L"NotificationsTimeout", NOTIFY_TIMEOUT_DEFAULT, NULL));
 
 					_r_wnd_sendcommand (hwnd, IDC_ENABLENOTIFICATIONS_CHK, WM_APP);
 
@@ -713,7 +713,7 @@ INT_PTR CALLBACK SettingsProc (
 						_r_obj_dereference (path);
 					}
 
-					path = _r_config_getstringexpand (L"LogViewer", LOG_VIEWER_DEFAULT, NULL);
+					path = _r_config_getstringexpand_ex(L"LogViewer", LOG_VIEWER_DEFAULT, NULL);
 
 					if (path)
 					{
@@ -725,7 +725,7 @@ INT_PTR CALLBACK SettingsProc (
 					_r_updown_setacceleration (hwnd, IDC_LOGSIZELIMIT, 64); // set step to 64kb
 
 					_r_updown_setrange (hwnd, IDC_LOGSIZELIMIT, 64, _r_calc_kilobytes2bytes (512));
-					_r_updown_setvalue (hwnd, IDC_LOGSIZELIMIT, _r_config_getulong (L"LogSizeLimitKb", LOG_SIZE_LIMIT_DEFAULT, NULL));
+					_r_updown_setvalue (hwnd, IDC_LOGSIZELIMIT, _r_config_getulong_ex(L"LogSizeLimitKb", LOG_SIZE_LIMIT_DEFAULT, NULL));
 
 					_r_button_setcheck (hwnd, IDC_ENABLEUILOG_CHK, _r_config_getboolean_ex(L"IsLogUiEnabled", FALSE, NULL));
 
@@ -928,11 +928,11 @@ INT_PTR CALLBACK SettingsProc (
 
 			if (ctrl_id == IDC_LOGSIZELIMIT)
 			{
-				_r_config_setlong (L"LogSizeLimitKb", _r_updown_getvalue (hwnd, ctrl_id), NULL);
+				_r_config_setlong_ex(L"LogSizeLimitKb", _r_updown_getvalue (hwnd, ctrl_id), NULL);
 			}
 			else if (ctrl_id == IDC_NOTIFICATIONTIMEOUT)
 			{
-				_r_config_setlong (L"NotificationsTimeout", _r_updown_getvalue (hwnd, ctrl_id), NULL);
+				_r_config_setlong_ex(L"NotificationsTimeout", _r_updown_getvalue (hwnd, ctrl_id), NULL);
 			}
 
 			break;
@@ -1010,7 +1010,7 @@ INT_PTR CALLBACK SettingsProc (
 						{
 							is_enabled = (lpnmlv->uNewState & LVIS_STATEIMAGEMASK) == INDEXTOSTATEIMAGEMASK (2);
 
-							_r_config_setboolean (ptr_clr->config_name->buffer, is_enabled, L"colors");
+							_r_config_setboolean_ex(ptr_clr->config_name->buffer, is_enabled, L"colors");
 
 							hmain = _r_app_gethwnd ();
 
@@ -1069,7 +1069,7 @@ INT_PTR CALLBACK SettingsProc (
 					{
 						ptr_clr_crnt->new_clr = cc.rgbResult;
 
-						_r_config_setulong (ptr_clr_crnt->config_value->buffer, cc.rgbResult, L"colors");
+						_r_config_setulong_ex(ptr_clr_crnt->config_value->buffer, cc.rgbResult, L"colors");
 
 						_r_listview_redraw (hwnd, IDC_COLORS);
 
@@ -1116,7 +1116,7 @@ INT_PTR CALLBACK SettingsProc (
 
 					is_enabled = _r_button_ischecked (hwnd, ctrl_id);
 
-					_r_config_setboolean (L"AlwaysOnTop", is_enabled, NULL);
+					_r_config_setboolean_ex(L"AlwaysOnTop", is_enabled, NULL);
 
 					hmain = _r_app_gethwnd ();
 
@@ -1138,31 +1138,31 @@ INT_PTR CALLBACK SettingsProc (
 
 				case IDC_CONFIRMEXIT_CHK:
 				{
-					_r_config_setboolean (L"ConfirmExit2", _r_button_ischecked (hwnd, ctrl_id), NULL);
+					_r_config_setboolean_ex(L"ConfirmExit2", _r_button_ischecked (hwnd, ctrl_id), NULL);
 					break;
 				}
 
 				case IDC_CONFIRMEXITTIMER_CHK:
 				{
-					_r_config_setboolean (L"ConfirmExitTimer", _r_button_ischecked (hwnd, ctrl_id), NULL);
+					_r_config_setboolean_ex(L"ConfirmExitTimer", _r_button_ischecked (hwnd, ctrl_id), NULL);
 					break;
 				}
 
 				case IDC_CONFIRMLOGCLEAR_CHK:
 				{
-					_r_config_setboolean (L"ConfirmLogClear", _r_button_ischecked (hwnd, ctrl_id), NULL);
+					_r_config_setboolean_ex(L"ConfirmLogClear", _r_button_ischecked (hwnd, ctrl_id), NULL);
 					break;
 				}
 
 				case IDC_CONFIRMALLOW_CHK:
 				{
-					_r_config_setboolean (L"ConfirmAllow", _r_button_ischecked (hwnd, ctrl_id), NULL);
+					_r_config_setboolean_ex(L"ConfirmAllow", _r_button_ischecked (hwnd, ctrl_id), NULL);
 					break;
 				}
 
 				case IDC_TRAYICONSINGLECLICK_CHK:
 				{
-					_r_config_setboolean (L"IsTrayIconSingleClick", _r_button_ischecked (hwnd, ctrl_id), NULL);
+					_r_config_setboolean_ex(L"IsTrayIconSingleClick", _r_button_ischecked (hwnd, ctrl_id), NULL);
 					break;
 				}
 
@@ -1214,7 +1214,7 @@ INT_PTR CALLBACK SettingsProc (
 						if (hmenu)
 							_r_menu_checkitem (hmenu, IDM_BLOCKLIST_SPY_DISABLE, IDM_BLOCKLIST_SPY_BLOCK, MF_BYCOMMAND, IDM_BLOCKLIST_SPY_DISABLE + new_state);
 
-						_r_config_setlong (L"BlocklistSpyState", new_state, NULL);
+						_r_config_setlong_ex(L"BlocklistSpyState", new_state, NULL);
 
 						_app_ruleblocklistset (hmain, new_state, INT_ERROR, INT_ERROR, TRUE);
 					}
@@ -1225,7 +1225,7 @@ INT_PTR CALLBACK SettingsProc (
 						if (hmenu)
 							_r_menu_checkitem (hmenu, IDM_BLOCKLIST_UPDATE_DISABLE, IDM_BLOCKLIST_UPDATE_BLOCK, MF_BYCOMMAND, IDM_BLOCKLIST_UPDATE_DISABLE + new_state);
 
-						_r_config_setlong (L"BlocklistUpdateState", new_state, NULL);
+						_r_config_setlong_ex(L"BlocklistUpdateState", new_state, NULL);
 
 						_app_ruleblocklistset (hmain, INT_ERROR, new_state, INT_ERROR, TRUE);
 					}
@@ -1236,7 +1236,7 @@ INT_PTR CALLBACK SettingsProc (
 						if (hmenu)
 							_r_menu_checkitem (hmenu, IDM_BLOCKLIST_EXTRA_DISABLE, IDM_BLOCKLIST_EXTRA_BLOCK, MF_BYCOMMAND, IDM_BLOCKLIST_EXTRA_DISABLE + new_state);
 
-						_r_config_setlong (L"BlocklistExtraState", new_state, NULL);
+						_r_config_setlong_ex(L"BlocklistExtraState", new_state, NULL);
 
 						_app_ruleblocklistset (hmain, INT_ERROR, INT_ERROR, new_state, TRUE);
 					}
@@ -1256,7 +1256,7 @@ INT_PTR CALLBACK SettingsProc (
 
 					if (!is_postmessage)
 					{
-						_r_config_setboolean (L"IsLogEnabled", is_enabled, NULL);
+						_r_config_setboolean_ex(L"IsLogEnabled", is_enabled, NULL);
 
 						_app_loginit (is_enabled);
 					}
@@ -1278,7 +1278,7 @@ INT_PTR CALLBACK SettingsProc (
 				{
 					BOOLEAN is_enabled = _r_button_ischecked (hwnd, ctrl_id);
 
-					_r_config_setboolean (L"IsLogUiEnabled", is_enabled, NULL);
+					_r_config_setboolean_ex(L"IsLogUiEnabled", is_enabled, NULL);
 
 					_r_toolbar_pressbutton (config.hrebar, IDC_TOOLBAR, IDM_TRAY_ENABLEUILOG_CHK, is_enabled);
 
@@ -1295,7 +1295,7 @@ INT_PTR CALLBACK SettingsProc (
 
 						if (log_path)
 						{
-							_r_config_setstringexpand (L"LogPath", log_path->buffer, NULL);
+							_r_config_setstringexpand_ex(L"LogPath", log_path->buffer, NULL);
 
 							if (_r_config_getboolean_ex(L"IsLogEnabled", FALSE, NULL))
 								_app_loginit (TRUE);
@@ -1337,7 +1337,7 @@ INT_PTR CALLBACK SettingsProc (
 
 							if (SUCCEEDED (status))
 							{
-								_r_config_setstringexpand (L"LogPath", path->buffer, NULL);
+								_r_config_setstringexpand_ex(L"LogPath", path->buffer, NULL);
 								_r_ctrl_setstring (hwnd, IDC_LOGPATH, path->buffer);
 
 								_app_loginit (_r_config_getboolean_ex(L"IsLogEnabled", FALSE, NULL));
@@ -1364,7 +1364,7 @@ INT_PTR CALLBACK SettingsProc (
 					if (!log_viewer)
 						break;
 
-					_r_config_setstringexpand (L"LogViewer", log_viewer->buffer, NULL);
+					_r_config_setstringexpand_ex(L"LogViewer", log_viewer->buffer, NULL);
 
 					_r_obj_dereference (log_viewer);
 
@@ -1401,7 +1401,7 @@ INT_PTR CALLBACK SettingsProc (
 
 							if (SUCCEEDED (status))
 							{
-								_r_config_setstringexpand (L"LogViewer", path->buffer, NULL);
+								_r_config_setstringexpand_ex(L"LogViewer", path->buffer, NULL);
 								_r_ctrl_setstring (hwnd, IDC_LOGVIEWER, path->buffer);
 
 								_r_obj_dereference (path);
@@ -1419,7 +1419,7 @@ INT_PTR CALLBACK SettingsProc (
 					if (notify_code != EN_KILLFOCUS)
 						break;
 
-					_r_config_setlong (L"LogSizeLimitKb", _r_updown_getvalue (hwnd, IDC_LOGSIZELIMIT), NULL);
+					_r_config_setlong_ex(L"LogSizeLimitKb", _r_updown_getvalue (hwnd, IDC_LOGSIZELIMIT), NULL);
 
 					break;
 				}
@@ -1433,7 +1433,7 @@ INT_PTR CALLBACK SettingsProc (
 					is_enabled = _r_button_ischecked (hwnd, ctrl_id);
 
 					if (!is_postmessage)
-						_r_config_setboolean (L"IsNotificationsEnabled", is_enabled, NULL);
+						_r_config_setboolean_ex(L"IsNotificationsEnabled", is_enabled, NULL);
 
 					_r_toolbar_pressbutton (config.hrebar, IDC_TOOLBAR, IDM_TRAY_ENABLENOTIFICATIONS_CHK, is_enabled);
 
@@ -1468,7 +1468,7 @@ INT_PTR CALLBACK SettingsProc (
 					_r_button_setcheck (hwnd, IDC_NOTIFICATIONFULLSCREENSILENTMODE_CHK, _r_config_getboolean_ex(L"IsNotificationsFullscreenSilentMode", TRUE, NULL));
 
 					if (!is_postmessage)
-						_r_config_setboolean (L"IsNotificationsSound", is_checked, NULL);
+						_r_config_setboolean_ex(L"IsNotificationsSound", is_checked, NULL);
 
 					_r_ctrl_enable (hwnd, IDC_NOTIFICATIONFULLSCREENSILENTMODE_CHK, _r_ctrl_isenabled (hwnd, ctrl_id) && is_checked);
 
@@ -1477,7 +1477,7 @@ INT_PTR CALLBACK SettingsProc (
 
 				case IDC_NOTIFICATIONFULLSCREENSILENTMODE_CHK:
 				{
-					_r_config_setboolean (L"IsNotificationsFullscreenSilentMode", _r_button_ischecked (hwnd, ctrl_id), NULL);
+					_r_config_setboolean_ex(L"IsNotificationsFullscreenSilentMode", _r_button_ischecked (hwnd, ctrl_id), NULL);
 					break;
 				}
 
@@ -1485,7 +1485,7 @@ INT_PTR CALLBACK SettingsProc (
 				{
 					HWND hnotify;
 
-					_r_config_setboolean (L"IsNotificationsOnTray", _r_button_ischecked (hwnd, ctrl_id), NULL);
+					_r_config_setboolean_ex(L"IsNotificationsOnTray", _r_button_ischecked (hwnd, ctrl_id), NULL);
 
 					hnotify = _app_notify_getwindow (NULL);
 
@@ -1498,20 +1498,20 @@ INT_PTR CALLBACK SettingsProc (
 				case IDC_NOTIFICATIONTIMEOUT_CTRL:
 				{
 					if (notify_code == EN_KILLFOCUS)
-						_r_config_setlong (L"NotificationsTimeout", _r_updown_getvalue (hwnd, IDC_NOTIFICATIONTIMEOUT), NULL);
+						_r_config_setlong_ex(L"NotificationsTimeout", _r_updown_getvalue (hwnd, IDC_NOTIFICATIONTIMEOUT), NULL);
 
 					break;
 				}
 
 				case IDC_EXCLUDESTEALTH_CHK:
 				{
-					_r_config_setboolean (L"IsExcludeStealth", _r_button_ischecked (hwnd, ctrl_id), NULL);
+					_r_config_setboolean_ex(L"IsExcludeStealth", _r_button_ischecked (hwnd, ctrl_id), NULL);
 					break;
 				}
 
 				case IDC_EXCLUDECLASSIFYALLOW_CHK:
 				{
-					_r_config_setboolean (L"IsExcludeClassifyAllow", _r_button_ischecked (hwnd, ctrl_id), NULL);
+					_r_config_setboolean_ex(L"IsExcludeClassifyAllow", _r_button_ischecked (hwnd, ctrl_id), NULL);
 
 					_wfp_logsetoption (_wfp_getenginehandle ());
 
@@ -1520,19 +1520,19 @@ INT_PTR CALLBACK SettingsProc (
 
 				case IDC_EXCLUDEBLOCKLIST_CHK:
 				{
-					_r_config_setboolean (L"IsExcludeBlocklist", _r_button_ischecked (hwnd, ctrl_id), NULL);
+					_r_config_setboolean_ex(L"IsExcludeBlocklist", _r_button_ischecked (hwnd, ctrl_id), NULL);
 					break;
 				}
 
 				case IDC_EXCLUDECUSTOM_CHK:
 				{
-					_r_config_setboolean (L"IsExcludeCustomRules", _r_button_ischecked (hwnd, ctrl_id), NULL);
+					_r_config_setboolean_ex(L"IsExcludeCustomRules", _r_button_ischecked (hwnd, ctrl_id), NULL);
 					break;
 				}
 
 				case IDC_EXCLUDEINBOUND_CHK:
 				{
-					_r_config_setboolean (L"IsExcludeInbound", _r_button_ischecked (hwnd, ctrl_id), NULL);
+					_r_config_setboolean_ex(L"IsExcludeInbound", _r_button_ischecked (hwnd, ctrl_id), NULL);
 					break;
 				}
 			}
@@ -1750,7 +1750,7 @@ VOID _app_initialize (
 	R_ENVIRONMENT environment;
 
 	// set privileges
-	_r_sys_setprocessprivilege (hwnd, NtCurrentProcess (), privileges, RTL_NUMBER_OF (privileges), TRUE);
+	_r_sys_setprocessprivilege (NtCurrentProcess (), privileges, RTL_NUMBER_OF (privileges), TRUE);
 
 	// set process priority
 	_r_sys_setenvironment (&environment, PROCESS_PRIORITY_CLASS_HIGH, IoPriorityHigh, MEMORY_PRIORITY_NORMAL);
@@ -2299,7 +2299,7 @@ INT_PTR CALLBACK DlgProc (
 
 					_app_listview_resize (hwnd, tab_context->listview_id, FALSE);
 
-					_r_config_setlong (L"CurrentTab", tab_context->listview_id, NULL);
+					_r_config_setlong_ex(L"CurrentTab", tab_context->listview_id, NULL);
 
 					break;
 				}
@@ -2969,7 +2969,7 @@ INT_PTR CALLBACK DlgProc (
 					}
 
 					_r_menu_checkitem (GetMenu (hwnd), IDM_VIEW_DETAILS, IDM_VIEW_TILE, MF_BYCOMMAND, ctrl_id);
-					_r_config_setlong (L"ViewType", view_type, NULL);
+					_r_config_setlong_ex(L"ViewType", view_type, NULL);
 
 					_app_listview_updateby_id (hwnd, DATA_LISTVIEW_CURRENT, PR_UPDATE_TYPE);
 
@@ -2996,7 +2996,7 @@ INT_PTR CALLBACK DlgProc (
 					}
 
 					_r_menu_checkitem (GetMenu (hwnd), IDM_SIZE_SMALL, IDM_SIZE_EXTRALARGE, MF_BYCOMMAND, ctrl_id);
-					_r_config_setlong (L"IconSize", icon_size, NULL);
+					_r_config_setlong_ex(L"IconSize", icon_size, NULL);
 
 					_app_listview_updateby_id (hwnd, DATA_LISTVIEW_CURRENT, PR_UPDATE_TYPE);
 
@@ -3039,7 +3039,7 @@ INT_PTR CALLBACK DlgProc (
 
 					SetFocus (config.hsearchbar);
 
-					_r_edit_setselection (config.hsearchbar, 0, 0, -1);
+					_r_edit_setselection (config.hsearchbar, 0, -1);
 
 					break;
 				}
@@ -3102,7 +3102,7 @@ INT_PTR CALLBACK DlgProc (
 
 						new_state = _r_calc_clamp (ctrl_id - IDM_BLOCKLIST_SPY_DISABLE, 0, 2);
 
-						_r_config_setlong (L"BlocklistSpyState", new_state, NULL);
+						_r_config_setlong_ex(L"BlocklistSpyState", new_state, NULL);
 
 						_app_ruleblocklistset (hwnd, new_state, INT_ERROR, INT_ERROR, TRUE);
 					}
@@ -3112,7 +3112,7 @@ INT_PTR CALLBACK DlgProc (
 
 						new_state = _r_calc_clamp (ctrl_id - IDM_BLOCKLIST_UPDATE_DISABLE, 0, 2);
 
-						_r_config_setlong (L"BlocklistUpdateState", new_state, NULL);
+						_r_config_setlong_ex(L"BlocklistUpdateState", new_state, NULL);
 
 						_app_ruleblocklistset (hwnd, INT_ERROR, new_state, INT_ERROR, TRUE);
 					}
@@ -3122,7 +3122,7 @@ INT_PTR CALLBACK DlgProc (
 
 						new_state = _r_calc_clamp (ctrl_id - IDM_BLOCKLIST_EXTRA_DISABLE, 0, 2);
 
-						_r_config_setlong (L"BlocklistExtraState", new_state, NULL);
+						_r_config_setlong_ex(L"BlocklistExtraState", new_state, NULL);
 
 						_app_ruleblocklistset (hwnd, INT_ERROR, INT_ERROR, new_state, TRUE);
 					}

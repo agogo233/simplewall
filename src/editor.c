@@ -3,6 +3,14 @@
 
 #include "global.h"
 
+FORCEINLINE VOID _r_wnd_topzoder (
+	_In_ HWND hwnd,
+	_In_ BOOLEAN is_enable
+)
+{
+	SetWindowPos (hwnd, is_enable ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+}
+
 _Ret_maybenull_
 PEDITOR_CONTEXT _app_editor_createwindow (
 	_In_opt_ HWND hwnd,
@@ -272,7 +280,7 @@ INT_PTR CALLBACK EditorRuleProc (
 			// enable save button when rule name is not empty
 			_r_ctrl_enable (hwnd, IDC_SAVE, _r_ctrl_getstringlength (hwnd, IDC_RULE_ID) != 0);
 
-			_r_theme_initialize (hwnd);
+			_r_theme_initialize (hwnd, TRUE);
 
 			SetFocus (NULL);
 
@@ -329,7 +337,7 @@ INT_PTR CALLBACK EditorRuleProc (
 			else if (notify_code == EN_MAXTEXT)
 			{
 				// show limit was reached ballon tip
-				_r_edit_showballoontip (hwnd, ctrl_id, 0, NULL, _r_locale_getstring (IDS_LIMIT_REACHED));
+				_r_ctrl_showballoontip (hwnd, ctrl_id, 0, NULL, _r_locale_getstring (IDS_LIMIT_REACHED));
 
 				return FALSE;
 			}
@@ -357,7 +365,7 @@ INT_PTR CALLBACK EditorRuleProc (
 
 					if (_r_obj_isstringempty2 (string))
 					{
-						_r_edit_showballoontip (hwnd, IDC_RULE_ID, 0, NULL, _r_locale_getstring (IDS_STATUS_EMPTY));
+						_r_ctrl_showballoontip (hwnd, IDC_RULE_ID, 0, NULL, _r_locale_getstring (IDS_STATUS_EMPTY));
 						_r_ctrl_enable (hwnd, IDC_SAVE, FALSE);
 
 						_r_obj_dereference (string);
@@ -380,7 +388,7 @@ INT_PTR CALLBACK EditorRuleProc (
 
 						if (!_app_parserulestring (&first_part, &address))
 						{
-							_r_edit_showballoontip (hwnd, IDC_RULE_ID, 0, NULL, _r_locale_getstring (IDS_STATUS_SYNTAX_ERROR));
+							_r_ctrl_showballoontip (hwnd, IDC_RULE_ID, 0, NULL, _r_locale_getstring (IDS_STATUS_SYNTAX_ERROR));
 							_r_ctrl_enable (hwnd, IDC_SAVE, FALSE);
 
 							return FALSE;
@@ -1184,7 +1192,7 @@ INT_PTR CALLBACK EditorPagesProc (
 			}
 			else if (notify_code == EN_MAXTEXT)
 			{
-				_r_edit_showballoontip (hwnd, ctrl_id, 0, NULL, _r_locale_getstring (IDS_LIMIT_REACHED));
+				_r_ctrl_showballoontip (hwnd, ctrl_id, 0, NULL, _r_locale_getstring (IDS_LIMIT_REACHED));
 
 				return FALSE;
 			}
@@ -1339,7 +1347,7 @@ INT_PTR CALLBACK EditorPagesProc (
 					if (!_app_isappvalidpath (context->ptr_app->real_path))
 						break;
 
-					status = _r_fs_openfile (&hfile, &context->ptr_app->real_path->sr, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_DELETE | FILE_SHARE_WRITE, 0, FALSE);
+					status = _r_fs_openfile (&context->ptr_app->real_path->sr, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_DELETE | FILE_SHARE_WRITE, 0, FALSE, &hfile);
 
 					if (NT_SUCCESS (status))
 					{
@@ -1514,7 +1522,7 @@ INT_PTR CALLBACK EditorProc (
 
 			_r_tab_selectitem (hwnd, IDC_TAB, _r_calc_clamp (context->page_id, 0, _r_tab_getitemcount (hwnd, IDC_TAB)));
 
-			_r_theme_initialize (hwnd);
+			_r_theme_initialize (hwnd, TRUE);
 
 			break;
 		}
@@ -1691,7 +1699,7 @@ INT_PTR CALLBACK EditorProc (
 
 							if (_r_obj_isstringempty2 (string))
 							{
-								_r_edit_showballoontip (hpage_general, IDC_RULE_NAME_ID, 0, NULL, _r_locale_getstring (IDS_STATUS_EMPTY));
+								_r_ctrl_showballoontip (hpage_general, IDC_RULE_NAME_ID, 0, NULL, _r_locale_getstring (IDS_STATUS_EMPTY));
 
 								_r_obj_dereference (string);
 

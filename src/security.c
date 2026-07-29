@@ -346,7 +346,7 @@ VOID _app_setprovidersecurity (
 
 			if (new_dacl)
 			{
-				status = FwpmProviderSetSecurityInfoByKey0 (hengine, provider_guid, OWNER_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION, (PCSID)config.builtin_admins_sid, NULL, new_dacl, NULL);
+				status = FwpmProviderSetSecurityInfoByKey0 (hengine, provider_guid, OWNER_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION, (const SID *)config.builtin_admins_sid, NULL, new_dacl, NULL);
 
 				if (status != ERROR_SUCCESS)
 					_r_log (LOG_LEVEL_ERROR, NULL, L"FwpmProviderSetSecurityInfoByKey0", status, NULL);
@@ -386,7 +386,7 @@ VOID _app_setsublayersecurity (
 
 			if (new_dacl)
 			{
-				status = FwpmSubLayerSetSecurityInfoByKey0 (hengine, sublayer_guid, OWNER_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION, (PCSID)config.builtin_admins_sid, NULL, new_dacl, NULL);
+				status = FwpmSubLayerSetSecurityInfoByKey0 (hengine, sublayer_guid, OWNER_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION, (const SID *)config.builtin_admins_sid, NULL, new_dacl, NULL);
 
 				if (status != ERROR_SUCCESS)
 					_r_log (LOG_LEVEL_ERROR, NULL, L"FwpmSubLayerSetSecurityInfoByKey0", status, NULL);
@@ -426,7 +426,7 @@ VOID _app_setcalloutsecurity (
 
 			if (new_dacl)
 			{
-				status = FwpmCalloutSetSecurityInfoByKey0 (hengine, callout_guid, OWNER_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION, (PCSID)config.builtin_admins_sid, NULL, new_dacl, NULL);
+				status = FwpmCalloutSetSecurityInfoByKey0 (hengine, callout_guid, OWNER_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION, (const SID *)config.builtin_admins_sid, NULL, new_dacl, NULL);
 
 				if (status != ERROR_SUCCESS)
 					_r_log (LOG_LEVEL_ERROR, NULL, L"FwpmCalloutSetSecurityInfoByKey0", status, NULL);
@@ -468,7 +468,7 @@ VOID _app_setfiltersecurity (
 
 			if (new_dacl)
 			{
-				status = FwpmFilterSetSecurityInfoByKey0 (hengine, filter_guid, OWNER_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION, (PCSID)config.builtin_admins_sid, NULL, new_dacl, NULL);
+				status = FwpmFilterSetSecurityInfoByKey0 (hengine, filter_guid, OWNER_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION, (const SID *)config.builtin_admins_sid, NULL, new_dacl, NULL);
 
 				if (status != ERROR_SUCCESS)
 					_r_log_v (LOG_LEVEL_ERROR, NULL, L"FwpmFilterSetSecurityInfoByKey0", status, L"#%d", line);

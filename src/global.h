@@ -5,6 +5,15 @@
 
 #include "routine.h"
 
+#define PR_SIZE_BUFFER_MINIMUM PR_SIZE_BUFFER_OVERFLOW
+#define GENERAL_ID 0x6E6574
+
+#if !defined(IN6_IS_ADDR_ULA)
+#define IN6_IS_ADDR_ULA(a) \
+	(((a)->s6_addr[0] == 0xfd) || \
+	 ((a)->s6_addr[0] == 0xfc))
+#endif
+
 typedef const R_STRINGREF* PCR_STRINGREF;
 
 #include <winsock2.h>

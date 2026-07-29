@@ -616,7 +616,7 @@ BOOLEAN _app_network_getpath (
 
 				if (NT_SUCCESS (status))
 				{
-					status = _r_sys_querytokeninformation ((PVOID_PTR)&app_container, htoken, TokenAppContainerSid);
+					status = _r_sys_querytokeninformation (htoken, TokenAppContainerSid, (PVOID_PTR)&app_container);
 
 					if (NT_SUCCESS (status))
 					{
@@ -631,11 +631,11 @@ BOOLEAN _app_network_getpath (
 
 			if (!process_name)
 			{
-				status = _r_sys_queryprocessstring (&process_name, hprocess, ProcessImageFileNameWin32);
+				status = _r_sys_queryprocessstring (hprocess, ProcessImageFileNameWin32, &process_name);
 
 				// fix for WSL processes (issue #606)
 				if (status == STATUS_UNSUCCESSFUL)
-					status = _r_sys_queryprocessstring (&process_name, hprocess, ProcessImageFileName);
+					status = _r_sys_queryprocessstring (hprocess, ProcessImageFileName, &process_name);
 			}
 
 			NtClose (hprocess);

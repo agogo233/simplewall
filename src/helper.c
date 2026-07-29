@@ -1137,7 +1137,7 @@ ULONG _app_addcolor (
 
 	ptr_clr.config_name = _r_obj_createstring (config_name);
 	ptr_clr.config_value = _r_obj_createstring (config_value);
-	ptr_clr.new_clr = _r_config_getulong (config_value, default_clr, L"colors");
+	ptr_clr.new_clr = _r_config_getulong_ex(config_value, default_clr, L"colors");
 
 	ptr_clr.default_clr = default_clr;
 	ptr_clr.locale_id = locale_id;
@@ -1743,7 +1743,7 @@ VOID NTAPI _app_queue_fileinformation (
 
 	hwnd = _r_app_gethwnd ();
 
-	status = _r_fs_openfile (&hfile, &ptr_app_info->path->sr, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_DELETE | FILE_SHARE_WRITE, 0, FALSE);
+	status = _r_fs_openfile (&ptr_app_info->path->sr, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_DELETE | FILE_SHARE_WRITE, 0, FALSE, &hfile);
 
 	if (!NT_SUCCESS (status))
 	{
@@ -1813,7 +1813,7 @@ VOID NTAPI _app_queue_notifyinformation (
 		{
 			if (_app_isappvalidbinary (ptr_app_info->path))
 			{
-				status = _r_fs_openfile (&hfile, &ptr_app_info->path->sr, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_DELETE | FILE_SHARE_WRITE, 0, FALSE);
+				status = _r_fs_openfile (&ptr_app_info->path->sr, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_DELETE | FILE_SHARE_WRITE, 0, FALSE, &hfile);
 
 				if (NT_SUCCESS (status))
 				{
@@ -2091,7 +2091,7 @@ VOID _app_wufixenable (
 	_app_wufixhelper (hsvcmgr, L"DoSvc", L"NetworkService", is_enable);
 	_app_wufixhelper (hsvcmgr, L"UsoSvc", L"netsvcs", is_enable);
 
-	_r_config_setboolean (L"IsWUFixEnabled", is_enable, NULL);
+	_r_config_setboolean_ex(L"IsWUFixEnabled", is_enable, NULL);
 
 	CloseServiceHandle (hsvcmgr);
 }

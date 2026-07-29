@@ -198,7 +198,9 @@ BOOLEAN _app_listview_lock (
 	if (_app_listview_islocked (hwnd, ctrl_id)) // check first!
 		return TRUE;
 
-	return _r_wnd_setcontext (hwnd, (USHORT_MAX - ctrl_id), INVALID_HANDLE_VALUE);
+	_r_wnd_setcontext (hwnd, (USHORT_MAX - ctrl_id), INVALID_HANDLE_VALUE);
+
+	return TRUE;
 }
 
 BOOLEAN _app_listview_unlock (
@@ -206,7 +208,9 @@ BOOLEAN _app_listview_unlock (
 	_In_ INT ctrl_id
 )
 {
-	return _r_wnd_removecontext (hwnd, (USHORT_MAX - ctrl_id));
+	_r_wnd_removecontext (hwnd, (USHORT_MAX - ctrl_id));
+
+	return TRUE;
 }
 
 LONG_PTR _app_listview_createcontext (
@@ -1066,8 +1070,8 @@ VOID _app_listview_sort (
 
 	if (is_notifycode)
 	{
-		_r_config_setboolean (L"SortIsDescending", is_descend, config_name);
-		_r_config_setlong (L"SortColumn", column_id, config_name);
+		_r_config_setboolean_ex(L"SortIsDescending", is_descend, config_name);
+		_r_config_setlong_ex(L"SortColumn", column_id, config_name);
 	}
 
 	for (INT i = 0; i < column_count; i++)

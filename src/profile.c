@@ -1762,7 +1762,7 @@ NTSTATUS _app_profile_save (
 	{
 		_r_fs_copyfile (&profile_info.profile_path->sr, &profile_info.profile_path_backup->sr, FALSE);
 
-		_r_config_setlong64 (L"BackupTimestamp", timestamp, NULL);
+		_r_config_setlong64_ex(L"BackupTimestamp", timestamp, NULL);
 	}
 
 	return status;
