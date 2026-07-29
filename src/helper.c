@@ -700,8 +700,8 @@ BOOLEAN _app_calculatefilehash (
 )
 {
 	static R_INITONCE init_once = PR_INITONCE_INIT;
-	static CCAHFFH2 _CryptCATAdminCalcHashFromFileHandle2 = NULL;
-	static CCAAC2 _CryptCATAdminAcquireContext2 = NULL;
+	static BOOL (WINAPI * _CryptCATAdminCalcHashFromFileHandle2)(HCATADMIN, HANDLE, DWORD*, BYTE*, DWORD) = NULL;
+	static BOOL (WINAPI * _CryptCATAdminAcquireContext2)(HCATADMIN*, const GUID*, PCWSTR, PCCERT_STRONG_SIGN_PARA, DWORD) = NULL;
 
 	GUID DriverActionVerify = DRIVER_ACTION_VERIFY;
 	HCATADMIN hcat_admin;
@@ -716,8 +716,8 @@ BOOLEAN _app_calculatefilehash (
 
 		if (NT_SUCCESS (status))
 		{
-			_CryptCATAdminCalcHashFromFileHandle2 = (CCAHFFH2)_r_sys_getprocaddress (hwintrust, "CryptCATAdminCalcHashFromFileHandle2", 0);
-			_CryptCATAdminAcquireContext2 = (CCAAC2)_r_sys_getprocaddress (hwintrust, "CryptCATAdminAcquireContext2", 0);
+			_CryptCATAdminCalcHashFromFileHandle2 = (BOOL (WINAPI *)(HCATADMIN, HANDLE, DWORD*, BYTE*, DWORD))_r_sys_getprocaddress (hwintrust, "CryptCATAdminCalcHashFromFileHandle2", 0);
+			_CryptCATAdminAcquireContext2 = (BOOL (WINAPI *)(HCATADMIN*, const GUID*, PCWSTR, PCCERT_STRONG_SIGN_PARA, DWORD))_r_sys_getprocaddress (hwintrust, "CryptCATAdminAcquireContext2", 0);
 
 			//_r_sys_freelibrary (hwintrust);
 		}
