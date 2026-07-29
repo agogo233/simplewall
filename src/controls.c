@@ -716,7 +716,7 @@ VOID _app_imagelist_init (
 	}
 	else
 	{
-		_r_imagelist_create (&config.himg_toolbar, size_toolbar, size_toolbar, ILC_COLOR32 | ILC_HIGHQUALITYSCALE, RTL_NUMBER_OF (toolbar_ids), RTL_NUMBER_OF (toolbar_ids));
+		_r_imagelist_create (size_toolbar, size_toolbar, ILC_COLOR32 | ILC_HIGHQUALITYSCALE, RTL_NUMBER_OF (toolbar_ids), RTL_NUMBER_OF (toolbar_ids, &config.himg_toolbar));
 	}
 
 	if (config.himg_toolbar)
@@ -740,7 +740,7 @@ VOID _app_imagelist_init (
 	}
 	else
 	{
-		_r_imagelist_create (&config.himg_rules_small, size_small, size_small, ILC_COLOR32 | ILC_HIGHQUALITYSCALE, RTL_NUMBER_OF (rules_ids), RTL_NUMBER_OF (rules_ids));
+		_r_imagelist_create (size_small, size_small, ILC_COLOR32 | ILC_HIGHQUALITYSCALE, RTL_NUMBER_OF (rules_ids), RTL_NUMBER_OF (rules_ids, &config.himg_rules_small));
 	}
 
 	if (config.himg_rules_small)
@@ -761,7 +761,7 @@ VOID _app_imagelist_init (
 	}
 	else
 	{
-		_r_imagelist_create (&config.himg_rules_large, size_large, size_large, ILC_COLOR32 | ILC_HIGHQUALITYSCALE, RTL_NUMBER_OF (rules_ids), RTL_NUMBER_OF (rules_ids));
+		_r_imagelist_create (size_large, size_large, ILC_COLOR32 | ILC_HIGHQUALITYSCALE, RTL_NUMBER_OF (rules_ids), RTL_NUMBER_OF (rules_ids, &config.himg_rules_large));
 	}
 
 	if (config.himg_rules_large)
