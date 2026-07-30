@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
         with:
           submodules: false
 
@@ -25,7 +25,7 @@ jobs:
           git -C ../builder checkout 74d1faba
 
       - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v3
+        uses: microsoft/setup-msbuild@v2
         with:
           vs-version: '17.0'
 
@@ -35,8 +35,23 @@ jobs:
       - name: Build x64 Release
         run: msbuild simplewall.sln /p:Configuration=Release /p:Platform=x64
 
+      - name: Build locale
+        run: python ../builder/src/build_locale.py --name-short=simplewall
+
+      - name: Prepare artifact
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path upload\x64
+          Copy-Item bin\64\simplewall.exe upload\x64\
+          Copy-Item bin\simplewall.lng upload\x64\
+          Copy-Item bin\Readme.txt upload\x64\
+          Copy-Item bin\License.txt upload\x64\
+          Copy-Item bin\History.txt upload\x64\
+          Copy-Item bin\profile_internal.xml upload\x64\
+          Copy-Item -Recurse bin\i18n upload\x64\
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: simplewall-x64
-          path: bin/64/simplewall.exe
+          path: upload/x64/
