@@ -8,7 +8,7 @@
 #define PR_SIZE_BUFFER_MINIMUM PR_SIZE_BUFFER_OVERFLOW
 #define GENERAL_ID 0x6E6574
 
-#pragma warning(disable: 4090 4244 4013 4703)
+#pragma warning(disable: 4090 4133 4244 4047 4013 4703)
 
 #if !defined(IN6_IS_ADDR_ULA)
 #define IN6_IS_ADDR_ULA(a) \
@@ -281,7 +281,12 @@ FORCEINLINE VOID _r_tooltip_settext (
 	_In_ LPWSTR text
 )
 {
-	TOOLINFO ti = {sizeof (ti), TTF_IDISHWND | TTF_SUBCLASS, hwnd_parent, (UINT_PTR) GetDlgItem (hwnd_parent, ctrl_id), 0, NULL, text, NULL, NULL};
+	TOOLINFO ti = {0};
+	ti.cbSize = sizeof (ti);
+	ti.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
+	ti.hwnd = hwnd_parent;
+	ti.uId = (UINT_PTR) GetDlgItem (hwnd_parent, ctrl_id);
+	ti.lpszText = text;
 	SendMessage (hwnd_tooltip, TTM_ADDTOOL, 0, (LPARAM) &ti);
 }
 
