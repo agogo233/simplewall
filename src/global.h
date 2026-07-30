@@ -328,6 +328,10 @@ FORCEINLINE VOID _r_button_seticon (
 	SendMessage (GetDlgItem (hwnd, ctrl_id), BM_SETIMAGE, IMAGE_ICON, (LPARAM) hicon);
 }
 
+#ifndef BCM_SETTEXTMARGINS
+#define BCM_SETTEXTMARGINS (BCM_FIRST + 0x0016)
+#endif
+
 FORCEINLINE VOID _r_button_setmargins (
 	_In_ HWND hwnd,
 	_In_ INT ctrl_id,
