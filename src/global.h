@@ -8,6 +8,8 @@
 #define PR_SIZE_BUFFER_MINIMUM PR_SIZE_BUFFER_OVERFLOW
 #define GENERAL_ID 0x6E6574
 
+#pragma warning(disable: 4090 4133 4244 4047 4013)
+
 #if !defined(IN6_IS_ADDR_ULA)
 #define IN6_IS_ADDR_ULA(a) \
 	(((a)->s6_addr[0] == 0xfd) || \
@@ -256,10 +258,66 @@ FORCEINLINE NTSTATUS _r_fs_createhardlink (
 
 FORCEINLINE BOOLEAN _r_button_isradiochecked (
 	_In_ HWND hwnd,
-	_In_opt_ INT ctrl_id
+	_In_opt_ INT ctrl_id,
+	_In_opt_ INT last_ctrl_id
 )
 {
+	UNREFERENCED_PARAMETER (last_ctrl_id);
 	return (Button_GetCheck (GetDlgItem (hwnd, ctrl_id)) == BST_CHECKED);
 }
+
+FORCEINLINE HWND _r_tooltip_create (
+	_In_ HWND hwnd
+)
+{
+	return CreateWindow (TOOLTIPS_CLASS, NULL, WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP,
+		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+		hwnd, NULL, NULL, NULL);
+}
+
+FORCEINLINE VOID _r_tooltip_settext (
+	_In_ HWND hwnd_tooltip,
+	_In_ HWND hwnd_parent,
+	_In_ INT ctrl_id,
+	_In_ LPWSTR text
+)
+{
+	TOOLINFO ti = {sizeof (ti), TTF_IDISHWND | TTF_SUBCLASS, hwnd_parent, (UINT_PTR) GetDlgItem (hwnd_parent, ctrl_id), 0, NULL, text, NULL, NULL};
+	SendMessage (hwnd_tooltip, TTM_ADDTOOL, 0, (LPARAM) &ti);
+}
+
+FORCEINLINE VOID _r_button_checkradio (
+	_In_ HWND hwnd,
+	_In_ INT ctrl_id_first,
+	_In_ INT ctrl_id_last,
+	_In_ INT ctrl_id_check
+)
+{
+	UNREFERENCED_PARAMETER (ctrl_id_last);
+	CheckDlgButton (hwnd, ctrl_id_first, BST_UNCHECKED);
+	CheckDlgButton (hwnd, ctrl_id_check, BST_CHECKED);
+}
+
+FORCEINLINE VOID _r_updown_setacceleration (
+	_In_ HWND hwnd,
+	_In_ INT ctrl_id,
+	_In_ INT step
+)
+{
+	UDACCEL accel = {0, (UINT) step};
+	SendMessage (GetDlgItem (hwnd, ctrl_id), UDM_SETACCEL, 1, (LPARAM) &accel);
+}
+
+FORCEINLINE BOOLEAN _r_config_invertboolean (
+	_In_ LPCWSTR key,
+	_In_ BOOLEAN default_value,
+	_In_opt_ LPCWSTR section
+)
+{
+	BOOLEAN val = _r_config_getboolean_ex (key, default_value, section);
+	_r_config_setboolean_ex (key, !val, section);
+	return !val;
+}
+
 #include "uwp.h"
 #include "wfp.h"

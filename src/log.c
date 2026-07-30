@@ -80,7 +80,7 @@ ULONG _app_getloghash (
 		_r_obj_getstring (ptr_log->local_addr_str)
 	);
 
-	return _r_str_gethash2 (buffer, TRUE);
+	return _r_str_gethash (buffer, TRUE);
 }
 
 _Ret_maybenull_
