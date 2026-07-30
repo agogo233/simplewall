@@ -319,5 +319,53 @@ FORCEINLINE BOOLEAN _r_config_invertboolean (
 	return !val;
 }
 
+FORCEINLINE VOID _r_button_seticon (
+	_In_ HWND hwnd,
+	_In_ INT ctrl_id,
+	_In_ HICON hicon
+)
+{
+	SendMessage (GetDlgItem (hwnd, ctrl_id), BM_SETIMAGE, IMAGE_ICON, (LPARAM) hicon);
+}
+
+FORCEINLINE VOID _r_button_setmargins (
+	_In_ HWND hwnd,
+	_In_ INT ctrl_id,
+	_In_ INT margins
+)
+{
+	SendMessage (GetDlgItem (hwnd, ctrl_id), BCM_SETTEXTMARGINS, 0, MAKELPARAM (margins, margins));
+}
+
+FORCEINLINE VOID _r_sys_settimer (
+	_In_ HWND hwnd,
+	_In_ UINT_PTR event_id,
+	_In_ UINT elapse,
+	_In_opt_ TIMERPROC timerproc
+)
+{
+	SetTimer (hwnd, event_id, elapse, timerproc);
+}
+
+FORCEINLINE INT _r_path_getdrivenumber (
+	_In_ PR_STRINGREF path
+)
+{
+	if (path->length >= 2 && path->buffer[1] == L':')
+	{
+		WCHAR c = path->buffer[0];
+		if ((c >= L'A' && c <= L'Z') || (c >= L'a' && c <= L'z'))
+			return (c | 0x20) - L'a';
+	}
+	return INT_ERROR;
+}
+
+FORCEINLINE BOOLEAN _r_path_isnetwork (
+	_In_ PR_STRINGREF path
+)
+{
+	return (path->length >= 2 && path->buffer[0] == L'\\' && path->buffer[1] == L'\\');
+}
+
 #include "uwp.h"
 #include "wfp.h"
