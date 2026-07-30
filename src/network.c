@@ -596,7 +596,7 @@ BOOLEAN _app_network_getpath (
 
 	if (modules)
 	{
-		process_name = _r_sys_querytaginformation (pid, ULongToPtr (*(PULONG)modules));
+		process_name = _r_sys_querytaginformation (ULongToPtr (pid), ULongToPtr (*(PULONG)modules));
 
 		if (process_name)
 			ptr_network->type = DATA_APP_SERVICE;

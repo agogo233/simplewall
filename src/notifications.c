@@ -491,7 +491,7 @@ BOOLEAN _app_notify_killprocess (
 
 		if (_r_str_isequal2 (&file_name->sr, process->ImageName.Buffer, TRUE))
 		{
-			status = _r_sys_getprocessimagepathbyid (HandleToULong (process->UniqueProcessId), TRUE, &path);
+			status = _r_sys_getprocessimagepathbyid (process->UniqueProcessId, TRUE, &path);
 
 			if (NT_SUCCESS (status))
 			{
