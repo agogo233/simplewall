@@ -39,4 +39,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: simplewall-x64
-          path: x64/Release/simplewall.exe
+          path: bin/64/simplewall.exe
