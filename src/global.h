@@ -8,7 +8,7 @@
 #define PR_SIZE_BUFFER_MINIMUM PR_SIZE_BUFFER_OVERFLOW
 #define GENERAL_ID 0x6E6574
 
-#pragma warning(disable: 4090 4133 4244 4047 4013 4022 4024 4703)
+#pragma warning(disable: 4090 4244 4013 4703)
 
 #if !defined(IN6_IS_ADDR_ULA)
 #define IN6_IS_ADDR_ULA(a) \
@@ -236,7 +236,6 @@ FORCEINLINE VOID _r_listview_scroll (
 	_In_ INT scroll_pos
 )
 {
-	SendMessage (GetDlgItem (hwnd, ctrl_id), LVM_GETTOPINDEX, 0, 0);
 	SendMessage (GetDlgItem (hwnd, ctrl_id), LVM_ENSUREVISIBLE, scroll_pos, FALSE);
 }
 
@@ -293,8 +292,8 @@ FORCEINLINE VOID _r_button_checkradio (
 	_In_ INT ctrl_id_check
 )
 {
-	UNREFERENCED_PARAMETER (ctrl_id_last);
-	CheckDlgButton (hwnd, ctrl_id_first, BST_UNCHECKED);
+	for (INT i = ctrl_id_first; i <= ctrl_id_last; i++)
+		CheckDlgButton (hwnd, i, BST_UNCHECKED);
 	CheckDlgButton (hwnd, ctrl_id_check, BST_CHECKED);
 }
 
@@ -355,7 +354,7 @@ FORCEINLINE INT _r_path_getdrivenumber (
 	_In_ PR_STRINGREF path
 )
 {
-	if (path->length >= 2 && path->buffer[1] == L':')
+	if (path->length >= sizeof (L"C:") - sizeof (L'\0') && path->buffer[1] == L':')
 	{
 		WCHAR c = path->buffer[0];
 		if ((c >= L'A' && c <= L'Z') || (c >= L'a' && c <= L'z'))

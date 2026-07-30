@@ -411,7 +411,7 @@ VOID _app_notify_playsound ()
 
 	if (_r_obj_isstringempty (current_path) || !_r_fs_isexists (&current_path->sr))
 	{
-		status = _r_reg_openkey (&hkey, HKEY_CURRENT_USER, L"AppEvents\\Schemes\\Apps\\.Default\\" NOTIFY_SOUND_NAME L"\\.Default", 0, KEY_READ);
+		status = _r_reg_openkey (HKEY_CURRENT_USER, L"AppEvents\\Schemes\\Apps\\.Default\\" NOTIFY_SOUND_NAME L"\\.Default", 0, KEY_READ, &hkey);
 
 		if (NT_SUCCESS (status))
 		{
@@ -491,13 +491,13 @@ BOOLEAN _app_notify_killprocess (
 
 		if (_r_str_isequal2 (&file_name->sr, process->ImageName.Buffer, TRUE))
 		{
-			status = _r_sys_getprocessimagepathbyid (&path, HandleToULong (process->UniqueProcessId), TRUE);
+			status = _r_sys_getprocessimagepathbyid (HandleToULong (process->UniqueProcessId), TRUE, &path);
 
 			if (NT_SUCCESS (status))
 			{
 				if (_r_str_isequal (&path->sr, &ptr_app->real_path->sr, TRUE))
 				{
-					status = _r_sys_openprocess (&hprocess, HandleToULong (process->UniqueProcessId), PROCESS_TERMINATE);
+					status = _r_sys_openprocess (HandleToULong (process->UniqueProcessId), PROCESS_TERMINATE, &hprocess);
 
 					if (NT_SUCCESS (status))
 					{

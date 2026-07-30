@@ -68,11 +68,11 @@ VOID _app_generate_credentials ()
 	// for revoke current user (v3.0.5 Beta and lower)
 	config.builtin_current_sid = _r_sys_getcurrenttoken ()->token_sid;
 
-	_r_sys_getservicesid (&config.service_wdiservicehost_sid, L"WdiServiceHost");
-	_r_sys_getservicesid (&config.service_policyagent_sid, L"PolicyAgent");
-	_r_sys_getservicesid (&config.service_mpssvc_sid, L"mpssvc");
-	_r_sys_getservicesid (&config.service_nlasvc_sid, L"NlaSvc");
-	_r_sys_getservicesid (&config.service_rpcss_sid, L"RpcSs");
+	_r_sys_getservicesid (L"WdiServiceHost", &config.service_wdiservicehost_sid);
+	_r_sys_getservicesid (L"PolicyAgent", &config.service_policyagent_sid);
+	_r_sys_getservicesid (L"mpssvc", &config.service_mpssvc_sid);
+	_r_sys_getservicesid (L"NlaSvc", &config.service_nlasvc_sid);
+	_r_sys_getservicesid (L"RpcSs", &config.service_rpcss_sid);
 }
 
 _Ret_maybenull_

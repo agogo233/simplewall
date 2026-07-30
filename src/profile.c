@@ -1476,7 +1476,7 @@ NTSTATUS _app_profile_load_fromresource (
 
 	if (NT_SUCCESS (status))
 	{
-		status = _r_res_loadresource (&storage, _r_sys_getimagebase (), RT_RCDATA, resource_name, 0);
+		status = _r_res_loadresource (_r_sys_getimagebase (), RT_RCDATA, resource_name, 0, &storage);
 
 		if (NT_SUCCESS (status))
 			status = _app_db_openfrombuffer (db_info, &storage, XML_TYPE_PROFILE_INTERNAL);

@@ -107,7 +107,7 @@ VOID _app_package_getpackagebyname (
 
 	_r_str_printf (buffer, RTL_NUMBER_OF (buffer), L"%s\\%s", path, key_name->buffer);
 
-	status = _r_reg_openkey (&hsubkey, hroot, buffer, 0, KEY_READ);
+	status = _r_reg_openkey (hroot, buffer, 0, KEY_READ, &hsubkey);
 
 	if (!NT_SUCCESS (status))
 	{
@@ -196,7 +196,7 @@ VOID _app_package_getpackagebysid (
 
 	_r_str_printf (buffer, RTL_NUMBER_OF (buffer), L"%s\\%s", path, key_name->buffer);
 
-	status = _r_reg_openkey (&hsubkey, hroot, buffer, 0, KEY_READ);
+	status = _r_reg_openkey (hroot, buffer, 0, KEY_READ, &hsubkey);
 
 	if (!NT_SUCCESS (status))
 	{
@@ -294,11 +294,11 @@ VOID NTAPI _app_package_threadproc (
 	hevents[0] = event_handle1;
 	hevents[1] = event_handle2;
 
-	status = _r_reg_openkey (&hservices_key, HKEY_LOCAL_MACHINE, L"System\\CurrentControlSet\\Services", 0, KEY_NOTIFY);
+	status = _r_reg_openkey (HKEY_LOCAL_MACHINE, L"System\\CurrentControlSet\\Services", 0, KEY_NOTIFY, &hservices_key);
 
 	if (_r_sys_isosversiongreaterorequal (WINDOWS_8))
 	{
-		_r_reg_openkey (&hpackages_key, HKEY_CURRENT_USER, L"Software\\Classes\\Local Settings\\Software\\Microsoft\\Windows\\CurrentVersion\\AppModel\\Repository\\Packages", 0, KEY_NOTIFY);
+		_r_reg_openkey (HKEY_CURRENT_USER, L"Software\\Classes\\Local Settings\\Software\\Microsoft\\Windows\\CurrentVersion\\AppModel\\Repository\\Packages", 0, KEY_NOTIFY, &hpackages_key);
 
 		flags |= REG_NOTIFY_THREAD_AGNOSTIC;
 	}
@@ -402,7 +402,7 @@ VOID _app_package_getpackageslist (
 	NTSTATUS status;
 
 	// query packages by name
-	status = _r_reg_openkey (&hkey, HKEY_CURRENT_USER, reg_byname, 0, KEY_READ);
+	status = _r_reg_openkey (HKEY_CURRENT_USER, reg_byname, 0, KEY_READ, &hkey);
 
 	if (!NT_SUCCESS (status))
 	{
@@ -429,7 +429,7 @@ VOID _app_package_getpackageslist (
 	}
 
 	// query packages by sid
-	status = _r_reg_openkey (&hkey, HKEY_CURRENT_USER, reg_bysid, 0, KEY_READ);
+	status = _r_reg_openkey (HKEY_CURRENT_USER, reg_bysid, 0, KEY_READ, &hkey);
 
 	if (!NT_SUCCESS (status))
 	{
@@ -536,7 +536,7 @@ VOID _app_package_getserviceslist (
 
 		_r_str_printf (general_key, RTL_NUMBER_OF (general_key), L"SYSTEM\\CurrentControlSet\\Services\\%s", service->lpServiceName);
 
-		status = _r_reg_openkey (&hkey, HKEY_LOCAL_MACHINE, general_key, 0, KEY_READ);
+		status = _r_reg_openkey (HKEY_LOCAL_MACHINE, general_key, 0, KEY_READ, &hkey);
 
 		if (!NT_SUCCESS (status))
 			continue;
@@ -558,7 +558,7 @@ VOID _app_package_getserviceslist (
 			}
 
 			// query service sid
-			status = _r_sys_getservicesid (&service_sid, service->lpServiceName);
+			status = _r_sys_getservicesid (service->lpServiceName, &service_sid);
 
 			if (NT_SUCCESS (status))
 			{
