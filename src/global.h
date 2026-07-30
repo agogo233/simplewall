@@ -8,7 +8,7 @@
 #define PR_SIZE_BUFFER_MINIMUM PR_SIZE_BUFFER_OVERFLOW
 #define GENERAL_ID 0x6E6574
 
-#pragma warning(disable: 4090 4133 4244 4047 4013 4022 4024)
+#pragma warning(disable: 4090 4133 4244 4047 4013 4022 4024 4703)
 
 #if !defined(IN6_IS_ADDR_ULA)
 #define IN6_IS_ADDR_ULA(a) \
