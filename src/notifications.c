@@ -497,7 +497,7 @@ BOOLEAN _app_notify_killprocess (
 			{
 				if (_r_str_isequal (&path->sr, &ptr_app->real_path->sr, TRUE))
 				{
-					status = _r_sys_openprocess (HandleToULong (process->UniqueProcessId), PROCESS_TERMINATE, &hprocess);
+					status = _r_sys_openprocess (process->UniqueProcessId, PROCESS_TERMINATE, &hprocess);
 
 					if (NT_SUCCESS (status))
 					{

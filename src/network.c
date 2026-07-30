@@ -604,7 +604,7 @@ BOOLEAN _app_network_getpath (
 
 	if (!process_name)
 	{
-		status = _r_sys_openprocess (pid, PROCESS_QUERY_LIMITED_INFORMATION, &hprocess);
+		status = _r_sys_openprocess (ULongToPtr (pid), PROCESS_QUERY_LIMITED_INFORMATION, &hprocess);
 
 		if (NT_SUCCESS (status))
 		{
