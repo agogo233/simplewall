@@ -25,7 +25,7 @@ VOID _app_loginit (
 	if (!log_path)
 		return;
 
-	status = _r_fs_createfile (&new_handle, &log_path->sr, FILE_OPEN_IF, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, FILE_ATTRIBUTE_NORMAL, 0, FALSE, NULL);
+	status = _r_fs_createfile (&log_path->sr, FILE_OPEN_IF, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, FILE_ATTRIBUTE_NORMAL, 0, FALSE, NULL, &new_handle);
 
 	if (NT_SUCCESS (status))
 	{
@@ -47,7 +47,7 @@ VOID _app_loginitfile (
 	BYTE bom[] = {0xFF, 0xFE};
 	LONG64 file_size;
 
-	_r_fs_getsize (NULL, hfile, &file_size);
+	_r_fs_getsize (NULL, hfile, (PLARGE_INTEGER)&file_size);
 
 	if (file_size == 0)
 	{
@@ -56,7 +56,7 @@ VOID _app_loginitfile (
 	}
 	else
 	{
-		_r_fs_setpos (hfile, file_size); // move to eof
+		_r_fs_setpos (hfile, (PLARGE_INTEGER)&file_size); // move to eof
 	}
 }
 
@@ -134,7 +134,7 @@ BOOLEAN _app_logislimitreached (
 	if (!limit)
 		return FALSE;
 
-	_r_fs_getsize (NULL, hfile, &file_size);
+	_r_fs_getsize (NULL, hfile, (PLARGE_INTEGER)&file_size);
 
 	return (file_size >= (_r_calc_kilobytes2bytes64 (limit)));
 }
@@ -317,7 +317,7 @@ VOID _wfp_logsubscribe (
 
 	if (_r_initonce_begin (&init_once))
 	{
-		status = _r_sys_loadlibrary2 (&hfwpuclnt, L"fwpuclnt.dll", 0);
+		status = _r_sys_loadlibrary2 (L"fwpuclnt.dll", 0, &hfwpuclnt);
 
 		if (NT_SUCCESS (status))
 		{
@@ -605,7 +605,7 @@ VOID CALLBACK _wfp_logcallback (
 
 	// get username information
 	if ((log->flags & FWPM_NET_EVENT_FLAG_USER_ID_SET) == FWPM_NET_EVENT_FLAG_USER_ID_SET && log->user_id)
-		_r_sys_getusername (&ptr_log->username, log->user_id, TRUE);
+		_r_sys_getusername (log->user_id, TRUE, &ptr_log->username);
 
 	// destination
 	if ((log->flags & FWPM_NET_EVENT_FLAG_IP_VERSION_SET) == FWPM_NET_EVENT_FLAG_IP_VERSION_SET)

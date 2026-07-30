@@ -237,5 +237,29 @@ FORCEINLINE VOID _r_listview_scroll (
 	SendMessage (GetDlgItem (hwnd, ctrl_id), LVM_GETTOPINDEX, 0, 0);
 	SendMessage (GetDlgItem (hwnd, ctrl_id), LVM_ENSUREVISIBLE, scroll_pos, FALSE);
 }
+
+FORCEINLINE NTSTATUS _r_sys_terminatethread (
+	_In_ HANDLE hthread,
+	_In_ NTSTATUS exit_code
+)
+{
+	return NtTerminateThread (hthread, exit_code);
+}
+
+FORCEINLINE NTSTATUS _r_fs_createhardlink (
+	_In_ PR_STRINGREF link_path,
+	_In_ PR_STRINGREF target_path
+)
+{
+	return STATUS_NOT_IMPLEMENTED;
+}
+
+FORCEINLINE BOOLEAN _r_button_isradiochecked (
+	_In_ HWND hwnd,
+	_In_opt_ INT ctrl_id
+)
+{
+	return (Button_GetCheck (GetDlgItem (hwnd, ctrl_id)) == BST_CHECKED);
+}
 #include "uwp.h"
 #include "wfp.h"
