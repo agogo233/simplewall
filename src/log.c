@@ -586,7 +586,7 @@ VOID CALLBACK _wfp_logcallback (
 	{
 		_r_obj_swapreference ((PVOID_PTR)&ptr_log->path, sid_string);
 
-		ptr_log->app_hash = _r_str_gethash (&ptr_log->path->sr, TRUE);
+		ptr_log->app_hash = _r_str_gethash2 (&ptr_log->path->sr, TRUE);
 	}
 	else if ((log->flags & FWPM_NET_EVENT_FLAG_APP_ID_SET) == FWPM_NET_EVENT_FLAG_APP_ID_SET && log->app_id)
 	{
@@ -594,7 +594,7 @@ VOID CALLBACK _wfp_logcallback (
 
 		_r_obj_movereference ((PVOID_PTR)&ptr_log->path, _r_path_dospathfromnt (&path->sr));
 
-		ptr_log->app_hash = _r_str_gethash (&ptr_log->path->sr, TRUE);
+		ptr_log->app_hash = _r_str_gethash2 (&ptr_log->path->sr, TRUE);
 
 		_r_obj_dereference (path);
 	}

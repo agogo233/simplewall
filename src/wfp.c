@@ -1231,7 +1231,7 @@ BOOLEAN _wfp_createrulefilters (
 	PR_ARRAY guids;
 	LPCGUID guid;
 	ULONG_PTR enum_key;
-	ULONG hash_code;
+	ULONG_PTR hash_code;
 	BOOLEAN is_enabled;
 
 	if (_r_obj_isempty2 (rules))
@@ -1346,10 +1346,10 @@ BOOLEAN _wfp_createrulefilters (
 
 				while (_r_obj_enumhashtable (ptr_rule->apps, NULL, &hash_code, &enum_key))
 				{
-					if ((ptr_rule->is_fordriver || ptr_rule->is_forservice) && _app_issystemhash (hash_code))
+					if ((ptr_rule->is_fordriver || ptr_rule->is_forservice) && _app_issystemhash ((ULONG)hash_code))
 						continue;
 
-					if (!_wfp_createrulefilter (engine_handle, ptr_rule->type, rule_name, hash_code, &ptr_rule->config, &rule_remote_part, &rule_local_part, ptr_rule->weight, ptr_rule->action, 0, ptr_rule->guids))
+					if (!_wfp_createrulefilter (engine_handle, ptr_rule->type, rule_name, (ULONG)hash_code, &ptr_rule->config, &rule_remote_part, &rule_local_part, ptr_rule->weight, ptr_rule->action, 0, ptr_rule->guids))
 						ptr_rule->is_haveerrors = TRUE;
 				}
 			}
@@ -2125,7 +2125,7 @@ NTSTATUS _FwpmGetAppIdFromFileName1 (
 
 	if (type == DATA_APP_REGULAR || type == DATA_APP_NETWORK || type == DATA_APP_SERVICE)
 	{
-		if (_r_str_gethash (&path->sr, TRUE) == config.ntoskrnl_hash)
+		if (_r_str_gethash2 (&path->sr, TRUE) == config.ntoskrnl_hash)
 		{
 			ByteBlobAlloc (byte_blob, path->buffer, path->length + sizeof (UNICODE_NULL));
 

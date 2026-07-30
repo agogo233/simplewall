@@ -429,7 +429,7 @@ PITEM_APP _app_addapplication (
 			_r_obj_initializestringref (&path_sr, path_full);
 	}
 
-	app_hash = _r_str_gethash (&path_sr, TRUE);
+	app_hash = _r_str_gethash2 (&path_sr, TRUE);
 
 	if (_app_isappfound (app_hash))
 		return _app_getappitem (app_hash); // already exists
@@ -534,7 +534,7 @@ PITEM_RULE _app_addrule (
 	if (_r_str_getlength2 (&ptr_rule->name->sr) > RULE_NAME_CCH_MAX)
 		_r_str_setlength (&ptr_rule->name->sr, RULE_NAME_CCH_MAX * sizeof (WCHAR));
 
-	ptr_rule->rule_hash = _r_str_gethash (&ptr_rule->name->sr, TRUE);
+	ptr_rule->rule_hash = _r_str_gethash2 (&ptr_rule->name->sr, TRUE);
 
 	// set rule destination
 	if (rule_remote)
@@ -923,7 +923,7 @@ VOID _app_setruleiteminfo (
 )
 {
 	ULONG_PTR enum_key = 0;
-	ULONG hash_code;
+	ULONG_PTR hash_code;
 
 	_r_listview_setitem (hwnd, listview_id, item_id, 0, LPSTR_TEXTCALLBACK, I_IMAGECALLBACK, I_GROUPIDCALLBACK, I_DEFAULT);
 
@@ -1162,7 +1162,7 @@ PR_STRING _app_rulesexpandapps (
 	PITEM_APP ptr_app;
 	PR_STRING string;
 	ULONG_PTR enum_key = 0;
-	ULONG hash_code;
+	ULONG_PTR hash_code;
 
 	_r_obj_initializestringbuilder (&sb, 0);
 
@@ -1191,7 +1191,7 @@ PR_STRING _app_rulesexpandapps (
 
 	while (_r_obj_enumhashtable (ptr_rule->apps, NULL, &hash_code, &enum_key))
 	{
-		ptr_app = _app_getappitem (hash_code);
+		ptr_app = _app_getappitem ((ULONG)hash_code);
 
 		if (!ptr_app)
 			continue;

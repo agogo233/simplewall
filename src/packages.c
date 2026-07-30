@@ -9,7 +9,7 @@ BOOLEAN _app_package_isnotexists (
 {
 	ULONG app_hash;
 
-	app_hash = _r_str_gethash (&package_sid->sr, TRUE);
+	app_hash = _r_str_gethash2 (&package_sid->sr, TRUE);
 
 	if (_app_isappfound (app_hash))
 		return TRUE;
@@ -127,7 +127,7 @@ VOID _app_package_getpackagebyname (
 		goto CleanupExit;
 
 	// already exists (skip)
-	app_hash = _r_str_gethash (&package_sid_string->sr, TRUE);
+	app_hash = _r_str_gethash2 (&package_sid_string->sr, TRUE);
 
 	if (_app_isappfound (app_hash))
 		goto CleanupExit;
@@ -189,7 +189,7 @@ VOID _app_package_getpackagebysid (
 	NTSTATUS status;
 
 	// already exists (skip)
-	app_hash = _r_str_gethash (&key_name->sr, TRUE);
+	app_hash = _r_str_gethash2 (&key_name->sr, TRUE);
 
 	if (_app_isappfound (app_hash))
 		return;
@@ -531,7 +531,7 @@ VOID _app_package_getserviceslist (
 	{
 		service = &services[i];
 
-		if (_app_isappfound (_r_str_gethash2 (service->lpServiceName, TRUE)))
+		if (_app_isappfound (_r_str_gethash (service->lpServiceName, TRUE)))
 			continue;
 
 		_r_str_printf (general_key, RTL_NUMBER_OF (general_key), L"SYSTEM\\CurrentControlSet\\Services\\%s", service->lpServiceName);

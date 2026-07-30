@@ -1602,7 +1602,7 @@ VOID _app_fileloggingenable ()
 	if (_r_config_getboolean_ex(L"IsEnableAppMonitor", FALSE, NULL))
 	{
 		// TODO! rewrite this and watch FS changes through NtNotifyChangeDirectoryFile, then read file hash!
-		if (NT_SUCCESS (_r_sys_createthread (&config.hmonitor_thread, NtCurrentProcess (), &_app_timercallback, NULL, NULL, L"FileMonitor")))
+		if (NT_SUCCESS (_r_sys_createthread (&config.hmonitor_thread, NtCurrentProcess (), (PUSER_THREAD_START_ROUTINE)&_app_timercallback, NULL, NULL, L"FileMonitor")))
 			NtResumeThread (config.hmonitor_thread, NULL);
 	}
 	else

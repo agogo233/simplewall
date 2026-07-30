@@ -1324,7 +1324,7 @@ INT_PTR CALLBACK SettingsProc (
 
 						if (path)
 						{
-							_r_filedialog_setpath (&file_dialog, &path->sr);
+							_r_filedialog_setpath (&file_dialog, path->sr.buffer);
 
 							_r_obj_dereference (path);
 						}
@@ -1388,7 +1388,7 @@ INT_PTR CALLBACK SettingsProc (
 
 						if (path)
 						{
-							_r_filedialog_setpath (&file_dialog, &path->sr);
+							_r_filedialog_setpath (&file_dialog, path->sr.buffer);
 
 							_r_obj_dereference (path);
 						}
@@ -1797,10 +1797,10 @@ VOID _app_initialize (
 	if (!config.ntoskrnl_path)
 		config.ntoskrnl_path = _r_obj_createstring (L"ntoskrnl.exe"); // search path
 
-	config.ntoskrnl_hash = _r_str_gethash (&config.system_path->sr, TRUE);
-	config.svchost_hash = _r_str_gethash (&config.svchost_path->sr, TRUE);
-	config.wusvc_hash = _r_str_gethash (&config.wusvc_path->sr, TRUE);
-	config.my_hash = _r_str_gethash (&config.my_path->sr, TRUE);
+	config.ntoskrnl_hash = _r_str_gethash2 (&config.system_path->sr, TRUE);
+	config.svchost_hash = _r_str_gethash2 (&config.svchost_path->sr, TRUE);
+	config.wusvc_hash = _r_str_gethash2 (&config.wusvc_path->sr, TRUE);
+	config.my_hash = _r_str_gethash2 (&config.my_path->sr, TRUE);
 
 	// initialize free list
 	_r_freelist_initialize (&listview_free_list, sizeof (ITEM_LISTVIEW_CONTEXT), 0x800);
@@ -1845,7 +1845,7 @@ VOID _app_initialize (
 	NtCreateEvent (&config.hnotify_evt, EVENT_ALL_ACCESS, NULL, NotificationEvent, TRUE);
 
 	if (hwnd)
-		_r_sys_createthread (NULL, NtCurrentProcess (), &_app_package_threadproc, hwnd, &environment, L"ServicesMonitor");
+		_r_sys_createthread (NULL, NtCurrentProcess (), (PUSER_THREAD_START_ROUTINE)&_app_package_threadproc, hwnd, &environment, L"ServicesMonitor");
 }
 
 INT FirstDriveFromMask (
@@ -2817,7 +2817,7 @@ INT_PTR CALLBACK DlgProc (
 						_r_obj_initializestringref (&sr, XML_PROFILE_FILE);
 
 						_r_filedialog_setfilter (&file_dialog, filters, RTL_NUMBER_OF (filters));
-						_r_filedialog_setpath (&file_dialog, &sr);
+						_r_filedialog_setpath (&file_dialog, sr.buffer);
 
 						status = _r_filedialog_show (hwnd, &file_dialog);
 
@@ -2861,7 +2861,7 @@ INT_PTR CALLBACK DlgProc (
 						_r_obj_initializestringref (&sr, XML_PROFILE_FILE);
 
 						_r_filedialog_setfilter (&file_dialog, filters, RTL_NUMBER_OF (filters));
-						_r_filedialog_setpath (&file_dialog, &sr);
+						_r_filedialog_setpath (&file_dialog, sr.buffer);
 
 						status = _r_filedialog_show (hwnd, &file_dialog);
 

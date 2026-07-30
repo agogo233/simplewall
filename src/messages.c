@@ -710,7 +710,7 @@ VOID _app_message_contextmenu (
 
 			hash_code = (ULONG)_app_listview_getitemcontext (hwnd, listview_id, lpnmlv->iItem);
 
-			ptr_network = _app_network_getitem (hash_code);
+			ptr_network = _app_network_getitem ((ULONG)hash_code);
 
 			if (ptr_network)
 			{
@@ -2067,7 +2067,7 @@ VOID _app_command_checkbox (
 	PITEM_RULE ptr_rule;
 	PITEM_APP ptr_app;
 	PR_LIST rules;
-	ULONG hash_code;
+	ULONG_PTR hash_code;
 	INT item_id = INT_ERROR;
 	BOOLEAN is_changed = FALSE, new_val = (ctrl_id == IDM_CHECK);
 
@@ -2083,7 +2083,7 @@ VOID _app_command_checkbox (
 		while ((item_id = _r_listview_getnextselected (hwnd, tab_context->listview_id, item_id)) != INT_ERROR)
 		{
 			hash_code = (ULONG)_app_listview_getitemcontext (hwnd, tab_context->listview_id, item_id);
-			ptr_app = _app_getappitem (hash_code);
+			ptr_app = _app_getappitem ((ULONG)hash_code);
 
 			if (!ptr_app)
 				continue;
@@ -2180,7 +2180,7 @@ VOID _app_command_delete (
 	PITEM_RULE ptr_rule;
 	ULONG_PTR enum_key = 0, rule_idx;
 	LPARAM lparam;
-	ULONG hash_code;
+	ULONG_PTR hash_code;
 	INT item_count, selected_count;
 
 	tab_context = _app_listview_getcontext (hwnd, INT_ERROR);
@@ -2257,7 +2257,7 @@ VOID _app_command_delete (
 		if (tab_context->listview_id == IDC_APPS_PROFILE)
 		{
 			hash_code = (ULONG)_app_listview_getitemcontext (hwnd, tab_context->listview_id, i);
-			ptr_app = _app_getappitem (hash_code);
+			ptr_app = _app_getappitem ((ULONG)hash_code);
 
 			if (!ptr_app)
 				continue;
@@ -2273,7 +2273,7 @@ VOID _app_command_delete (
 				_app_timer_reset (hwnd, ptr_app);
 
 				_r_queuedlock_acquireexclusive (&lock_apps);
-				_app_freeapplication (hwnd, hash_code);
+				_app_freeapplication (hwnd, (ULONG)hash_code);
 				_r_queuedlock_releaseexclusive (&lock_apps);
 			}
 
@@ -2324,7 +2324,7 @@ VOID _app_command_delete (
 		else if (tab_context->listview_id == IDC_NETWORK)
 		{
 			hash_code = (ULONG)_app_listview_getitemcontext (hwnd, tab_context->listview_id, i);
-			ptr_network = _app_network_getitem (hash_code);
+			ptr_network = _app_network_getitem ((ULONG)hash_code);
 
 			if (!ptr_network)
 				continue;
@@ -2343,7 +2343,7 @@ VOID _app_command_delete (
 				{
 					_r_listview_deleteitem (hwnd, tab_context->listview_id, i);
 
-					_app_network_removeitem (hash_code);
+					_app_network_removeitem ((ULONG)hash_code);
 				}
 			}
 
@@ -2431,7 +2431,7 @@ VOID _app_command_openeditor (
 	PITEM_LOG ptr_log;
 	PITEM_APP ptr_app;
 	ULONG_PTR id_code;
-	ULONG hash_code;
+	ULONG_PTR hash_code;
 	INT item_id = INT_ERROR;
 
 	tab_context = _app_listview_getcontext (hwnd, INT_ERROR);
@@ -2453,7 +2453,7 @@ VOID _app_command_openeditor (
 			{
 				hash_code = (ULONG)_app_listview_getitemcontext (hwnd, tab_context->listview_id, item_id);
 
-				if (_app_isappfound (hash_code))
+				if (_app_isappfound ((ULONG)hash_code))
 					_r_obj_addhashtableitem (ptr_rule->apps, hash_code, NULL);
 			}
 
@@ -2462,7 +2462,7 @@ VOID _app_command_openeditor (
 			if (item_id != INT_ERROR)
 			{
 				hash_code = (ULONG)_app_listview_getitemcontext (hwnd, tab_context->listview_id, item_id);
-				ptr_app = _app_getappitem (hash_code);
+				ptr_app = _app_getappitem ((ULONG)hash_code);
 
 				if (ptr_app)
 				{
@@ -2484,7 +2484,7 @@ VOID _app_command_openeditor (
 			if (item_id != INT_ERROR)
 			{
 				hash_code = (ULONG)_app_listview_getitemcontext (hwnd, tab_context->listview_id, item_id);
-				ptr_network = _app_network_getitem (hash_code);
+				ptr_network = _app_network_getitem ((ULONG)hash_code);
 
 				if (ptr_network)
 				{
@@ -2609,7 +2609,7 @@ VOID _app_command_properties (
 	PITEM_RULE ptr_rule;
 	PITEM_APP ptr_app;
 	PITEM_LOG ptr_log;
-	ULONG hash_code;
+	ULONG_PTR hash_code;
 	INT item_id;
 
 	tab_context = _app_listview_getcontext (hwnd, INT_ERROR);
@@ -2629,7 +2629,7 @@ VOID _app_command_properties (
 		case IDC_APPS_UWP:
 		{
 			hash_code = (ULONG)_app_listview_getitemcontext (hwnd, tab_context->listview_id, item_id);
-			ptr_app = _app_getappitem (hash_code);
+			ptr_app = _app_getappitem ((ULONG)hash_code);
 
 			if (!ptr_app)
 				return;
@@ -2687,7 +2687,7 @@ VOID _app_command_properties (
 		case IDC_NETWORK:
 		{
 			hash_code = (ULONG)_app_listview_getitemcontext (hwnd, tab_context->listview_id, item_id);
-			ptr_network = _app_network_getitem (hash_code);
+			ptr_network = _app_network_getitem ((ULONG)hash_code);
 
 			if (!ptr_network)
 				return;
@@ -2766,7 +2766,7 @@ VOID _app_command_purgeunused (
 	PR_LIST apps_list;
 	PR_ARRAY guids;
 	ULONG_PTR enum_key = 0;
-	ULONG hash_code;
+	ULONG_PTR hash_code;
 	INT i = 1;
 
 	apps_list = _r_obj_createlist (0x10, NULL);
@@ -2825,7 +2825,7 @@ VOID _app_command_purgeunused (
 				_app_notify_freeobject (NULL, ptr_app);
 				_app_timer_reset (NULL, ptr_app);
 
-				_app_freeapplication (hwnd, hash_code);
+				_app_freeapplication (hwnd, (ULONG)hash_code);
 			}
 
 			//_r_queuedlock_releaseexclusive (&lock_apps);
