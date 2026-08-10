@@ -24,12 +24,7 @@ VOID _app_package_parsepath (
 	_Inout_ PR_STRING_PTR package_root_folder
 )
 {
-	R_STRINGREF appx_names[] = {
-		PR_STRINGREF_INIT (L"AppxManifest.xml"),
-		PR_STRINGREF_INIT (L"VSAppxManifest.xml"),
-	};
-
-	R_STRINGREF separator_sr = PR_STRINGREF_INIT (L"\\");
+	R_STRINGREF appx_names[] = {PR_STRINGREF_INIT (L"AppxManifest.xml"), PR_STRINGREF_INIT (L"VSAppxManifest.xml")}, separator_sr = PR_STRINGREF_INIT (L"\\");
 	R_XML_LIBRARY xml_library = {0};
 	PR_STRING manifest_path = NULL, path_string, result_path = NULL;
 	R_STRINGREF executable_sr;
@@ -473,7 +468,7 @@ VOID _app_package_getserviceslist (
 	SC_HANDLE hsvcmgr;
 	HANDLE hkey;
 	LONG64 service_timestamp;
-	ULONG buffer_size, return_length, services_returned, service_type = SERVICE_WIN32_OWN_PROCESS | SERVICE_WIN32_SHARE_PROCESS, sd_length;
+	ULONG buffer_size, return_length, sd_length, services_returned, service_type = SERVICE_WIN32_OWN_PROCESS | SERVICE_WIN32_SHARE_PROCESS;
 	NTSTATUS status;
 
 	hsvcmgr = OpenSCManagerW (NULL, NULL, SC_MANAGER_CONNECT | SC_MANAGER_ENUMERATE_SERVICE);
@@ -488,7 +483,12 @@ VOID _app_package_getserviceslist (
 
 	// win10+
 	if (_r_sys_isosversiongreaterorequal (WINDOWS_10))
-		service_type |= SERVICE_INTERACTIVE_PROCESS | SERVICE_USER_SERVICE | SERVICE_USERSERVICE_INSTANCE;
+	{
+		service_type |= SERVICE_INTERACTIVE_PROCESS | SERVICE_USER_SERVICE;
+
+		if (_r_config_getboolean (L"IsCollectUserServiceInstance", FALSE, NULL))
+			service_type |= SERVICE_USERSERVICE_INSTANCE;
+	}
 
 	buffer_size = PR_SIZE_BUFFER;
 	buffer = _r_mem_allocate (buffer_size);
@@ -520,7 +520,6 @@ VOID _app_package_getserviceslist (
 	if (!buffer)
 	{
 		CloseServiceHandle (hsvcmgr);
-
 		return;
 	}
 
@@ -540,6 +539,18 @@ VOID _app_package_getserviceslist (
 
 		if (!NT_SUCCESS (status))
 			continue;
+
+		// skip userservice instances service types (win10+)
+		if (_r_sys_isosversiongreaterorequal (WINDOWS_10) && !_r_config_getboolean (L"IsCollectUserServiceInstance", FALSE, NULL))
+		{
+			status = _r_reg_queryulong (hkey, L"Type", &service_type);
+
+			if (!NT_SUCCESS (status) || (service_type & SERVICE_USERSERVICE_INSTANCE) != 0)
+			{
+				NtClose (hkey);
+				continue;
+			}
+		}
 
 		// query service path
 		status = _r_reg_querystring (hkey, L"ImagePath", &service_path, NULL);
