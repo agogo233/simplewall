@@ -486,7 +486,7 @@ VOID _app_package_getserviceslist (
 	{
 		service_type |= SERVICE_INTERACTIVE_PROCESS | SERVICE_USER_SERVICE;
 
-		if (_r_config_getboolean (L"IsCollectUserServiceInstance", FALSE, NULL))
+		if (_r_config_getboolean (L"IsCollectUserServiceInstance", FALSE))
 			service_type |= SERVICE_USERSERVICE_INSTANCE;
 	}
 
@@ -541,7 +541,7 @@ VOID _app_package_getserviceslist (
 			continue;
 
 		// skip userservice instances service types (win10+)
-		if (_r_sys_isosversiongreaterorequal (WINDOWS_10) && !_r_config_getboolean (L"IsCollectUserServiceInstance", FALSE, NULL))
+		if (_r_sys_isosversiongreaterorequal (WINDOWS_10) && !_r_config_getboolean (L"IsCollectUserServiceInstance", FALSE))
 		{
 			status = _r_reg_queryulong (hkey, L"Type", &service_type);
 
