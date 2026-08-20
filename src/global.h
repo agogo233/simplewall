@@ -8,7 +8,7 @@
 #define PR_SIZE_BUFFER_MINIMUM PR_SIZE_BUFFER_OVERFLOW
 #define GENERAL_ID 0x6E6574
 
-#pragma warning(disable: 4090 4133 4244 4047 4013 4703)
+#pragma warning(disable: 4090 4133 4244 4047 4013)
 
 #if !defined(IN6_IS_ADDR_ULA)
 #define IN6_IS_ADDR_ULA(a) \
@@ -252,7 +252,7 @@ FORCEINLINE NTSTATUS _r_fs_createhardlink (
 	_In_ PR_STRINGREF target_path
 )
 {
-	return STATUS_NOT_IMPLEMENTED;
+	return CreateHardLinkW (link_path->buffer, target_path->buffer, NULL) ? STATUS_SUCCESS : STATUS_UNSUCCESSFUL;
 }
 
 FORCEINLINE BOOLEAN _r_button_isradiochecked (
@@ -359,7 +359,7 @@ FORCEINLINE INT _r_path_getdrivenumber (
 	_In_ PR_STRINGREF path
 )
 {
-	if (path->length >= sizeof (L"C:") - sizeof (L'\0') && path->buffer[1] == L':')
+	if (path->length >= 2 * sizeof (WCHAR) && path->buffer[1] == L':')
 	{
 		WCHAR c = path->buffer[0];
 		if ((c >= L'A' && c <= L'Z') || (c >= L'a' && c <= L'z'))
@@ -372,7 +372,7 @@ FORCEINLINE BOOLEAN _r_path_isnetwork (
 	_In_ PR_STRINGREF path
 )
 {
-	return (path->length >= 2 && path->buffer[0] == L'\\' && path->buffer[1] == L'\\');
+	return (path->length >= 2 * sizeof (WCHAR) && path->buffer[0] == L'\\' && path->buffer[1] == L'\\');
 }
 
 #include "uwp.h"
