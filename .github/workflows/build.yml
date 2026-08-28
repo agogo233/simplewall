@@ -65,6 +65,12 @@ jobs:
           New-Item -ItemType Directory -Force -Path upload\x64-debug
           Copy-Item bin\64\simplewall.exe upload\x64-debug\
           Copy-Item bin\64\simplewall.pdb upload\x64-debug\
+          Copy-Item bin\simplewall.lng upload\x64-debug\
+          Copy-Item bin\Readme.txt upload\x64-debug\
+          Copy-Item bin\License.txt upload\x64-debug\
+          Copy-Item bin\History.txt upload\x64-debug\
+          Copy-Item bin\profile_internal.xml upload\x64-debug\
+          Copy-Item -Recurse bin\i18n upload\x64-debug\
 
       - name: Upload debug artifact
         uses: actions/upload-artifact@v4
