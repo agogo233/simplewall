@@ -108,6 +108,12 @@ BEGIN
 			MENUITEM " ", IDM_PROFILETYPE_COMPRESSED
 			MENUITEM " ", IDM_PROFILETYPE_ENCRYPTED
 		END
+		POPUP " "
+		BEGIN
+			MENUITEM " ", IDM_CONNECTIONS_ENABLE
+			MENUITEM " ", IDM_CONNECTIONS_SHOWAITCONNECTIONS
+			MENUITEM " ", IDM_CONNECTIONS_MEASUREUDPTRAFFIC
+		END
 		MENUITEM SEPARATOR
 		MENUITEM " ", IDM_USENETWORKRESOLUTION_CHK
 		MENUITEM " ", IDM_USECERTIFICATES_CHK
@@ -842,6 +848,14 @@ BEGIN
 	IDS_WARNING_UNEXPECTED L"Be careful, through service/driver host (svchost.exe/System) internet traffic can let out through unexpected ways. Continue?"
 	IDS_WARNING_ME "If you disallow main process, you cannot use resolve network addresses option. Continue?"
 	IDS_TOTAL "Total"
+
+	IDS_CONNECTIONS_ENABLE "Enable connections monitoring"
+	IDS_CONNECTIONS_SHOWAITCONNECTIONS "Show waiting connections"
+	IDS_CONNECTIONS_MEASUREUDPTRAFFIC "Measure UDP/QUIC traffic (experimental, restart required)"
+
+	IDS_UDP_ACCOUNTING "UDP (including QUIC): ETW bytes since this socket was first monitored."
+	IDS_UDP_UNAVAILABLE "UDP measurement unavailable or incomplete. Restart simplewall to retry. Error"
+	IDS_UDP_PENDING "UDP: no verified measurement yet. Sockets opened before monitoring must be reopened."
 END
 
 //
