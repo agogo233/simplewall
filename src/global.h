@@ -257,6 +257,16 @@ FORCEINLINE PLARGE_INTEGER _r_sys_gettimestamp (
 	return li;
 }
 
+FORCEINLINE HRESULT _r_imagelist_replace (
+	_In_ HIMAGELIST himg,
+	_In_ HBITMAP hbitmap,
+	_In_opt_ HBITMAP hmask,
+	_In_ INT index
+)
+{
+	return ImageList_Replace (himg, index, hbitmap, hmask) ? S_OK : HRESULT_FROM_WIN32 (GetLastError ());
+}
+
 FORCEINLINE NTSTATUS _r_fs_createhardlink (
 	_In_ PR_STRINGREF link_path,
 	_In_ PR_STRINGREF target_path
