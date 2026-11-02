@@ -48,9 +48,9 @@ HANDLE _wfp_getenginehandle ()
 					}
 				}
 
-				_r_show_errormessage (_r_app_gethwnd (), L"WFP engine initialization failed! Try again later.", status, NULL, ET_WINDOWS);
+				_r_show_errormessage (_r_app_gethwnd (), L"WFP engine initialization failed! Try again later.", NULL, status, ET_WINDOWS);
 
-				_r_log (LOG_LEVEL_CRITICAL, NULL, L"FwpmEngineOpen0", status, NULL);
+				_r_log (LOG_LEVEL_CRITICAL, NULL, L"FwpmEngineOpen0", NULL, status);
 
 				NtTerminateProcess (NtCurrentProcess (), status);
 
@@ -251,7 +251,7 @@ BOOLEAN _wfp_initialize (
 					is_intransact = FALSE;
 				}
 
-				_r_log (LOG_LEVEL_ERROR, &GUID_TrayIcon, L"FwpmProviderAdd0", status, NULL);
+				_r_log (LOG_LEVEL_ERROR, &GUID_TrayIcon, L"FwpmProviderAdd0", NULL, status);
 
 				is_success = FALSE;
 
@@ -288,7 +288,7 @@ BOOLEAN _wfp_initialize (
 					is_intransact = FALSE;
 				}
 
-				_r_log (LOG_LEVEL_ERROR, &GUID_TrayIcon, L"FwpmSubLayerAdd0", status, NULL);
+				_r_log (LOG_LEVEL_ERROR, &GUID_TrayIcon, L"FwpmSubLayerAdd0", NULL, status);
 
 				is_success = FALSE;
 
@@ -341,7 +341,7 @@ BOOLEAN _wfp_initialize (
 
 			if (status != ERROR_SUCCESS)
 			{
-				_r_log (LOG_LEVEL_ERROR, NULL, L"FwpmEngineSetOption0", status, L"FWPM_ENGINE_COLLECT_NET_EVENTS");
+				_r_log (LOG_LEVEL_ERROR, NULL, L"FwpmEngineSetOption0", L"FWPM_ENGINE_COLLECT_NET_EVENTS", status);
 			}
 			else
 			{
@@ -367,7 +367,7 @@ BOOLEAN _wfp_initialize (
 		status = FwpmEngineSetOption0 (engine_handle, FWPM_ENGINE_PACKET_QUEUING, &val);
 
 		if (status != ERROR_SUCCESS)
-			_r_log (LOG_LEVEL_WARNING, NULL, L"FwpmEngineSetOption0", status, L"FWPM_ENGINE_PACKET_QUEUING");
+			_r_log (LOG_LEVEL_WARNING, NULL, L"FwpmEngineSetOption0", L"FWPM_ENGINE_PACKET_QUEUING", status);
 	}
 
 CleanupExit:
@@ -444,7 +444,7 @@ VOID _wfp_uninitialize (
 				{
 					_r_str_fromguid (guid, TRUE, &string);
 
-					_r_log (LOG_LEVEL_ERROR, &GUID_TrayIcon, L"FwpmCalloutDeleteByKey0", status, _r_obj_getstringordefault (string, L"<unknown callout>"));
+					_r_log (LOG_LEVEL_ERROR, &GUID_TrayIcon, L"FwpmCalloutDeleteByKey0", _r_obj_getstringordefault (string, L"<unknown callout>"), status);
 
 					if (string)
 						_r_obj_dereference (string);
@@ -456,13 +456,13 @@ VOID _wfp_uninitialize (
 		status = FwpmSubLayerDeleteByKey0 (engine_handle, &GUID_WfpSublayer);
 
 		if (status != ERROR_SUCCESS && status != FWP_E_SUBLAYER_NOT_FOUND)
-			_r_log (LOG_LEVEL_ERROR, &GUID_TrayIcon, L"FwpmSubLayerDeleteByKey0", status, NULL);
+			_r_log (LOG_LEVEL_ERROR, &GUID_TrayIcon, L"FwpmSubLayerDeleteByKey0", NULL, status);
 
 		// destroy provider
 		status = FwpmProviderDeleteByKey0 (engine_handle, &GUID_WfpProvider);
 
 		if (status != ERROR_SUCCESS && status != FWP_E_PROVIDER_NOT_FOUND)
-			_r_log (LOG_LEVEL_ERROR, &GUID_TrayIcon, L"FwpmProviderDeleteByKey0", status, NULL);
+			_r_log (LOG_LEVEL_ERROR, &GUID_TrayIcon, L"FwpmProviderDeleteByKey0", NULL, status);
 
 		if (is_intransact)
 			_wfp_transact_commit (engine_handle, DBG_ARG);
@@ -984,7 +984,7 @@ BOOLEAN _wfp_createrulefilter (
 			}
 			else
 			{
-				_r_log (LOG_LEVEL_ERROR, NULL, TEXT (__FUNCTION__), STATUS_NOT_FOUND, _r_obj_getstring (ptr_app->original_path));
+				_r_log (LOG_LEVEL_ERROR, NULL, TEXT (__FUNCTION__), _r_obj_getstring (ptr_app->original_path), STATUS_NOT_FOUND);
 
 				goto CleanupExit;
 			}
@@ -1004,7 +1004,7 @@ BOOLEAN _wfp_createrulefilter (
 			}
 			else
 			{
-				_r_log (LOG_LEVEL_ERROR, NULL, TEXT (__FUNCTION__), STATUS_NOT_FOUND, _r_obj_getstring (ptr_app->original_path));
+				_r_log (LOG_LEVEL_ERROR, NULL, TEXT (__FUNCTION__), _r_obj_getstring (ptr_app->original_path), STATUS_NOT_FOUND);
 
 				goto CleanupExit;
 			}
@@ -1026,7 +1026,7 @@ BOOLEAN _wfp_createrulefilter (
 			{
 				// do not log file not found to error log
 				if (status != STATUS_OBJECT_NAME_NOT_FOUND && status != STATUS_OBJECT_PATH_NOT_FOUND)
-					_r_log (LOG_LEVEL_ERROR, NULL, L"FwpmGetAppIdFromFileName", status, _r_obj_getstring (ptr_app->original_path));
+					_r_log (LOG_LEVEL_ERROR, NULL, L"FwpmGetAppIdFromFileName", _r_obj_getstring (ptr_app->original_path), status);
 
 				goto CleanupExit;
 			}
@@ -1378,7 +1378,7 @@ BOOLEAN _wfp_createrulefilters (
 		{
 			ptr_rule = (PITEM_RULE)_r_obj_getlistitem (rules, i);
 
-			if (ptr_rule && ptr_rule->is_enabled)
+			if (ptr_rule && !!ptr_rule->is_enabled)
 			{
 				for (ULONG_PTR j = 0; j < _r_obj_getarraysize (ptr_rule->guids); j++)
 				{
@@ -1463,7 +1463,7 @@ BOOLEAN _wfp_createappfilters (
 	{
 		ptr_app = (PITEM_APP)_r_obj_getlistitem (rules, i);
 
-		if (ptr_app && ptr_app->is_enabled)
+		if (ptr_app && !!ptr_app->is_enabled)
 		{
 			string = _app_getappdisplayname (ptr_app, TRUE);
 
@@ -1772,13 +1772,19 @@ BOOLEAN _wfp_createglobalfilters (
 		_wfp_createfilter (engine_handle, DATA_FILTER_GENERAL, FWN_BOOTTIME, NULL, 0, &FWPM_LAYER_OUTBOUND_ICMP_ERROR_V6, NULL, FWW_LOWEST, FWP_ACTION_BLOCK, FWPM_FILTER_FLAG_BOOTTIME, filter_ids);
 
 		// win7+ boot-time features
-		fwfc[0].fieldKey = FWPM_CONDITION_FLAGS;
-		fwfc[0].matchType = FWP_MATCH_FLAGS_NONE_SET;
-		fwfc[0].conditionValue.type = FWP_UINT32;
-		fwfc[0].conditionValue.uint32 = FWP_CONDITION_FLAG_IS_OUTBOUND_PASS_THRU | FWP_CONDITION_FLAG_IS_INBOUND_PASS_THRU;
+		//
+		// NOTE: boot-time filters added while bfe is running are enforced immediately, so this block stays active the whole time filters are enabled. nothing else
+		// ever permits forwarded traffic, which breaks mobile hotspot, internet connection sharing and nat'd vm switches (issue #425).
+		if (!_r_config_getboolean_ex (L"AllowIpForwarding", FALSE, NULL))
+		{
+			fwfc[0].fieldKey = FWPM_CONDITION_FLAGS;
+			fwfc[0].matchType = FWP_MATCH_FLAGS_NONE_SET;
+			fwfc[0].conditionValue.type = FWP_UINT32;
+			fwfc[0].conditionValue.uint32 = FWP_CONDITION_FLAG_IS_OUTBOUND_PASS_THRU | FWP_CONDITION_FLAG_IS_INBOUND_PASS_THRU;
 
-		_wfp_createfilter (engine_handle, DATA_FILTER_GENERAL, FWN_BOOTTIME, fwfc, 1, &FWPM_LAYER_IPFORWARD_V4, NULL, FWW_APP, FWP_ACTION_BLOCK, FWPM_FILTER_FLAG_BOOTTIME, filter_ids);
-		_wfp_createfilter (engine_handle, DATA_FILTER_GENERAL, FWN_BOOTTIME, fwfc, 1, &FWPM_LAYER_IPFORWARD_V6, NULL, FWW_APP, FWP_ACTION_BLOCK, FWPM_FILTER_FLAG_BOOTTIME, filter_ids);
+			_wfp_createfilter (engine_handle, DATA_FILTER_GENERAL, FWN_BOOTTIME, fwfc, 1, &FWPM_LAYER_IPFORWARD_V4, NULL, FWW_APP, FWP_ACTION_BLOCK, FWPM_FILTER_FLAG_BOOTTIME, filter_ids);
+			_wfp_createfilter (engine_handle, DATA_FILTER_GENERAL, FWN_BOOTTIME, fwfc, 1, &FWPM_LAYER_IPFORWARD_V6, NULL, FWW_APP, FWP_ACTION_BLOCK, FWPM_FILTER_FLAG_BOOTTIME, filter_ids);
+		}
 	}
 
 	action = _r_config_getboolean_ex(L"BlockOutboundConnections", TRUE, NULL) ? FWP_ACTION_BLOCK : FWP_ACTION_PERMIT;
@@ -1941,7 +1947,7 @@ ULONG _wfp_dumpfilters (
 
 	if (status != ERROR_SUCCESS)
 	{
-		_r_log (LOG_LEVEL_ERROR, &GUID_TrayIcon, L"FwpmFilterCreateEnumHandle0", status, NULL);
+		_r_log (LOG_LEVEL_ERROR, &GUID_TrayIcon, L"FwpmFilterCreateEnumHandle0", NULL, status);
 
 		*out_buffer = NULL;
 
@@ -1952,7 +1958,7 @@ ULONG _wfp_dumpfilters (
 
 	if (status != ERROR_SUCCESS)
 	{
-		_r_log (LOG_LEVEL_ERROR, &GUID_TrayIcon, L"FwpmFilterEnum0", status, NULL);
+		_r_log (LOG_LEVEL_ERROR, &GUID_TrayIcon, L"FwpmFilterEnum0", NULL, status);
 
 		goto CleanupExit;
 	}
@@ -2062,7 +2068,7 @@ VOID _wfp_firewallenable (
 
 	if (FAILED (status))
 	{
-		_r_log (LOG_LEVEL_INFO, NULL, L"CoCreateInstance", status, L"IID_INetFwPolicy2");
+		_r_log (LOG_LEVEL_INFO, NULL, L"CoCreateInstance", L"IID_INetFwPolicy2", status);
 
 		return;
 	}

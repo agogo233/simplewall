@@ -50,7 +50,7 @@ VOID _app_timer_set (
 
 	if (seconds <= 0)
 	{
-		_app_timer_reset (NULL, ptr_app);
+		_app_timer_reset (NULL, ptr_app, TRUE);
 	}
 	else
 	{
@@ -82,11 +82,11 @@ VOID _app_timer_set (
 			{
 				if (hwnd)
 				{
-					_r_show_errormessage (hwnd, L"Could not allocate timer!", status, NULL, ET_NATIVE);
+					_r_show_errormessage (hwnd, L"Could not allocate timer!", NULL, status, ET_NATIVE);
 				}
 				else
 				{
-					_r_log (LOG_LEVEL_ERROR, NULL, L"TpAllocTimer", status, NULL);
+					_r_log (LOG_LEVEL_ERROR, NULL, L"TpAllocTimer", NULL, status);
 				}
 			}
 		}
@@ -98,7 +98,7 @@ VOID _app_timer_set (
 		}
 		else
 		{
-			_app_timer_reset (NULL, ptr_app);
+			_app_timer_reset (NULL, ptr_app, TRUE);
 		}
 	}
 
@@ -108,9 +108,13 @@ VOID _app_timer_set (
 
 VOID _app_timer_reset (
 	_In_opt_ HWND hwnd,
-	_Inout_ PITEM_APP ptr_app
+	_Inout_ PITEM_APP ptr_app,
+	_In_ BOOLEAN is_destroyfilters
 )
 {
+	if (is_destroyfilters && _wfp_isfiltersinstalled ())
+		_wfp_destroyfilters_array (_wfp_getenginehandle (), ptr_app->guids, DBG_ARG);
+
 	ptr_app->is_enabled = FALSE;
 	ptr_app->is_haveerrors = FALSE;
 
@@ -146,7 +150,6 @@ VOID NTAPI _app_timer_callback (
 	WCHAR buffer[0x100];
 	PR_STRING display_name;
 	PITEM_APP ptr_app;
-	PR_LIST rules;
 	HWND hwnd;
 	ULONG icon_id = NIIF_INFO;
 	HRESULT status;
@@ -160,13 +163,7 @@ VOID NTAPI _app_timer_callback (
 
 	hwnd = _r_app_gethwnd ();
 
-	_app_timer_reset (hwnd, ptr_app);
-
-	rules = _r_obj_createlist (0x01, NULL);
-
-	_r_obj_addlistitem_ex(rules, ptr_app, NULL);
-
-	_wfp_createappfilters (_wfp_getenginehandle (), rules, DBG_ARG, FALSE);
+	_app_timer_reset (hwnd, ptr_app, TRUE);
 
 	if (hwnd)
 		_app_listview_updateby_id (hwnd, ptr_app->type, PR_UPDATE_TYPE | PR_UPDATE_FORCE);
@@ -192,5 +189,4 @@ VOID NTAPI _app_timer_callback (
 		CoUninitialize ();
 
 	_r_obj_dereference (ptr_app);
-	_r_obj_dereference (rules);
 }

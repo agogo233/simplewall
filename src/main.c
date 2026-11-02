@@ -237,6 +237,16 @@ VOID _app_config_apply (
 		case IDC_INSTALLBOOTTIMEFILTERS_CHK:
 		{
 			new_val = !_r_config_getboolean_ex(L"InstallBoottimeFilters", TRUE, NULL);
+
+			if (hsettings)
+				_r_ctrl_enable (hsettings, IDC_ALLOWIPFORWARDING_CHK, new_val);
+
+			break;
+		}
+
+		case IDC_ALLOWIPFORWARDING_CHK:
+		{
+			new_val = !_r_config_getboolean_ex (L"AllowIpForwarding", FALSE, NULL);
 			break;
 		}
 
@@ -266,6 +276,24 @@ VOID _app_config_apply (
 			break;
 		}
 
+		case IDM_CONNECTIONS_ENABLE:
+		{
+			new_val = !_r_config_getboolean_ex (L"IsNetworkMonitorEnabled", TRUE, NULL);
+			break;
+		}
+
+		case IDM_CONNECTIONS_SHOWAITCONNECTIONS:
+		{
+			new_val = !_r_config_getboolean_ex (L"IsNetworkShowWaitConnections", TRUE, NULL);
+			break;
+		}
+
+		case IDM_CONNECTIONS_MEASUREUDPTRAFFIC:
+		{
+			new_val = !_r_config_getboolean_ex (L"IsUdpTrafficEnabled", FALSE, NULL);
+			break;
+		}
+
 		default:
 		{
 			return;
@@ -273,9 +301,6 @@ VOID _app_config_apply (
 	}
 
 	hmenu = GetMenu (hwnd);
-
-	if (!hmenu)
-		return;
 
 	switch (ctrl_id)
 	{
@@ -286,7 +311,8 @@ VOID _app_config_apply (
 
 			is_enabled = _r_autorun_isenabled ();
 
-			_r_menu_checkitem (hmenu, IDM_LOADONSTARTUP_CHK, 0, MF_BYCOMMAND, is_enabled);
+			if (hmenu)
+				_r_menu_checkitem (hmenu, IDM_LOADONSTARTUP_CHK, 0, MF_BYCOMMAND, is_enabled);
 
 			if (hsettings)
 				_r_button_setcheck (hsettings, IDC_LOADONSTARTUP_CHK, is_enabled);
@@ -299,7 +325,8 @@ VOID _app_config_apply (
 		{
 			_r_config_setboolean_ex(L"IsStartMinimized", new_val, NULL);
 
-			_r_menu_checkitem (hmenu, IDM_STARTMINIMIZED_CHK, 0, MF_BYCOMMAND, new_val);
+			if (hmenu)
+				_r_menu_checkitem (hmenu, IDM_STARTMINIMIZED_CHK, 0, MF_BYCOMMAND, new_val);
 
 			break;
 		}
@@ -311,7 +338,8 @@ VOID _app_config_apply (
 
 			is_enabled = _r_skipuac_isenabled ();
 
-			_r_menu_checkitem (hmenu, IDM_SKIPUACWARNING_CHK, 0, MF_BYCOMMAND, is_enabled);
+			if (hmenu)
+				_r_menu_checkitem (hmenu, IDM_SKIPUACWARNING_CHK, 0, MF_BYCOMMAND, is_enabled);
 
 			if (hsettings)
 				_r_button_setcheck (hsettings, IDC_SKIPUACWARNING_CHK, is_enabled);
@@ -324,7 +352,8 @@ VOID _app_config_apply (
 		{
 			_r_update_enable (new_val);
 
-			_r_menu_checkitem (hmenu, IDM_CHECKUPDATES_CHK, 0, MF_BYCOMMAND, new_val);
+			if (hmenu)
+				_r_menu_checkitem (hmenu, IDM_CHECKUPDATES_CHK, 0, MF_BYCOMMAND, new_val);
 
 			break;
 		}
@@ -334,7 +363,8 @@ VOID _app_config_apply (
 		{
 			_r_config_setboolean_ex(L"BlockOutboundConnections", new_val, NULL);
 
-			_r_menu_checkitem (hmenu, IDM_RULE_BLOCKOUTBOUND, 0, MF_BYCOMMAND, new_val);
+			if (hmenu)
+				_r_menu_checkitem (hmenu, IDM_RULE_BLOCKOUTBOUND, 0, MF_BYCOMMAND, new_val);
 
 			break;
 		}
@@ -344,7 +374,8 @@ VOID _app_config_apply (
 		{
 			_r_config_setboolean_ex(L"BlockInboundConnections", new_val, NULL);
 
-			_r_menu_checkitem (hmenu, IDM_RULE_BLOCKINBOUND, 0, MF_BYCOMMAND, new_val);
+			if (hmenu)
+				_r_menu_checkitem (hmenu, IDM_RULE_BLOCKINBOUND, 0, MF_BYCOMMAND, new_val);
 
 			break;
 		}
@@ -354,7 +385,8 @@ VOID _app_config_apply (
 		{
 			_r_config_setboolean_ex(L"AllowLoopbackConnections", new_val, NULL);
 
-			_r_menu_checkitem (hmenu, IDM_RULE_ALLOWLOOPBACK, 0, MF_BYCOMMAND, new_val);
+			if (hmenu)
+				_r_menu_checkitem (hmenu, IDM_RULE_ALLOWLOOPBACK, 0, MF_BYCOMMAND, new_val);
 
 			break;
 		}
@@ -364,7 +396,8 @@ VOID _app_config_apply (
 		{
 			_r_config_setboolean_ex(L"AllowIPv6", new_val, NULL);
 
-			_r_menu_checkitem (hmenu, IDM_RULE_ALLOW6TO4, 0, MF_BYCOMMAND, new_val);
+			if (hmenu)
+				_r_menu_checkitem (hmenu, IDM_RULE_ALLOW6TO4, 0, MF_BYCOMMAND, new_val);
 
 			break;
 		}
@@ -373,7 +406,8 @@ VOID _app_config_apply (
 		{
 			_r_config_setboolean_ex(L"IsWUFixEnabled", new_val, NULL);
 
-			_r_menu_checkitem (hmenu, IDM_RULE_ALLOWWINDOWSUPDATE, 0, MF_BYCOMMAND, new_val);
+			if (hmenu)
+				_r_menu_checkitem (hmenu, IDM_RULE_ALLOWWINDOWSUPDATE, 0, MF_BYCOMMAND, new_val);
 
 			break;
 		}
@@ -382,7 +416,8 @@ VOID _app_config_apply (
 		{
 			_r_config_setlong_ex(L"ProfileType", 0, NULL);
 
-			_r_menu_checkitem (hmenu, IDM_PROFILETYPE_PLAIN, IDM_PROFILETYPE_ENCRYPTED, MF_BYCOMMAND, IDM_PROFILETYPE_PLAIN);
+			if (hmenu)
+				_r_menu_checkitem (hmenu, IDM_PROFILETYPE_PLAIN, IDM_PROFILETYPE_ENCRYPTED, MF_BYCOMMAND, IDM_PROFILETYPE_PLAIN);
 
 			_app_profile_save (hwnd);
 
@@ -393,7 +428,8 @@ VOID _app_config_apply (
 		{
 			_r_config_setlong_ex(L"ProfileType", 1, NULL);
 
-			_r_menu_checkitem (hmenu, IDM_PROFILETYPE_PLAIN, IDM_PROFILETYPE_ENCRYPTED, MF_BYCOMMAND, IDM_PROFILETYPE_COMPRESSED);
+			if (hmenu)
+				_r_menu_checkitem (hmenu, IDM_PROFILETYPE_PLAIN, IDM_PROFILETYPE_ENCRYPTED, MF_BYCOMMAND, IDM_PROFILETYPE_COMPRESSED);
 
 			_app_profile_save (hwnd);
 
@@ -404,9 +440,40 @@ VOID _app_config_apply (
 		{
 			_r_config_setlong_ex(L"ProfileType", 2, NULL);
 
-			_r_menu_checkitem (hmenu, IDM_PROFILETYPE_PLAIN, IDM_PROFILETYPE_ENCRYPTED, MF_BYCOMMAND, IDM_PROFILETYPE_ENCRYPTED);
+			if (hmenu)
+				_r_menu_checkitem (hmenu, IDM_PROFILETYPE_PLAIN, IDM_PROFILETYPE_ENCRYPTED, MF_BYCOMMAND, IDM_PROFILETYPE_ENCRYPTED);
 
 			_app_profile_save (hwnd);
+
+			break;
+		}
+
+		case IDM_CONNECTIONS_ENABLE:
+		{
+			_r_config_setboolean_ex (L"IsNetworkMonitorEnabled", new_val, NULL);
+
+			if (hmenu)
+				_r_menu_checkitem (hmenu, IDM_CONNECTIONS_ENABLE, 0, MF_BYCOMMAND, new_val);
+
+			break;
+		}
+
+		case IDM_CONNECTIONS_SHOWAITCONNECTIONS:
+		{
+			_r_config_setboolean_ex (L"IsNetworkShowWaitConnections", new_val, NULL);
+
+			if (hmenu)
+				_r_menu_checkitem (hmenu, IDM_CONNECTIONS_SHOWAITCONNECTIONS, 0, MF_BYCOMMAND, new_val);
+
+			break;
+		}
+
+		case IDM_CONNECTIONS_MEASUREUDPTRAFFIC:
+		{
+			_r_config_setboolean_ex (L"IsUdpTrafficEnabled", new_val, NULL);
+
+			if (hmenu)
+				_r_menu_checkitem (hmenu, IDM_CONNECTIONS_MEASUREUDPTRAFFIC, 0, MF_BYCOMMAND, new_val);
 
 			break;
 		}
@@ -423,6 +490,12 @@ VOID _app_config_apply (
 			break;
 		}
 
+		case IDC_ALLOWIPFORWARDING_CHK:
+		{
+			_r_config_setboolean_ex (L"AllowIpForwarding", new_val, NULL);
+			break;
+		}
+
 		case IDC_USECERTIFICATES_CHK:
 		case IDM_USECERTIFICATES_CHK:
 		{
@@ -431,7 +504,8 @@ VOID _app_config_apply (
 
 			_r_config_setboolean_ex(L"IsCertificatesEnabled", new_val, NULL);
 
-			_r_menu_checkitem (hmenu, IDM_USECERTIFICATES_CHK, 0, MF_BYCOMMAND, new_val);
+			if (hmenu)
+				_r_menu_checkitem (hmenu, IDM_USECERTIFICATES_CHK, 0, MF_BYCOMMAND, new_val);
 
 			if (new_val)
 			{
@@ -452,7 +526,8 @@ VOID _app_config_apply (
 		{
 			_r_config_setboolean_ex(L"IsKeepUnusedApps", new_val, NULL);
 
-			_r_menu_checkitem (hmenu, IDM_KEEPUNUSED_CHK, 0, MF_BYCOMMAND, new_val);
+			if (hmenu)
+				_r_menu_checkitem (hmenu, IDM_KEEPUNUSED_CHK, 0, MF_BYCOMMAND, new_val);
 
 			break;
 		}
@@ -465,8 +540,11 @@ VOID _app_config_apply (
 
 			_r_config_setboolean_ex(L"IsHashesEnabled", new_val, NULL);
 
-			_r_menu_checkitem (hmenu, IDM_USEHASHES_CHK, 0, MF_BYCOMMAND, new_val);
-			_r_menu_enableitem (hmenu, IDM_USEAPPMONITOR_CHK, FALSE, new_val);
+			if (hmenu)
+			{
+				_r_menu_checkitem (hmenu, IDM_USEHASHES_CHK, 0, MF_BYCOMMAND, new_val);
+				_r_menu_enableitem (hmenu, IDM_USEAPPMONITOR_CHK, FALSE, new_val);
+			}
 
 			if (new_val)
 			{
@@ -488,7 +566,8 @@ VOID _app_config_apply (
 		{
 			_r_config_setboolean_ex(L"IsNetworkResolutionsEnabled", new_val, NULL);
 
-			_r_menu_checkitem (hmenu, IDM_USENETWORKRESOLUTION_CHK, 0, MF_BYCOMMAND, new_val);
+			if (hmenu)
+				_r_menu_checkitem (hmenu, IDM_USENETWORKRESOLUTION_CHK, 0, MF_BYCOMMAND, new_val);
 
 			break;
 		}
@@ -497,7 +576,8 @@ VOID _app_config_apply (
 		{
 			_r_config_setboolean_ex(L"IsEnableAppMonitor", new_val, NULL);
 
-			_r_menu_checkitem (hmenu, IDM_USEAPPMONITOR_CHK, 0, MF_BYCOMMAND, new_val);
+			if (hmenu)
+				_r_menu_checkitem (hmenu, IDM_USEAPPMONITOR_CHK, 0, MF_BYCOMMAND, new_val);
 
 			_app_fileloggingenable ();
 
@@ -506,7 +586,8 @@ VOID _app_config_apply (
 
 		case IDM_USEDARKTHEME_CHK:
 		{
-			_r_menu_checkitem (hmenu, IDM_USEDARKTHEME_CHK, 0, MF_BYCOMMAND, new_val);
+			if (hmenu)
+				_r_menu_checkitem (hmenu, IDM_USEDARKTHEME_CHK, 0, MF_BYCOMMAND, new_val);
 
 			_r_theme_enable (hwnd, new_val);
 
@@ -527,6 +608,7 @@ VOID _app_config_apply (
 		case IDM_PROFILETYPE_PLAIN:
 		case IDM_PROFILETYPE_COMPRESSED:
 		case IDM_PROFILETYPE_ENCRYPTED:
+		case IDM_CONNECTIONS_MEASUREUDPTRAFFIC:
 		case IDC_USENETWORKRESOLUTION_CHK:
 		case IDM_USENETWORKRESOLUTION_CHK:
 		case IDC_USECERTIFICATES_CHK:
@@ -596,9 +678,12 @@ INT_PTR CALLBACK SettingsProc (
 					_r_button_setcheck (hwnd, IDC_RULE_ALLOW6TO4, _r_config_getboolean_ex(L"AllowIPv6", TRUE, NULL));
 					_r_button_setcheck (hwnd, IDC_USESTEALTHMODE_CHK, _r_config_getboolean_ex(L"UseStealthMode", TRUE, NULL));
 					_r_button_setcheck (hwnd, IDC_INSTALLBOOTTIMEFILTERS_CHK, _r_config_getboolean_ex(L"InstallBoottimeFilters", TRUE, NULL));
+					_r_button_setcheck (hwnd, IDC_ALLOWIPFORWARDING_CHK, _r_config_getboolean_ex(L"AllowIpForwarding", FALSE, NULL));
 					_r_button_setcheck (hwnd, IDC_USECERTIFICATES_CHK, _r_config_getboolean_ex(L"IsCertificatesEnabled", TRUE, NULL));
 					_r_button_setcheck (hwnd, IDC_USEHASHES_CHK, _r_config_getboolean_ex(L"IsHashesEnabled", FALSE, NULL));
 					_r_button_setcheck (hwnd, IDC_USENETWORKRESOLUTION_CHK, _r_config_getboolean_ex(L"IsNetworkResolutionsEnabled", TRUE, NULL));
+
+					_r_ctrl_enable (hwnd, IDC_ALLOWIPFORWARDING_CHK, _r_button_ischecked (hwnd, IDC_INSTALLBOOTTIMEFILTERS_CHK));
 
 					htip = _r_tooltip_create (hwnd);
 
@@ -796,9 +881,7 @@ INT_PTR CALLBACK SettingsProc (
 
 				case IDD_SETTINGS_RULES:
 				{
-					LPCWSTR recommended_string;
-
-					recommended_string = _r_locale_getstring (IDS_RECOMMENDED);
+					LPCWSTR recommended_string = _r_locale_getstring (IDS_RECOMMENDED);
 
 					_r_ctrl_setstringformat (hwnd, IDC_RULE_BLOCKOUTBOUND, L"%s (%s)", _r_locale_getstring (IDS_RULE_BLOCKOUTBOUND), recommended_string);
 					_r_ctrl_setstringformat (hwnd, IDC_RULE_BLOCKINBOUND, L"%s (%s)", _r_locale_getstring (IDS_RULE_BLOCKINBOUND), recommended_string);
@@ -806,6 +889,7 @@ INT_PTR CALLBACK SettingsProc (
 					_r_ctrl_setstringformat (hwnd, IDC_RULE_ALLOW6TO4, L"%s (%s)", _r_locale_getstring (IDS_RULE_ALLOW6TO4), recommended_string);
 					_r_ctrl_setstringformat (hwnd, IDC_USESTEALTHMODE_CHK, L"%s (%s)", _r_locale_getstring (IDS_USESTEALTHMODE_CHK), recommended_string);
 					_r_ctrl_setstringformat (hwnd, IDC_INSTALLBOOTTIMEFILTERS_CHK, L"%s (%s)", _r_locale_getstring (IDS_INSTALLBOOTTIMEFILTERS_CHK), recommended_string);
+					_r_ctrl_setstring (hwnd, IDC_ALLOWIPFORWARDING_CHK, _r_locale_getstring (IDS_ALLOWIPFORWARDING_CHK));
 
 					_r_ctrl_setstring (hwnd, IDC_USECERTIFICATES_CHK, _r_locale_getstring (IDS_USECERTIFICATES_CHK));
 					_r_ctrl_setstring (hwnd, IDC_USEHASHES_CHK, _r_locale_getstring (IDS_USEHASHES_CHK));
@@ -1176,6 +1260,7 @@ INT_PTR CALLBACK SettingsProc (
 				case IDC_RULE_ALLOW6TO4:
 				case IDC_USESTEALTHMODE_CHK:
 				case IDC_INSTALLBOOTTIMEFILTERS_CHK:
+				case IDC_ALLOWIPFORWARDING_CHK:
 				case IDC_USECERTIFICATES_CHK:
 				case IDC_USEHASHES_CHK:
 				case IDC_USENETWORKRESOLUTION_CHK:
@@ -1309,7 +1394,7 @@ INT_PTR CALLBACK SettingsProc (
 
 				case IDC_LOGPATH_BTN:
 				{
-					COMDLG_FILTERSPEC filters[] = {{L"Log files (*.log, *.csv)", L"*.log;*.csv"}, {L"All files (*.*)", L"*.*"}};
+					COMDLG_FILTERSPEC filters[] = {{L"Log files (*.log, *.csv)", L"*.log;*.csv"},{L"All files (*.*)", L"*.*"}};
 					R_FILE_DIALOG file_dialog;
 					PR_STRING path;
 					HRESULT status;
@@ -1373,7 +1458,7 @@ INT_PTR CALLBACK SettingsProc (
 
 				case IDC_LOGVIEWER_BTN:
 				{
-					COMDLG_FILTERSPEC filters[] = {{L"Executable files (*.exe)", L"*.exe"}, {L"All files (*.*)", L"*.*"}};
+					COMDLG_FILTERSPEC filters[] = {{L"Executable files (*.exe)", L"*.exe"},{L"All files (*.*)", L"*.*"}};
 					R_FILE_DIALOG file_dialog;
 					PR_STRING path;
 					HRESULT status;
@@ -2110,6 +2195,7 @@ INT_PTR CALLBACK DlgProc (
 
 		case WM_DESTROY:
 		{
+			_app_network_stop ();
 			_app_loginit (FALSE);
 
 			if (_r_queuedlock_islocked (&lock_apply))
@@ -2206,14 +2292,11 @@ INT_PTR CALLBACK DlgProc (
 		case WM_SIZE:
 		{
 			RECT rect;
-			LONG dpi_value;
 
 			if (!GetClientRect (hwnd, &rect))
 				break;
 
-			dpi_value = _r_dc_getwindowdpi (hwnd);
-
-			_app_window_resize (hwnd, &rect, dpi_value);
+			_app_window_resize (hwnd, &rect, _r_dc_getwindowdpi (hwnd));
 
 			break;
 		}
@@ -2222,16 +2305,13 @@ INT_PTR CALLBACK DlgProc (
 		{
 			LPMINMAXINFO minmax;
 			R_SIZE point = {0};
-			LONG dpi_value;
 
 			minmax = (LPMINMAXINFO)lparam;
 
 			point.cx = 500;
 			point.cy = 220;
 
-			dpi_value = _r_dc_getwindowdpi (hwnd);
-
-			_r_dc_getsizedpivalue (&point, dpi_value, TRUE);
+			_r_dc_getsizedpivalue (&point, _r_dc_getwindowdpi (hwnd), TRUE);
 
 			minmax->ptMinTrackSize.x = point.cx;
 			minmax->ptMinTrackSize.y = point.cy;
@@ -2241,9 +2321,7 @@ INT_PTR CALLBACK DlgProc (
 
 		case WM_NOTIFY:
 		{
-			LPNMHDR nmlp;
-
-			nmlp = (LPNMHDR)lparam;
+			LPNMHDR nmlp = (LPNMHDR)lparam;
 
 			switch (nmlp->code)
 			{
@@ -2479,11 +2557,11 @@ INT_PTR CALLBACK DlgProc (
 									_app_notify_freeobject (NULL, ptr_app);
 
 								if (!is_enabled && _app_istimerset (ptr_app))
-									_app_timer_reset (hwnd, ptr_app);
+									_app_timer_reset (hwnd, ptr_app, TRUE);
 
 								if (_wfp_isfiltersinstalled ())
 								{
-									rules = _r_obj_createlist (1, NULL);
+									rules = _r_obj_createlist (0x01, NULL);
 
 									_r_obj_addlistitem_ex(rules, ptr_app, NULL);
 
@@ -2718,7 +2796,7 @@ INT_PTR CALLBACK DlgProc (
 
 					if (hmenu)
 					{
-						hsubmenu = GetSubMenu (GetSubMenu (hmenu, 2), LANG_MENU);
+						hsubmenu = GetSubMenu (GetSubMenu (hmenu, LANG_SUBMENU), LANG_MENU);
 
 						if (hsubmenu)
 							_r_locale_apply (hsubmenu, ctrl_id, IDX_LANGUAGE);
@@ -2804,7 +2882,7 @@ INT_PTR CALLBACK DlgProc (
 
 				case IDM_IMPORT:
 				{
-					COMDLG_FILTERSPEC filters[] = {{L"Profile files (*.xml)", L"*.xml"}, {L"All files (*.*)", L"*.*"}};
+					COMDLG_FILTERSPEC filters[] = {{L"Profile files (*.xml)", L"*.xml"},{L"All files (*.*)", L"*.*"}};
 					R_FILE_DIALOG file_dialog;
 					R_STRINGREF sr;
 					PR_STRING path;
@@ -2848,7 +2926,7 @@ INT_PTR CALLBACK DlgProc (
 
 				case IDM_EXPORT:
 				{
-					COMDLG_FILTERSPEC filters[] = {{L"Profile files (*.xml)", L"*.xml"}, {L"All files (*.*)", L"*.*"}};
+					COMDLG_FILTERSPEC filters[] = {{L"Profile files (*.xml)", L"*.xml"},{L"All files (*.*)", L"*.*"}};
 					R_FILE_DIALOG file_dialog;
 					R_STRINGREF sr;
 					PR_STRING path;
@@ -2877,7 +2955,7 @@ INT_PTR CALLBACK DlgProc (
 
 								// display message for export profile failure (issue #707)
 								if (!NT_SUCCESS (status))
-									_r_show_errormessage (hwnd, L"Could not create file copy!", status, path->buffer, ET_NATIVE);
+									_r_show_errormessage (hwnd, L"Could not create file copy!", path->buffer, status, ET_NATIVE);
 
 								_r_obj_dereference (path);
 							}
@@ -3067,6 +3145,9 @@ INT_PTR CALLBACK DlgProc (
 				case IDM_PROFILETYPE_PLAIN:
 				case IDM_PROFILETYPE_COMPRESSED:
 				case IDM_PROFILETYPE_ENCRYPTED:
+				case IDM_CONNECTIONS_ENABLE:
+				case IDM_CONNECTIONS_SHOWAITCONNECTIONS:
+				case IDM_CONNECTIONS_MEASUREUDPTRAFFIC:
 				case IDM_USENETWORKRESOLUTION_CHK:
 				case IDM_USECERTIFICATES_CHK:
 				case IDM_KEEPUNUSED_CHK:
@@ -3233,7 +3314,7 @@ INT_PTR CALLBACK DlgProc (
 
 				case IDM_ADD_FILE:
 				{
-					COMDLG_FILTERSPEC filters[] = {{L"Executable files (*.exe)", L"*.exe"}, {L"All files (*.*)", L"*.*"}};
+					COMDLG_FILTERSPEC filters[] = {{L"Executable files (*.exe)", L"*.exe"},{L"All files (*.*)", L"*.*"}};
 					R_FILE_DIALOG file_dialog;
 					PITEM_APP ptr_app;
 					PR_STRING path;
@@ -3321,7 +3402,7 @@ INT_PTR CALLBACK DlgProc (
 										status = _r_shell_showfile (&ptr_app->real_path->sr);
 
 										if (FAILED (status))
-											_r_show_errormessage (hwnd, L"Cannot explore file!", status, ptr_app->real_path->buffer, ET_WINDOWS);
+											_r_show_errormessage (hwnd, L"Cannot explore file!", ptr_app->real_path->buffer, status, ET_WINDOWS);
 									}
 								}
 
@@ -3345,7 +3426,7 @@ INT_PTR CALLBACK DlgProc (
 										status = _r_shell_showfile (&ptr_network->path->sr);
 
 										if (FAILED (status))
-											_r_show_errormessage (hwnd, L"Cannot explore file!", status, ptr_network->path->buffer, ET_WINDOWS);
+											_r_show_errormessage (hwnd, L"Cannot explore file!", ptr_network->path->buffer, status, ET_WINDOWS);
 									}
 								}
 
@@ -3369,7 +3450,7 @@ INT_PTR CALLBACK DlgProc (
 										status = _r_shell_showfile (&ptr_log->path->sr);
 
 										if (FAILED (status))
-											_r_show_errormessage (hwnd, L"Cannot explore file!", status, ptr_log->path->buffer, ET_WINDOWS);
+											_r_show_errormessage (hwnd, L"Cannot explore file!", ptr_log->path->buffer, status, ET_WINDOWS);
 									}
 								}
 

@@ -78,6 +78,10 @@ VOID _app_message_initialize (
 
 		_r_menu_checkitem (hmenu, IDM_PROFILETYPE_PLAIN, IDM_PROFILETYPE_ENCRYPTED, MF_BYCOMMAND, IDM_PROFILETYPE_PLAIN + _r_calc_clamp (_r_config_getlong_ex(L"ProfileType", 0, NULL), 0, 2));
 
+		_r_menu_checkitem (hmenu, IDM_CONNECTIONS_ENABLE, 0, MF_BYCOMMAND, _r_config_getboolean_ex (L"IsNetworkMonitorEnabled", TRUE, NULL));
+		_r_menu_checkitem (hmenu, IDM_CONNECTIONS_SHOWAITCONNECTIONS, 0, MF_BYCOMMAND, _r_config_getboolean_ex (L"IsNetworkShowWaitConnections", TRUE, NULL));
+		_r_menu_checkitem (hmenu, IDM_CONNECTIONS_MEASUREUDPTRAFFIC, 0, MF_BYCOMMAND, _r_config_getboolean_ex (L"IsUdpTrafficEnabled", FALSE, NULL));
+
 		is_enabled = _r_config_getboolean_ex(L"IsHashesEnabled", FALSE, NULL);
 
 		_r_menu_checkitem (hmenu, IDM_USECERTIFICATES_CHK, 0, MF_BYCOMMAND, _r_config_getboolean_ex(L"IsCertificatesEnabled", TRUE, NULL));
@@ -158,7 +162,7 @@ VOID _app_message_localize (
 
 		_r_menu_setitemtext (hmenu, IDM_USEDARKTHEME_CHK, FALSE, _r_locale_getstring (IDS_USEDARKTHEME));
 
-		hsubmenu = GetSubMenu (hmenu, 2);
+		hsubmenu = GetSubMenu (hmenu, LANG_SUBMENU);
 
 		if (hsubmenu)
 		{
@@ -187,6 +191,10 @@ VOID _app_message_localize (
 		_r_menu_setitemtext (hmenu, IDM_PROFILETYPE_COMPRESSED, FALSE, _r_locale_getstring (IDS_PROFILE_TYPE_COMPRESSED));
 		_r_menu_setitemtext (hmenu, IDM_PROFILETYPE_ENCRYPTED, FALSE, _r_locale_getstring (IDS_PROFILE_TYPE_ENCRYPTED));
 
+		_r_menu_setitemtext (hmenu, IDM_CONNECTIONS_ENABLE, FALSE, _r_locale_getstring (IDS_CONNECTIONS_ENABLE));
+		_r_menu_setitemtext (hmenu, IDM_CONNECTIONS_SHOWAITCONNECTIONS, FALSE, _r_locale_getstring (IDS_CONNECTIONS_SHOWAITCONNECTIONS));
+		_r_menu_setitemtext (hmenu, IDM_CONNECTIONS_MEASUREUDPTRAFFIC, FALSE, _r_locale_getstring (IDS_CONNECTIONS_MEASUREUDPTRAFFIC));
+
 		_r_menu_setitemtext (hmenu, IDM_USENETWORKRESOLUTION_CHK, FALSE, _r_locale_getstring (IDS_USENETWORKRESOLUTION_CHK));
 		_r_menu_setitemtext (hmenu, IDM_USECERTIFICATES_CHK, FALSE, _r_locale_getstring (IDS_USECERTIFICATES_CHK));
 		_r_menu_setitemtext (hmenu, IDM_KEEPUNUSED_CHK, FALSE, _r_locale_getstring (IDS_KEEPUNUSED_CHK));
@@ -199,6 +207,7 @@ VOID _app_message_localize (
 		{
 			_r_menu_setitemtext (hsubmenu, 5, TRUE, _r_locale_getstring (IDS_TRAY_RULES));
 			_r_menu_setitemtext (hsubmenu, 6, TRUE, _r_locale_getstring (IDS_PROFILE_TYPE));
+			_r_menu_setitemtext (hsubmenu, 7, TRUE, _r_locale_getstring (IDS_TAB_NETWORK));
 		}
 
 		recommended_string = _r_locale_getstring (IDS_RECOMMENDED);
@@ -1405,6 +1414,12 @@ VOID _app_displayinfonetwork_callback (
 			case 10:
 			case 11:
 			{
+				if (ptr_network->protocol == IPPROTO_UDP && _InterlockedCompareExchange (&ptr_network->traffic_error, 0, 0))
+				{
+					_r_str_copy (lpnmlv->item.pszText, lpnmlv->item.cchTextMax, L"\x2014");
+					break;
+				}
+
 				if (!ptr_network->is_stats_initialized)
 					break;
 
@@ -1891,7 +1906,7 @@ VOID _app_command_logshow (
 		status = _r_sys_createprocess (&viewer_path->sr, &cmdline->sr, NULL, FALSE);
 
 		if (status != STATUS_SUCCESS)
-			_r_show_errormessage (hwnd, L"Could not create process!", status, cmdline->buffer, ET_NATIVE);
+			_r_show_errormessage (hwnd, L"Could not create process!", cmdline->buffer, status, ET_NATIVE);
 
 		_r_obj_dereference (viewer_path);
 		_r_obj_dereference (log_path);
@@ -1967,7 +1982,7 @@ VOID _app_command_logerrshow (
 	status = _r_sys_createprocess (&viewer_path->sr, &process_path->sr, NULL, FALSE);
 
 	if (status != STATUS_SUCCESS)
-		_r_show_errormessage (hwnd, L"Could not create process!", status, viewer_path->buffer, ET_NATIVE);
+		_r_show_errormessage (hwnd, L"Could not create process!", viewer_path->buffer, status, ET_NATIVE);
 
 	_r_obj_dereference (process_path);
 	_r_obj_dereference (viewer_path);
@@ -1988,7 +2003,7 @@ VOID _app_command_logerrclear (
 	status = _r_fs_deletefile (&path->sr, NULL);
 
 	if (!NT_SUCCESS (status))
-		_r_show_errormessage (hwnd, L"Could not delete file!", status, path->buffer, ET_NATIVE);
+		_r_show_errormessage (hwnd, L"Could not delete file!", path->buffer, status, ET_NATIVE);
 }
 
 VOID _app_command_copy (
@@ -2092,7 +2107,7 @@ VOID _app_command_checkbox (
 			{
 				if (!new_val)
 				{
-					_app_timer_reset (hwnd, ptr_app);
+					_app_timer_reset (hwnd, ptr_app, TRUE);
 				}
 				else
 				{
@@ -2241,6 +2256,7 @@ VOID _app_command_delete (
 		if (_r_show_message (hwnd, MB_YESNO | MB_ICONEXCLAMATION, NULL, string->buffer) != IDYES)
 		{
 			_r_obj_dereference (string);
+
 			return;
 		}
 
@@ -2270,7 +2286,7 @@ VOID _app_command_delete (
 				_r_listview_deleteitem (hwnd, tab_context->listview_id, i);
 
 				_app_notify_freeobject (NULL, ptr_app);
-				_app_timer_reset (hwnd, ptr_app);
+				_app_timer_reset (hwnd, ptr_app, FALSE);
 
 				_r_queuedlock_acquireexclusive (&lock_apps);
 				_app_freeapplication (hwnd, (ULONG)hash_code);
@@ -2407,7 +2423,7 @@ VOID _app_command_disable (
 		}
 		else if (ctrl_id == IDM_DISABLETIMER)
 		{
-			_app_timer_reset (hwnd, ptr_app);
+			_app_timer_reset (hwnd, ptr_app, TRUE);
 		}
 
 		_app_listview_updateitemby_id (hwnd, tab_context->listview_id, item_id);
@@ -2823,7 +2839,7 @@ VOID _app_command_purgeunused (
 
 				_app_deleteappitem (hwnd, ptr_app->type, hash_code);
 				_app_notify_freeobject (NULL, ptr_app);
-				_app_timer_reset (NULL, ptr_app);
+				_app_timer_reset (NULL, ptr_app, FALSE);
 
 				_app_freeapplication (hwnd, (ULONG)hash_code);
 			}
@@ -2917,7 +2933,7 @@ VOID _app_command_purgetimers (
 				ptr_app = (PITEM_APP)_r_obj_getlistitem (apps_list, i);
 
 				if (ptr_app)
-					_app_timer_reset (hwnd, ptr_app);
+					_app_timer_reset (hwnd, ptr_app, TRUE);
 			}
 
 			_app_listview_updateby_id (hwnd, DATA_LISTVIEW_CURRENT, PR_UPDATE_TYPE | PR_UPDATE_FORCE);

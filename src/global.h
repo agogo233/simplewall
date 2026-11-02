@@ -35,6 +35,8 @@ typedef const R_STRINGREF* PCR_STRINGREF;
 #include <softpub.h>
 #include <subauth.h>
 #include <mscat.h>
+#include <evntrace.h>
+#include <evntcons.h>
 
 #include "app.h"
 #include "rapp.h"
@@ -375,5 +377,6 @@ FORCEINLINE BOOLEAN _r_path_isnetwork (
 	return (path->length >= 2 * sizeof (WCHAR) && path->buffer[0] == L'\\' && path->buffer[1] == L'\\');
 }
 
+#include "udpstats.h"
 #include "uwp.h"
 #include "wfp.h"
