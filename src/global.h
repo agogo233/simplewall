@@ -249,6 +249,14 @@ FORCEINLINE NTSTATUS _r_sys_terminatethread (
 	return NtTerminateThread (hthread, exit_code);
 }
 
+FORCEINLINE PLARGE_INTEGER _r_sys_gettimestamp (
+	_In_ PLARGE_INTEGER li
+)
+{
+	GetSystemTimeAsFileTime ((PFILETIME) li);
+	return li;
+}
+
 FORCEINLINE NTSTATUS _r_fs_createhardlink (
 	_In_ PR_STRINGREF link_path,
 	_In_ PR_STRINGREF target_path
