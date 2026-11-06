@@ -115,13 +115,14 @@ DECLSPEC_SELECTANY const LONG64 timer_array[] =
 #define WM_NOTIFICATION (WM_APP + 21)
 
 // Missing routine library functions (compatibility shims)
+// note: a control id of zero means that the given window is the target itself
 FORCEINLINE VOID _r_edit_setreadonly (
 	_In_ HWND hwnd,
 	_In_opt_ INT ctrl_id,
 	_In_ BOOLEAN is_readonly
 )
 {
-	SendMessage (GetDlgItem (hwnd, ctrl_id), EM_SETREADONLY, (WPARAM)is_readonly, 0);
+	_r_ctrl_setreadonly (hwnd, ctrl_id, is_readonly);
 }
 
 FORCEINLINE VOID _r_edit_setmargin (
@@ -131,16 +132,16 @@ FORCEINLINE VOID _r_edit_setmargin (
 	_In_ INT right_margin
 )
 {
-	SendMessage (GetDlgItem (hwnd, ctrl_id), EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELPARAM (left_margin, right_margin));
+	_r_ctrl_settextmargin (hwnd, ctrl_id, left_margin, right_margin);
 }
 
 FORCEINLINE VOID _r_wnd_sendcommand (
 	_In_ HWND hwnd,
 	_In_ INT ctrl_id,
-	_In_ WPARAM wparam
+	_In_ LPARAM lparam
 )
 {
-	SendMessage (GetDlgItem (hwnd, ctrl_id), WM_COMMAND, wparam, 0);
+	_r_ctrl_sendcommand (hwnd, ctrl_id, lparam);
 }
 
 FORCEINLINE VOID _r_menu_addseparator (
@@ -160,7 +161,7 @@ FORCEINLINE VOID _r_button_setcheck (
 	_In_ BOOLEAN is_checked
 )
 {
-	Button_SetCheck (GetDlgItem (hwnd, ctrl_id), is_checked ? BST_CHECKED : BST_UNCHECKED);
+	_r_ctrl_checkbutton (hwnd, ctrl_id, is_checked);
 }
 
 FORCEINLINE BOOLEAN _r_button_ischecked (
@@ -168,7 +169,7 @@ FORCEINLINE BOOLEAN _r_button_ischecked (
 	_In_opt_ INT ctrl_id
 )
 {
-	return (Button_GetCheck (GetDlgItem (hwnd, ctrl_id)) == BST_CHECKED);
+	return _r_ctrl_isbuttonchecked (hwnd, ctrl_id);
 }
 
 FORCEINLINE BOOLEAN _r_fs_isexists (
@@ -179,10 +180,10 @@ FORCEINLINE BOOLEAN _r_fs_isexists (
 }
 
 FORCEINLINE BOOLEAN _r_obj_isbyteempty (
-	_In_ PR_BYTE string
+	_In_opt_ PR_BYTE string
 )
 {
-	return _r_obj_isbyteempty2 (string);
+	return (string == NULL || string->length == 0 || string->buffer == NULL || string->buffer[0] == ANSI_NULL);
 }
 
 FORCEINLINE BOOLEAN _r_toolbar_getidealsize (
@@ -192,28 +193,29 @@ FORCEINLINE BOOLEAN _r_toolbar_getidealsize (
 	_Out_ PSIZE out_size
 )
 {
-	SendMessage (GetDlgItem (hwnd, ctrl_id), TB_GETIDEALSIZE, (WPARAM)is_vertical, (LPARAM)out_size);
-	return TRUE;
+	RtlZeroMemory (out_size, sizeof (SIZE));
+
+	return !!_r_wnd_sendmessage (hwnd, ctrl_id, TB_GETIDEALSIZE, (WPARAM)is_vertical, (LPARAM)out_size);
 }
 
 FORCEINLINE BOOLEAN _r_rebar_getinfo (
 	_In_ HWND hwnd,
 	_In_opt_ INT ctrl_id,
-	_In_ UINT_PTR band_id,
+	_In_ UINT_PTR band_index,
 	_Inout_ PVOID rbi
 )
 {
-	return (BOOLEAN)SendMessage (GetDlgItem (hwnd, ctrl_id), RB_GETBANDINFO, (WPARAM)band_id, (LPARAM)rbi);
+	return !!_r_wnd_sendmessage (hwnd, ctrl_id, RB_GETBANDINFO, (WPARAM)band_index, (LPARAM)rbi);
 }
 
 FORCEINLINE VOID _r_rebar_setinfo (
 	_In_ HWND hwnd,
 	_In_opt_ INT ctrl_id,
-	_In_ UINT_PTR band_id,
+	_In_ UINT_PTR band_index,
 	_In_ PVOID rbi
 )
 {
-	SendMessage (GetDlgItem (hwnd, ctrl_id), RB_SETBANDINFO, (WPARAM)band_id, (LPARAM)rbi);
+	_r_wnd_sendmessage (hwnd, ctrl_id, RB_SETBANDINFO, (WPARAM)band_index, (LPARAM)rbi);
 }
 
 #include "controls.h"
@@ -238,7 +240,7 @@ FORCEINLINE VOID _r_listview_scroll (
 	_In_ INT scroll_pos
 )
 {
-	SendMessage (GetDlgItem (hwnd, ctrl_id), LVM_ENSUREVISIBLE, scroll_pos, FALSE);
+	_r_listview_ensurevisible (hwnd, ctrl_id, scroll_pos);
 }
 
 FORCEINLINE NTSTATUS _r_sys_terminatethread (
@@ -275,23 +277,20 @@ FORCEINLINE NTSTATUS _r_fs_createhardlink (
 	return CreateHardLinkW (link_path->buffer, target_path->buffer, NULL) ? STATUS_SUCCESS : STATUS_UNSUCCESSFUL;
 }
 
-FORCEINLINE BOOLEAN _r_button_isradiochecked (
+FORCEINLINE INT _r_button_isradiochecked (
 	_In_ HWND hwnd,
-	_In_opt_ INT ctrl_id,
-	_In_opt_ INT last_ctrl_id
+	_In_ INT ctrl_id,
+	_In_ INT last_ctrl_id
 )
 {
-	UNREFERENCED_PARAMETER (last_ctrl_id);
-	return (Button_GetCheck (GetDlgItem (hwnd, ctrl_id)) == BST_CHECKED);
+	return _r_ctrl_isradiochecked (hwnd, ctrl_id, last_ctrl_id);
 }
 
 FORCEINLINE HWND _r_tooltip_create (
 	_In_ HWND hwnd
 )
 {
-	return CreateWindow (TOOLTIPS_CLASS, NULL, WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP,
-		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
-		hwnd, NULL, NULL, NULL);
+	return _r_ctrl_createtip (hwnd);
 }
 
 FORCEINLINE VOID _r_tooltip_settext (
@@ -301,13 +300,7 @@ FORCEINLINE VOID _r_tooltip_settext (
 	_In_ LPWSTR text
 )
 {
-	TOOLINFO ti = {0};
-	ti.cbSize = sizeof (ti);
-	ti.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
-	ti.hwnd = hwnd_parent;
-	ti.uId = (UINT_PTR) GetDlgItem (hwnd_parent, ctrl_id);
-	ti.lpszText = text;
-	SendMessage (hwnd_tooltip, TTM_ADDTOOL, 0, (LPARAM) &ti);
+	_r_ctrl_settiptext (hwnd_tooltip, hwnd_parent, ctrl_id, text);
 }
 
 FORCEINLINE VOID _r_button_checkradio (
@@ -317,9 +310,7 @@ FORCEINLINE VOID _r_button_checkradio (
 	_In_ INT ctrl_id_check
 )
 {
-	for (INT i = ctrl_id_first; i <= ctrl_id_last; i++)
-		CheckDlgButton (hwnd, i, BST_UNCHECKED);
-	CheckDlgButton (hwnd, ctrl_id_check, BST_CHECKED);
+	_r_ctrl_checkradio (hwnd, ctrl_id_first, ctrl_id_last, ctrl_id_check);
 }
 
 FORCEINLINE VOID _r_updown_setacceleration (
@@ -328,8 +319,7 @@ FORCEINLINE VOID _r_updown_setacceleration (
 	_In_ INT step
 )
 {
-	UDACCEL accel = {0, (UINT) step};
-	SendMessage (GetDlgItem (hwnd, ctrl_id), UDM_SETACCEL, 1, (LPARAM) &accel);
+	_r_ctrl_setacceleration (hwnd, ctrl_id, (ULONG)step);
 }
 
 FORCEINLINE BOOLEAN _r_config_invertboolean (
@@ -349,12 +339,8 @@ FORCEINLINE VOID _r_button_seticon (
 	_In_ HICON hicon
 )
 {
-	SendMessage (GetDlgItem (hwnd, ctrl_id), BM_SETIMAGE, IMAGE_ICON, (LPARAM) hicon);
+	_r_ctrl_seticon (hwnd, ctrl_id, hicon);
 }
-
-#ifndef BCM_SETTEXTMARGINS
-#define BCM_SETTEXTMARGINS (BCM_FIRST + 0x0016)
-#endif
 
 FORCEINLINE VOID _r_button_setmargins (
 	_In_ HWND hwnd,
@@ -362,7 +348,9 @@ FORCEINLINE VOID _r_button_setmargins (
 	_In_ INT margins
 )
 {
-	SendMessage (GetDlgItem (hwnd, ctrl_id), BCM_SETTEXTMARGINS, 0, MAKELPARAM (margins, margins));
+	RECT rect = {margins, margins, margins, margins};
+
+	_r_wnd_sendmessage (hwnd, ctrl_id, BCM_SETTEXTMARGIN, 0, (LPARAM)&rect);
 }
 
 FORCEINLINE VOID _r_sys_settimer (
