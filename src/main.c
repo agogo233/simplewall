@@ -3627,6 +3627,105 @@ BOOLEAN NTAPI _app_parseargs (
 	}
 }
 
+// TEMPORARY: startup diagnostics for the STATUS_NO_MEMORY crash report (remove after root cause found)
+static VOID _app_diag_writeline (
+	_In_ HANDLE hfile,
+	_In_ LPCWSTR text
+)
+{
+	ULONG bytes_write;
+
+	WriteFile (hfile, text, (ULONG)(_r_str_getlength (text) * sizeof (WCHAR)), &bytes_write, NULL);
+}
+
+// TEMPORARY: startup diagnostics for the STATUS_NO_MEMORY crash report (remove after root cause found)
+static VOID _app_startup_diag ()
+{
+	static const GUID GUID_ROAMINGAPPDATA_LOCAL = {0x3eb685db, 0x65f9, 0x4cf6, {0xa0, 0x3a, 0xe3, 0xef, 0x65, 0x72, 0x9f, 0x3d}};
+
+	WCHAR path[0x400];
+	WCHAR buf[0x400];
+	WORD bom = 0xfeff;
+	HANDLE hfile;
+	HRESULT status;
+	PWSTR path_buffer;
+	ULONG length;
+	ULONG written;
+
+	length = GetModuleFileNameW (NULL, path, RTL_NUMBER_OF (path));
+
+	if (!length)
+		return;
+
+	while (length && path[length - 1] != OBJ_NAME_PATH_SEPARATOR)
+		length -= 1;
+
+	if (!length)
+		return;
+
+	_r_str_copy (&path[length], RTL_NUMBER_OF (path) - length, L"simplewall_diag.log");
+
+	hfile = CreateFileW (path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+	if (hfile == INVALID_HANDLE_VALUE)
+		return;
+
+	WriteFile (hfile, &bom, sizeof (bom), &written, NULL);
+
+	_r_str_printf (buf, RTL_NUMBER_OF (buf), L"ImagePathName: len=%d max=%d nullterm=%d\r\n",
+		NtCurrentPeb ()->ProcessParameters->ImagePathName.Length, NtCurrentPeb ()->ProcessParameters->ImagePathName.MaximumLength,
+		(INT)(NtCurrentPeb ()->ProcessParameters->ImagePathName.Length && NtCurrentPeb ()->ProcessParameters->ImagePathName.Buffer[NtCurrentPeb ()->ProcessParameters->ImagePathName.Length / sizeof (WCHAR)] == UNICODE_NULL));
+
+	_app_diag_writeline (hfile, buf);
+
+	if (NtCurrentPeb ()->ProcessParameters->ImagePathName.Length && NtCurrentPeb ()->ProcessParameters->ImagePathName.Buffer[NtCurrentPeb ()->ProcessParameters->ImagePathName.Length / sizeof (WCHAR)] == UNICODE_NULL)
+	{
+		_r_str_printf (buf, RTL_NUMBER_OF (buf), L"  text: %.300s\r\n", NtCurrentPeb ()->ProcessParameters->ImagePathName.Buffer);
+		_app_diag_writeline (hfile, buf);
+	}
+
+	_r_str_printf (buf, RTL_NUMBER_OF (buf), L"CommandLine: len=%d max=%d nullterm=%d\r\n",
+		NtCurrentPeb ()->ProcessParameters->CommandLine.Length, NtCurrentPeb ()->ProcessParameters->CommandLine.MaximumLength,
+		(INT)(NtCurrentPeb ()->ProcessParameters->CommandLine.Length && NtCurrentPeb ()->ProcessParameters->CommandLine.Buffer[NtCurrentPeb ()->ProcessParameters->CommandLine.Length / sizeof (WCHAR)] == UNICODE_NULL));
+
+	_app_diag_writeline (hfile, buf);
+
+	if (NtCurrentPeb ()->ProcessParameters->CommandLine.Length && NtCurrentPeb ()->ProcessParameters->CommandLine.Buffer[NtCurrentPeb ()->ProcessParameters->CommandLine.Length / sizeof (WCHAR)] == UNICODE_NULL)
+	{
+		_r_str_printf (buf, RTL_NUMBER_OF (buf), L"  text: %.300s\r\n", NtCurrentPeb ()->ProcessParameters->CommandLine.Buffer);
+		_app_diag_writeline (hfile, buf);
+	}
+
+	_r_str_printf (buf, RTL_NUMBER_OF (buf), L"CurrentDirectory: len=%d max=%d nullterm=%d\r\n",
+		NtCurrentPeb ()->ProcessParameters->CurrentDirectory.DosPath.Length, NtCurrentPeb ()->ProcessParameters->CurrentDirectory.DosPath.MaximumLength,
+		(INT)(NtCurrentPeb ()->ProcessParameters->CurrentDirectory.DosPath.Length && NtCurrentPeb ()->ProcessParameters->CurrentDirectory.DosPath.Buffer[NtCurrentPeb ()->ProcessParameters->CurrentDirectory.DosPath.Length / sizeof (WCHAR)] == UNICODE_NULL));
+
+	_app_diag_writeline (hfile, buf);
+
+	if (NtCurrentPeb ()->ProcessParameters->CurrentDirectory.DosPath.Length && NtCurrentPeb ()->ProcessParameters->CurrentDirectory.DosPath.Buffer[NtCurrentPeb ()->ProcessParameters->CurrentDirectory.DosPath.Length / sizeof (WCHAR)] == UNICODE_NULL)
+	{
+		_r_str_printf (buf, RTL_NUMBER_OF (buf), L"  text: %.300s\r\n", NtCurrentPeb ()->ProcessParameters->CurrentDirectory.DosPath.Buffer);
+		_app_diag_writeline (hfile, buf);
+	}
+
+	status = SHGetKnownFolderPath (&GUID_ROAMINGAPPDATA_LOCAL, KF_FLAG_DONT_VERIFY, NULL, &path_buffer);
+
+	if (SUCCEEDED (status))
+	{
+		_r_str_printf (buf, RTL_NUMBER_OF (buf), L"RoamingAppData: len=%d text: %.200s\r\n", (INT)_r_str_getlength (path_buffer), path_buffer);
+		_app_diag_writeline (hfile, buf);
+
+		CoTaskMemFree (path_buffer);
+	}
+	else
+	{
+		_r_str_printf (buf, RTL_NUMBER_OF (buf), L"RoamingAppData: failed, status=0x%08x\r\n", (ULONG)status);
+		_app_diag_writeline (hfile, buf);
+	}
+
+	CloseHandle (hfile);
+}
+
 INT APIENTRY wWinMain (
 	_In_ HINSTANCE hinst,
 	_In_opt_ HINSTANCE prev_hinst,
@@ -3635,6 +3734,8 @@ INT APIENTRY wWinMain (
 )
 {
 	HWND hwnd;
+
+	_app_startup_diag ();
 
 	if (!_r_app_initialize (&_app_parseargs))
 		return ERROR_APP_INIT_FAILURE;
