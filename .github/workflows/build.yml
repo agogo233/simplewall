@@ -21,8 +21,6 @@ jobs:
         run: |
           git clone https://github.com/henrypp/routine.git ../routine
           git -C ../routine checkout a5479438
-          git clone https://github.com/henrypp/builder.git ../builder
-          git -C ../builder checkout 74d1faba
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
@@ -36,7 +34,7 @@ jobs:
         run: msbuild simplewall.sln /p:Configuration=Release /p:Platform=x64
 
       - name: Build locale
-        run: python ../builder/src/build_locale.py --name-short=simplewall
+        run: python build_locale.py --name-short=simplewall
 
       - name: Prepare artifact
         shell: pwsh
