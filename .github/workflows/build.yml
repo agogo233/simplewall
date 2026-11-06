@@ -18,9 +18,16 @@ jobs:
           submodules: false
 
       - name: Clone submodules
+        shell: bash
         run: |
           git clone https://github.com/henrypp/routine.git ../routine
-          git -C ../routine checkout a5479438
+          # the pinned revision is the same source as a5479438, which upstream
+          # dropped from the history when it rewrote it, so fall back to
+          # fetching it by revision
+          git -C ../routine checkout 6e6888c3ffca5324a2865524f03533ff8dee7ddf || {
+            git -C ../routine fetch origin 6e6888c3ffca5324a2865524f03533ff8dee7ddf
+            git -C ../routine checkout FETCH_HEAD
+          }
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
