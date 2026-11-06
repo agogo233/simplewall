@@ -144,6 +144,37 @@ FORCEINLINE VOID _r_wnd_sendcommand (
 	_r_ctrl_sendcommand (hwnd, ctrl_id, lparam);
 }
 
+// The upstream sources call the two routines below with the description and
+// the error code in swapped positions, while the pinned routine library has
+// the error code before the description. Redirect the calls with adjusted
+// arguments. note: the wrappers must be defined before the macros so their
+// bodies call the original routines
+FORCEINLINE VOID _r_log_compat (
+	_In_ R_LOG_LEVEL log_level,
+	_In_opt_ LPCGUID tray_guid,
+	_In_ LPCWSTR title,
+	_In_opt_ LPCWSTR description,
+	_In_ LONG error_code
+)
+{
+	_r_log (log_level, tray_guid, title, error_code, description);
+}
+
+#define _r_log _r_log_compat
+
+FORCEINLINE NTSTATUS _r_show_errormessage_compat (
+	_In_opt_ HWND hwnd,
+	_In_opt_ LPCWSTR title,
+	_In_opt_ LPCWSTR description,
+	_In_ LONG error_code,
+	_In_ R_ERROR_TYPE type
+)
+{
+	return _r_show_errormessage (hwnd, title, error_code, description, type);
+}
+
+#define _r_show_errormessage _r_show_errormessage_compat
+
 FORCEINLINE VOID _r_menu_addseparator (
 	_In_ HMENU hmenu
 )
