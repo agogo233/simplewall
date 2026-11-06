@@ -198,6 +198,26 @@ FORCEINLINE BOOLEAN _r_toolbar_getidealsize (
 	return !!_r_wnd_sendmessage (hwnd, ctrl_id, TB_GETIDEALSIZE, (WPARAM)is_vertical, (LPARAM)out_size);
 }
 
+FORCEINLINE VOID _r_toolbar_setpadding (
+	_In_ HWND hwnd,
+	_In_opt_ INT ctrl_id,
+	_In_ INT padding_x,
+	_In_ INT padding_y
+)
+{
+	_r_wnd_sendmessage (hwnd, ctrl_id, TB_SETPADDING, 0, MAKELPARAM (padding_x, padding_y));
+}
+
+FORCEINLINE VOID _r_toolbar_setbuttonsize (
+	_In_ HWND hwnd,
+	_In_opt_ INT ctrl_id,
+	_In_ INT button_width,
+	_In_ INT button_height
+)
+{
+	_r_wnd_sendmessage (hwnd, ctrl_id, TB_SETBUTTONSIZE, 0, MAKELPARAM (button_width, button_height));
+}
+
 FORCEINLINE BOOLEAN _r_rebar_getinfo (
 	_In_ HWND hwnd,
 	_In_opt_ INT ctrl_id,
