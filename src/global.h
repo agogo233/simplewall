@@ -8,7 +8,7 @@
 #define PR_SIZE_BUFFER_MAXIMUM (16 * 1024 * 1024)
 #define GENERAL_ID 0x6E6574
 
-#pragma warning(disable: 4090 4133 4244 4047 4013)
+#pragma warning(disable: 4090 4244 4047 4013)
 
 #if !defined(IN6_IS_ADDR_ULA)
 #define IN6_IS_ADDR_ULA(a) \
