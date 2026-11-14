@@ -738,7 +738,7 @@ NTSTATUS _app_db_decodebuffer (
 		return STATUS_NO_DATA_DETECTED;
 
 	// check for large buffer size
-	if (db_info->bytes->length >= PR_SIZE_BUFFER_MINIMUM)
+	if (db_info->bytes->length >= PR_SIZE_BUFFER_MAXIMUM)
 		return STATUS_BUFFER_OVERFLOW; // STATUS_FILE_TOO_LARGE
 
 	do
