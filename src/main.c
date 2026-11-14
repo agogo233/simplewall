@@ -1861,7 +1861,7 @@ VOID _app_initialize (
 
 	_app_profile_initialize ();
 
-	config.my_path = _r_obj_createstring2 (_r_sys_getimagepath ());
+	config.my_path = _r_obj_createstring (_r_sys_getimagepath ());
 
 	config.svchost_path = _r_obj_concatstringrefs (
 		2,
