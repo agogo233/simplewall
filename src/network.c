@@ -277,6 +277,50 @@ VOID _app_network_initialize (
 
 			if (hctrl_apps)
 				_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe proc (apps)", NULL, (LONG)(LONG_PTR)GetWindowLongPtrW (hctrl_apps, GWLP_WNDPROC));
+
+			// explicit index insert
+			{
+				LVITEMW lvi3 = {0};
+				RECT rc = {0};
+				LONG gle;
+
+				lvi3.iItem = 0;
+				lvi3.iSubItem = 0;
+				lvi3.mask = LVIF_TEXT;
+				lvi3.pszText = (LPWSTR)L"p0";
+
+				probe_idx = (INT)SendMessageW (hctrl, LVM_INSERTITEM, 0, (LPARAM)&lvi3);
+
+				gle = (LONG)GetLastError ();
+
+				_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe insert0", NULL, probe_idx);
+				_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe insert0 gle", NULL, gle);
+
+				if (probe_idx != INT_ERROR)
+					SendMessageW (hctrl, LVM_DELETEITEM, (WPARAM)probe_idx, 0);
+
+				// empty mask insert
+				lvi3.iItem = 0;
+				lvi3.iSubItem = 0;
+				lvi3.mask = 0;
+				lvi3.pszText = NULL;
+
+				probe_idx = (INT)SendMessageW (hctrl, LVM_INSERTITEM, 0, (LPARAM)&lvi3);
+
+				_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe insert0 mask0", NULL, probe_idx);
+
+				if (probe_idx != INT_ERROR)
+					SendMessageW (hctrl, LVM_DELETEITEM, (WPARAM)probe_idx, 0);
+
+				// notify format query
+				probe_idx = (INT)SendMessageW (hctrl, WM_NOTIFYFORMAT, (WPARAM)hwnd, NF_QUERY);
+
+				_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe notifyfmt", NULL, probe_idx);
+
+				// window rect (width | height << 16)
+				if (GetWindowRect (hctrl, &rc))
+					_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe rect", NULL, (LONG)((rc.right - rc.left) | ((rc.bottom - rc.top) << 16)));
+			}
 		}
 
 		// apps list reference insert (same thread, same arguments)
