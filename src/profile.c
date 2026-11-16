@@ -493,9 +493,9 @@ PITEM_APP _app_addapplication (
 	ptr_app->timestamp = _r_unixtime_now ();
 
 	// insert object into the table
-	//_r_queuedlock_acquireexclusive (&lock_apps);
+	_r_queuedlock_acquireexclusive (&lock_apps);
 	_r_obj_addhashtablepointer (apps_table, app_hash, ptr_app);
-	//_r_queuedlock_releaseexclusive (&lock_apps);
+	_r_queuedlock_releaseexclusive (&lock_apps);
 
 	// insert item
 	if (hwnd)

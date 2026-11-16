@@ -1,3 +1,10 @@
+v3.9.2 Beta (unreleased)
+- fixed race condition in app timers which could lead to crash or double free
+- fixed possible buffer overread when loading malformed profile file
+- fixed profile version range validation
+- fixed concurrent access to the apps table
+- deprecated insecure "Encrypted" profile type (hardcoded key); it is grayed out in menu and new profiles are saved as compressed instead, existing encrypted profiles remain readable
+
 v3.9.1 Beta (22 July 2026)
 - added network statistics to watch info about speed (issue #2100) [thx @Tarkiin]
 - added option to exclude inbound blocked packets (#2111)

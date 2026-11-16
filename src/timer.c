@@ -3,6 +3,8 @@
 
 #include "global.h"
 
+static R_QUEUED_LOCK lock_timer = PR_QUEUED_LOCK_INIT; // protects htimer lifetime across threads
+
 BOOLEAN _app_istimersactive ()
 {
 	PITEM_APP ptr_app = NULL;
@@ -25,7 +27,7 @@ BOOLEAN _app_istimersactive ()
 	return FALSE;
 }
 
-BOOLEAN _app_istimerset (
+static BOOLEAN _app_istimerset_unsafe (
 	_In_ PITEM_APP ptr_app
 )
 {
@@ -33,6 +35,21 @@ BOOLEAN _app_istimerset (
 		return FALSE;
 
 	return !!IsThreadpoolTimerSet (ptr_app->htimer);
+}
+
+BOOLEAN _app_istimerset (
+	_In_ PITEM_APP ptr_app
+)
+{
+	BOOLEAN is_set;
+
+	_r_queuedlock_acquireexclusive (&lock_timer);
+
+	is_set = _app_istimerset_unsafe (ptr_app);
+
+	_r_queuedlock_releaseexclusive (&lock_timer);
+
+	return is_set;
 }
 
 VOID _app_timer_set (
@@ -60,6 +77,10 @@ VOID _app_timer_set (
 
 		_r_calc_filetime2largeinteger (&file_time, &timestamp);
 
+		status = STATUS_SUCCESS;
+
+		_r_queuedlock_acquireexclusive (&lock_timer);
+
 		if (ptr_app->htimer)
 		{
 			TpSetTimer (ptr_app->htimer, &timestamp, 0, 0);
@@ -78,7 +99,18 @@ VOID _app_timer_set (
 
 				is_created = TRUE;
 			}
-			else
+		}
+
+		_r_queuedlock_releaseexclusive (&lock_timer);
+
+		if (is_created)
+		{
+			ptr_app->is_enabled = TRUE;
+			ptr_app->timer = (current_time + seconds);
+		}
+		else
+		{
+			if (!NT_SUCCESS (status))
 			{
 				if (hwnd)
 				{
@@ -89,15 +121,7 @@ VOID _app_timer_set (
 					_r_log (LOG_LEVEL_ERROR, NULL, L"TpAllocTimer", NULL, status);
 				}
 			}
-		}
 
-		if (is_created)
-		{
-			ptr_app->is_enabled = TRUE;
-			ptr_app->timer = (current_time + seconds);
-		}
-		else
-		{
 			_app_timer_reset (NULL, ptr_app, TRUE);
 		}
 	}
@@ -112,6 +136,8 @@ VOID _app_timer_reset (
 	_In_ BOOLEAN is_destroyfilters
 )
 {
+	PTP_TIMER current_timer;
+
 	if (is_destroyfilters && _wfp_isfiltersinstalled ())
 		_wfp_destroyfilters_array (_wfp_getenginehandle (), ptr_app->guids, DBG_ARG);
 
@@ -120,8 +146,17 @@ VOID _app_timer_reset (
 
 	ptr_app->timer = 0;
 
-	if (_app_istimerset (ptr_app))
-		_app_timer_remove (ptr_app);
+	current_timer = NULL;
+
+	_r_queuedlock_acquireexclusive (&lock_timer);
+
+	if (_app_istimerset_unsafe (ptr_app))
+		current_timer = (PTP_TIMER)InterlockedExchangePointer ((PVOID volatile *)&ptr_app->htimer, NULL);
+
+	_r_queuedlock_releaseexclusive (&lock_timer);
+
+	if (current_timer)
+		TpReleaseTimer (current_timer);
 
 	if (hwnd)
 		_app_listview_updateitemby_param (hwnd, ptr_app->app_hash, TRUE);
@@ -133,9 +168,13 @@ VOID _app_timer_remove (
 {
 	PTP_TIMER current_timer;
 
-	current_timer = ptr_app->htimer;
+	current_timer = NULL;
 
-	ptr_app->htimer = NULL;
+	_r_queuedlock_acquireexclusive (&lock_timer);
+
+	current_timer = (PTP_TIMER)InterlockedExchangePointer ((PVOID volatile *)&ptr_app->htimer, NULL);
+
+	_r_queuedlock_releaseexclusive (&lock_timer);
 
 	if (current_timer)
 		TpReleaseTimer (current_timer);

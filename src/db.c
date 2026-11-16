@@ -131,7 +131,8 @@ BYTE _app_getprofiletype ()
 
 		case 2:
 		{
-			return PROFILE2_ID_ENCRYPTED;
+			// deprecated: hardcoded key provides no real confidentiality; save as compressed instead
+			return PROFILE2_ID_COMPRESSED;
 		}
 
 		default:
@@ -155,7 +156,14 @@ NTSTATUS _app_db_ishashvalid (
 	if (!NT_SUCCESS (status))
 		return status;
 
-	status = RtlEqualMemory (hash_bytes->buffer, new_hash_bytes->buffer, min (hash_bytes->length, new_hash_bytes->length)) ? STATUS_SUCCESS : STATUS_INVALID_IMAGE_HASH;
+	if (hash_bytes->length != PROFILE2_SHA256_LENGTH || new_hash_bytes->length != PROFILE2_SHA256_LENGTH)
+	{
+		status = STATUS_INVALID_IMAGE_HASH;
+	}
+	else
+	{
+		status = RtlEqualMemory (hash_bytes->buffer, new_hash_bytes->buffer, PROFILE2_SHA256_LENGTH) ? STATUS_SUCCESS : STATUS_INVALID_IMAGE_HASH;
+	}
 
 	_r_obj_dereference (new_hash_bytes);
 
@@ -581,6 +589,10 @@ NTSTATUS _app_db_decodebody (
 	if (!NT_SUCCESS (status))
 		return status;
 
+	// guard against too short buffer after decompression/decryption
+	if (db_info->bytes->length < sizeof (profile2_fourcc))
+		return STATUS_DATA_ERROR;
+
 	if (RtlEqualMemory (db_info->bytes->buffer, profile2_fourcc, sizeof (profile2_fourcc)))
 		return STATUS_MORE_PROCESSING_REQUIRED;
 
@@ -770,7 +782,7 @@ NTSTATUS _app_db_decodebuffer (
 		return STATUS_OBJECT_TYPE_MISMATCH;
 
 	// validate version range
-	if (db_info->version < XML_VERSION_MINIMAL && db_info->version > XML_VERSION_MAXIMUM)
+	if (db_info->version < XML_VERSION_MINIMAL || db_info->version > XML_VERSION_MAXIMUM)
 		return STATUS_FILE_NOT_SUPPORTED;
 
 	return STATUS_SUCCESS;

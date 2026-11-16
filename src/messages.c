@@ -80,7 +80,7 @@ VOID _app_message_initialize (
 		if (_r_sys_isosversionlower (WINDOWS_10))
 			_r_menu_enableitem (hmenu, IDM_RULE_ALLOWWINDOWSUPDATE, FALSE, FALSE);
 
-		_r_menu_checkitem (hmenu, IDM_PROFILETYPE_PLAIN, IDM_PROFILETYPE_ENCRYPTED, MF_BYCOMMAND, IDM_PROFILETYPE_PLAIN + _r_calc_clamp (_r_config_getlong_ex(L"ProfileType", 0, NULL), 0, 2));
+		_r_menu_checkitem (hmenu, IDM_PROFILETYPE_PLAIN, IDM_PROFILETYPE_ENCRYPTED, MF_BYCOMMAND, IDM_PROFILETYPE_PLAIN + _r_calc_clamp (_r_config_getlong_ex(L"ProfileType", 0, NULL), 0, 1));
 
 		_r_menu_checkitem (hmenu, IDM_CONNECTIONS_ENABLE, 0, MF_BYCOMMAND, _r_config_getboolean_ex (L"IsNetworkMonitorEnabled", TRUE, NULL));
 		_r_menu_checkitem (hmenu, IDM_CONNECTIONS_SHOWAITCONNECTIONS, 0, MF_BYCOMMAND, _r_config_getboolean_ex (L"IsNetworkShowWaitConnections", TRUE, NULL));
