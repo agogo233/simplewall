@@ -553,6 +553,7 @@ BEGIN
 	IDS_FINDNEXT ""
 	IDS_PURGE_UNUSED "Purge unused apps"
 	IDS_PURGE_INVALID "Purge invalid apps"
+	IDS_PURGE_INVALID_NONE "No invalid apps found"
 	IDS_PURGE_TIMERS "Purge timers"
 	IDS_REFRESH "Refresh"
 	IDS_VIEW "View"

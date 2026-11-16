@@ -2926,7 +2926,7 @@ VOID _app_command_purgeinvalid (
 
 				_r_queuedlock_acquireshared (&lock_apps);
 
-				ptr_app = (PITEM_APP)_r_obj_findhashtable (apps_table, (ULONG)hash_code);
+				ptr_app = (PITEM_APP)_r_obj_findhashtablepointer (apps_table, (ULONG)hash_code);
 
 				if (ptr_app && (ptr_app->is_undeletable || ptr_app->type != DATA_APP_REGULAR || !ptr_app->real_path || _r_fs_isexists (&ptr_app->real_path->sr)))
 					ptr_app = NULL;
@@ -2953,6 +2953,10 @@ VOID _app_command_purgeinvalid (
 
 			_app_profile_save (hwnd);
 		}
+	}
+	else
+	{
+		_r_show_message (hwnd, MB_OK | MB_ICONINFORMATION, NULL, _r_locale_getstring (IDS_PURGE_INVALID_NONE));
 	}
 
 	_r_obj_deletestringbuilder (&sb);
