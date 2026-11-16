@@ -67,6 +67,20 @@ VOID _app_listview_clearitems (
 	_In_ HWND hwnd
 );
 
+VOID _app_listview_setredraw (
+	_In_ HWND hwnd,
+	_In_ BOOLEAN is_enable
+);
+
+VOID _app_listview_queueredraw (
+	_In_ HWND hwnd,
+	_In_ INT listview_id
+);
+
+VOID _app_listview_flushredraw (
+	_In_ HWND hwnd
+);
+
 BOOLEAN _app_listview_islocked (
 	_In_ HWND hwnd,
 	_In_ INT ctrl_id

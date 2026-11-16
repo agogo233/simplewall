@@ -1664,7 +1664,10 @@ CleanupExit:
 	if (is_update)
 	{
 		if (hwnd)
+		{
+			_app_listview_setredraw (hwnd, FALSE);
 			_app_listview_clearitems (hwnd);
+		}
 
 		_app_profile_refresh (hwnd);
 	}
@@ -1697,7 +1700,10 @@ CleanupExit:
 		_app_profile_load_fallback ();
 
 		if (hwnd)
+		{
 			_app_listview_additems (hwnd);
+			_app_listview_setredraw (hwnd, TRUE);
+		}
 	}
 
 	_app_db_destroy (&db_info);

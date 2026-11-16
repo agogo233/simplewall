@@ -3,6 +3,8 @@
 
 #include "global.h"
 
+static volatile LONG listview_redraw_mask = 0;
+
 _Ret_maybenull_
 PITEM_TAB_CONTEXT _app_listview_getcontext (
 	_In_ HWND hwnd,
@@ -121,7 +123,7 @@ VOID _app_listview_addappitem (
 	_app_listview_lock (hwnd, listview_id);
 
 	_r_listview_additem (hwnd, listview_id, item_id, LPSTR_TEXTCALLBACK, I_IMAGECALLBACK, I_GROUPIDCALLBACK, _app_listview_createcontext (ptr_app->app_hash));
-	_app_setappiteminfo (hwnd, listview_id, item_id, ptr_app);
+	_r_listview_setitemcheck (hwnd, listview_id, item_id, !!ptr_app->is_enabled);
 
 	_app_listview_unlock (hwnd, listview_id);
 }
@@ -133,6 +135,8 @@ VOID _app_listview_addruleitem (
 	_In_ BOOLEAN is_forapp
 )
 {
+	ULONG_PTR enum_key = 0;
+	ULONG_PTR hash_code;
 	INT item_id, listview_id;
 
 	listview_id = _app_listview_getbytype (ptr_rule->type);
@@ -145,7 +149,16 @@ VOID _app_listview_addruleitem (
 	_app_listview_lock (hwnd, listview_id);
 
 	_r_listview_additem (hwnd, listview_id, item_id, LPSTR_TEXTCALLBACK, I_IMAGECALLBACK, I_GROUPIDCALLBACK, _app_listview_createcontext (rule_idx));
-	_app_setruleiteminfo (hwnd, listview_id, item_id, ptr_rule, is_forapp);
+	_r_listview_setitemcheck (hwnd, listview_id, item_id, !!ptr_rule->is_enabled);
+
+	if (is_forapp)
+	{
+		while (_r_obj_enumhashtable (ptr_rule->apps, NULL, &hash_code, &enum_key))
+		{
+			if (hash_code != 0)
+				_app_listview_updateitemby_param (hwnd, hash_code, TRUE);
+		}
+	}
 
 	_app_listview_unlock (hwnd, listview_id);
 }
@@ -186,6 +199,61 @@ VOID _app_listview_clearitems (
 	for (INT i = IDC_APPS_PROFILE; i <= IDC_RULES_CUSTOM; i++)
 	{
 		_r_listview_deleteallitems (hwnd, i);
+	}
+}
+
+VOID _app_listview_setredraw (
+	_In_ HWND hwnd,
+	_In_ BOOLEAN is_enable
+)
+{
+	for (INT i = IDC_APPS_PROFILE; i <= IDC_RULES_CUSTOM; i++)
+	{
+		HWND hlistview;
+
+		hlistview = GetDlgItem (hwnd, i);
+
+		if (hlistview)
+		{
+			SendMessage (hlistview, WM_SETREDRAW, (WPARAM)is_enable, 0);
+
+			if (is_enable)
+				InvalidateRect (hlistview, NULL, TRUE);
+		}
+	}
+}
+
+VOID _app_listview_queueredraw (
+	_In_ HWND hwnd,
+	_In_ INT listview_id
+)
+{
+	INT index;
+
+	index = listview_id - IDC_APPS_PROFILE;
+
+	if (index < 0 || index > (IDC_RULES_CUSTOM - IDC_APPS_PROFILE))
+		return;
+
+	_InterlockedOr (&listview_redraw_mask, (1 << index));
+
+	_r_sys_settimer (hwnd, INFOREDRAW_TIMER_ID, INFOREDRAW_TIMEOUT, NULL);
+}
+
+VOID _app_listview_flushredraw (
+	_In_ HWND hwnd
+)
+{
+	LONG mask;
+
+	mask = _InterlockedExchange (&listview_redraw_mask, 0);
+
+	for (INT i = IDC_APPS_PROFILE; i <= IDC_RULES_CUSTOM; i++)
+	{
+		if (mask & 1)
+			_r_listview_redraw (hwnd, i);
+
+		mask >>= 1;
 	}
 }
 

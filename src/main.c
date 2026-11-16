@@ -2238,6 +2238,18 @@ INT_PTR CALLBACK DlgProc (
 			break;
 		}
 
+		case WM_TIMER:
+		{
+			if (wparam == INFOREDRAW_TIMER_ID)
+			{
+				KillTimer (hwnd, INFOREDRAW_TIMER_ID);
+
+				_app_listview_flushredraw (hwnd);
+			}
+
+			break;
+		}
+
 		case WM_DESTROY:
 		{
 			_app_search_cleanup ();

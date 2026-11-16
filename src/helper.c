@@ -1767,7 +1767,7 @@ VOID NTAPI _app_queue_fileinformation (
 
 	// redraw listview
 	if (hwnd && _r_wnd_isvisible (hwnd, FALSE) && ptr_app_info->listview_id != 0)
-		_r_listview_redraw (hwnd, ptr_app_info->listview_id);
+		_app_listview_queueredraw (hwnd, ptr_app_info->listview_id);
 
 	ptr_app_info->is_loaded = TRUE;
 
