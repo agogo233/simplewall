@@ -2196,6 +2196,7 @@ INT_PTR CALLBACK DlgProc (
 
 		case WM_DESTROY:
 		{
+			_app_search_cleanup ();
 			_app_network_stop ();
 			_app_loginit (FALSE);
 

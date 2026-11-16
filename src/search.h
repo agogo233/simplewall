@@ -100,6 +100,8 @@ VOID _app_search_applyfilter (
 	_In_opt_ PR_STRING search_string
 );
 
+VOID _app_search_cleanup ();
+
 LRESULT CALLBACK _app_search_subclass_proc (
 	_In_ HWND hwnd,
 	_In_ UINT msg,

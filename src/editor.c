@@ -839,6 +839,8 @@ INT_PTR CALLBACK EditorPagesProc (
 
 		case WM_DESTROY:
 		{
+			_app_search_cleanup ();
+
 			// apps
 			if (GetDlgItem (hwnd, IDC_RULE_APPS_ID))
 				_r_listview_deleteallitems (hwnd, IDC_RULE_APPS_ID);
@@ -1531,6 +1533,8 @@ INT_PTR CALLBACK EditorProc (
 
 		case WM_DESTROY:
 		{
+			_app_search_cleanup ();
+
 			_r_window_saveposition (hwnd, L"editor");
 
 			context = _app_editor_getcontext (hwnd);

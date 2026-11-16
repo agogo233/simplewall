@@ -4,6 +4,18 @@
 
 #include "global.h"
 
+#define SEARCH_TIMER_ID (GENERAL_ID + 1)
+#define SEARCH_DEBOUNCE_TIMEOUT 300 // milliseconds
+
+typedef struct _SEARCH_DEBOUNCE
+{
+	HWND hwnd;
+	INT listview_id;
+	PR_STRING string;
+} SEARCH_DEBOUNCE, *PSEARCH_DEBOUNCE;
+
+static SEARCH_DEBOUNCE search_debounce = {0};
+
 VOID _app_search_initialize (
 	_Inout_ PSEARCH_CONTEXT context
 )
@@ -308,7 +320,7 @@ BOOLEAN _app_search_applyfiltercallback (
 	}
 
 	if (is_changed)
-		_app_listview_updateby_id (hwnd, listview_id, PR_UPDATE_NOSETVIEW | PR_UPDATE_FORCE);
+		_app_listview_updateby_id (hwnd, listview_id, PR_UPDATE_NOSETVIEW | PR_UPDATE_NOSORT | PR_UPDATE_NORESIZE | PR_UPDATE_FORCE);
 
 	return is_changed;
 }
@@ -532,6 +544,34 @@ CleanupExit:
 	return is_changed;
 }
 
+static VOID CALLBACK _app_search_debounce_proc (
+	_In_ HWND hwnd,
+	_In_ UINT msg,
+	_In_ UINT_PTR event_id,
+	_In_ DWORD elapsed
+)
+{
+	PR_STRING string;
+	INT listview_id;
+
+	KillTimer (hwnd, event_id);
+
+	if (search_debounce.hwnd != hwnd)
+		return; // stale timer from another window
+
+	string = search_debounce.string;
+	listview_id = search_debounce.listview_id;
+
+	search_debounce.hwnd = NULL;
+	search_debounce.listview_id = 0;
+	search_debounce.string = NULL;
+
+	_app_search_applyfiltercallback (hwnd, listview_id, string);
+
+	if (string)
+		_r_obj_dereference (string);
+}
+
 VOID _app_search_applyfilter (
 	_In_ HWND hwnd,
 	_In_ INT listview_id,
@@ -541,7 +581,33 @@ VOID _app_search_applyfilter (
 	if (!((listview_id >= IDC_APPS_PROFILE && listview_id <= IDC_LOG) || listview_id == IDC_RULE_APPS_ID || listview_id == IDC_APP_RULES_ID))
 		return;
 
-	_app_search_applyfiltercallback (hwnd, listview_id, search_string);
+	// cancel pending request on another window (if any)
+	if (search_debounce.hwnd && search_debounce.hwnd != hwnd)
+		KillTimer (search_debounce.hwnd, SEARCH_TIMER_ID);
+
+	KillTimer (hwnd, SEARCH_TIMER_ID);
+
+	// keep only the latest request; the filter is applied once typing pauses
+	_r_obj_clearreference ((PVOID_PTR)&search_debounce.string);
+
+	if (search_string)
+		search_debounce.string = _r_obj_reference (search_string);
+
+	search_debounce.hwnd = hwnd;
+	search_debounce.listview_id = listview_id;
+
+	_r_sys_settimer (hwnd, SEARCH_TIMER_ID, SEARCH_DEBOUNCE_TIMEOUT, &_app_search_debounce_proc);
+}
+
+VOID _app_search_cleanup ()
+{
+	if (search_debounce.hwnd)
+		KillTimer (search_debounce.hwnd, SEARCH_TIMER_ID);
+
+	_r_obj_clearreference ((PVOID_PTR)&search_debounce.string);
+
+	search_debounce.hwnd = NULL;
+	search_debounce.listview_id = 0;
 }
 
 VOID _app_search_createbufferedcontext (
