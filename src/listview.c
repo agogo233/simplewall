@@ -150,17 +150,113 @@ VOID _app_listview_addruleitem (
 	_app_listview_unlock (hwnd, listview_id);
 }
 
+static INT _app_listview_probeinsert (
+	_In_ HWND hwnd,
+	_In_ LPCWSTR string,
+	_In_ INT image_id,
+	_In_ INT group_id,
+	_In_ LPARAM lparam
+)
+{
+	LVITEMW lvi = {0};
+
+	lvi.iItem = INT_ERROR;
+	lvi.iSubItem = 0;
+	lvi.lParam = lparam;
+
+	if (string)
+	{
+		lvi.mask |= LVIF_TEXT;
+		lvi.pszText = (LPWSTR)string;
+	}
+
+	if (image_id != I_DEFAULT)
+	{
+		lvi.mask |= LVIF_IMAGE;
+		lvi.iImage = image_id;
+	}
+
+	if (group_id != I_DEFAULT)
+	{
+		lvi.mask |= LVIF_GROUPID;
+		lvi.iGroupId = group_id;
+	}
+
+	return (INT)_r_wnd_sendmessage (hwnd, IDC_NETWORK, LVM_INSERTITEM, 0, (LPARAM)&lvi);
+}
+
 VOID _app_listview_addnetworkitem (
 	_In_ HWND hwnd,
 	_In_ ULONG network_hash
 )
 {
+	static INT probe_count = 0;
+
 	INT item_id;
+	INT probe_idx;
+	HWND hctrl;
 
 	item_id = _r_listview_additem (hwnd, IDC_NETWORK, INT_ERROR, LPSTR_TEXTCALLBACK, I_IMAGECALLBACK, I_GROUPIDCALLBACK, _app_listview_createcontext (network_hash));
 
-	if (item_id == INT_ERROR)
-		_r_log (LOG_LEVEL_ERROR, NULL, L"network: listview insert failed", NULL, (LONG)GetLastError ());
+	if (item_id != INT_ERROR)
+		return;
+
+	if (probe_count >= 3)
+		return;
+
+	probe_count += 1;
+
+	hctrl = GetDlgItem (hwnd, IDC_NETWORK);
+
+	if (hctrl)
+	{
+		_r_log (
+			LOG_LEVEL_INFO,
+			NULL,
+			L"network: probe state",
+			_r_obj_getstring (
+				_r_format_string (
+					L"ctrl=0x%p, style=0x%08lx, exstyle=0x%08lx, items=%d, unicode=%d",
+					hctrl,
+					(ULONG)GetWindowLongPtrW (hctrl, GWL_STYLE),
+					(ULONG)GetWindowLongPtrW (hctrl, GWL_EXSTYLE),
+					(INT)SendMessageW (hctrl, LVM_GETITEMCOUNT, 0, 0),
+					IsWindowUnicode (hctrl) ? 1 : 0
+				),
+				L"(null)"
+			),
+			0
+		);
+	}
+
+	probe_idx = _app_listview_probeinsert (hwnd, LPSTR_TEXTCALLBACK, I_IMAGECALLBACK, I_DEFAULT, _app_listview_createcontext (network_hash));
+
+	if (probe_idx != INT_ERROR)
+	{
+		_r_log (LOG_LEVEL_INFO, NULL, L"network: probe1 success (no group)", NULL, probe_idx);
+		_r_wnd_sendmessage (hwnd, IDC_NETWORK, LVM_DELETEITEM, (WPARAM)probe_idx, 0);
+		return;
+	}
+
+	probe_idx = _app_listview_probeinsert (hwnd, LPSTR_TEXTCALLBACK, I_DEFAULT, I_GROUPIDCALLBACK, _app_listview_createcontext (network_hash));
+
+	if (probe_idx != INT_ERROR)
+	{
+		_r_log (LOG_LEVEL_INFO, NULL, L"network: probe2 success (no image)", NULL, probe_idx);
+		_r_wnd_sendmessage (hwnd, IDC_NETWORK, LVM_DELETEITEM, (WPARAM)probe_idx, 0);
+		return;
+	}
+
+	probe_idx = _app_listview_probeinsert (hwnd, LPSTR_TEXTCALLBACK, I_IMAGECALLBACK, I_GROUPIDCALLBACK, _app_listview_createcontext (network_hash));
+
+	if (probe_idx != INT_ERROR)
+	{
+		_r_log (LOG_LEVEL_INFO, NULL, L"network: probe3 success (same args retry)", NULL, probe_idx);
+		_r_wnd_sendmessage (hwnd, IDC_NETWORK, LVM_DELETEITEM, (WPARAM)probe_idx, 0);
+		return;
+	}
+
+	_r_log (LOG_LEVEL_ERROR, NULL, L"network: all probes failed", NULL, (LONG)GetLastError ());
 }
 
 VOID _app_listview_addlogitem (
