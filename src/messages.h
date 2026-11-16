@@ -124,6 +124,10 @@ VOID _app_command_purgeunused (
 	_In_ HWND hwnd
 );
 
+VOID _app_command_purgeinvalid (
+	_In_ HWND hwnd
+);
+
 VOID _app_command_purgetimers (
 	_In_ HWND hwnd
 );

@@ -144,6 +144,7 @@ VOID _app_message_localize (
 
 		// edit submenu
 		_r_menu_setitemtextformat (hmenu, IDM_PURGE_UNUSED, FALSE, L"%s\tCtrl+Shift+X", _r_locale_getstring (IDS_PURGE_UNUSED));
+		_r_menu_setitemtextformat (hmenu, IDM_PURGE_INVALID, FALSE, L"%s\tCtrl+Shift+I", _r_locale_getstring (IDS_PURGE_INVALID));
 		_r_menu_setitemtextformat (hmenu, IDM_PURGE_TIMERS, FALSE, L"%s\tCtrl+Shift+T", _r_locale_getstring (IDS_PURGE_TIMERS));
 		_r_menu_setitemtextformat (hmenu, IDM_LOGCLEAR, FALSE, L"%s\tCtrl+X", _r_locale_getstring (IDS_LOGCLEAR));
 		_r_menu_setitemtextformat (hmenu, IDM_REFRESH, FALSE, L"%s\tF5", _r_locale_getstring (IDS_REFRESH));
@@ -2849,6 +2850,101 @@ VOID _app_command_purgeunused (
 			}
 
 			//_r_queuedlock_releaseexclusive (&lock_apps);
+
+			if (!_r_obj_isempty2 (guids) && _wfp_isfiltersinstalled ())
+				_wfp_destroyfilters_array (_wfp_getenginehandle (), guids, DBG_ARG);
+
+			_app_listview_updateby_id (hwnd, DATA_LISTVIEW_CURRENT, PR_UPDATE_TYPE | PR_UPDATE_FORCE);
+
+			_app_profile_save (hwnd);
+		}
+	}
+
+	_r_obj_deletestringbuilder (&sb);
+
+	_r_obj_dereference (apps_list);
+	_r_obj_dereference (guids);
+}
+
+VOID _app_command_purgeinvalid (
+	_In_ HWND hwnd
+)
+{
+	R_STRINGBUILDER sb;
+	PITEM_APP ptr_app = NULL;
+	PR_STRING string = NULL;
+	PR_LIST apps_list;
+	PR_ARRAY guids;
+	ULONG_PTR enum_key = 0;
+	ULONG_PTR hash_code;
+	INT i = 1;
+
+	apps_list = _r_obj_createlist (0x10, NULL);
+	guids = _r_obj_createarray (sizeof (GUID), 0x10, NULL);
+
+	_r_obj_initializestringbuilder (&sb, 0);
+
+	_r_queuedlock_acquireshared (&lock_apps);
+
+	while (_r_obj_enumhashtablepointer (apps_table, (PVOID_PTR)&ptr_app, &hash_code, &enum_key))
+	{
+		if (ptr_app->is_undeletable || ptr_app->type != DATA_APP_REGULAR)
+			continue;
+
+		if (!ptr_app->real_path || _r_fs_isexists (&ptr_app->real_path->sr))
+			continue;
+
+		_r_obj_addlistitem_ex (apps_list, (PVOID)hash_code, NULL);
+
+		string = _app_getapppath (ptr_app);
+
+		if (string)
+		{
+			_r_obj_appendstringbuilderformat (&sb, L"%d. ", i);
+			_r_obj_appendstringbuilder2 (&sb, &string->sr);
+			_r_obj_appendstringbuilder (&sb, SZ_CRLF);
+
+			_r_obj_dereference (string);
+
+			i += 1;
+		}
+	}
+
+	_r_queuedlock_releaseshared (&lock_apps);
+
+	if (_r_obj_getlistsize (apps_list))
+	{
+		string = _r_obj_finalstringbuilder (&sb);
+
+		_r_str_trimstring2 (&string->sr, SZ_CRLF, PR_TRIM_END_ONLY);
+
+		if (_r_show_confirmmessage (hwnd, _r_locale_getstring (IDS_PURGE_INVALID), string->buffer, L"ConfirmInvalid", FALSE))
+		{
+			for (ULONG_PTR i = 0; i < _r_obj_getlistsize (apps_list); i++)
+			{
+				hash_code = (ULONG_PTR)_r_obj_getlistitem (apps_list, i);
+
+				_r_queuedlock_acquireshared (&lock_apps);
+
+				ptr_app = (PITEM_APP)_r_obj_findhashtable (apps_table, (ULONG)hash_code);
+
+				if (ptr_app && (ptr_app->is_undeletable || ptr_app->type != DATA_APP_REGULAR || !ptr_app->real_path || _r_fs_isexists (&ptr_app->real_path->sr)))
+					ptr_app = NULL;
+
+				if (ptr_app && !_r_obj_isempty (ptr_app->guids))
+					_r_obj_addarrayitems (guids, ptr_app->guids->items, ptr_app->guids->count);
+
+				_r_queuedlock_releaseshared (&lock_apps);
+
+				if (!ptr_app)
+					continue;
+
+				_app_deleteappitem (hwnd, ptr_app->type, hash_code);
+				_app_notify_freeobject (NULL, ptr_app);
+				_app_timer_reset (NULL, ptr_app, FALSE);
+
+				_app_freeapplication (hwnd, (ULONG)hash_code);
+			}
 
 			if (!_r_obj_isempty2 (guids) && _wfp_isfiltersinstalled ())
 				_wfp_destroyfilters_array (_wfp_getenginehandle (), guids, DBG_ARG);

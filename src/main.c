@@ -3495,6 +3495,12 @@ INT_PTR CALLBACK DlgProc (
 					break;
 				}
 
+				case IDM_PURGE_INVALID:
+				{
+					_app_command_purgeinvalid (hwnd);
+					break;
+				}
+
 				case IDM_PURGE_TIMERS:
 				{
 					_app_command_purgetimers (hwnd);
