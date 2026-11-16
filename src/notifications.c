@@ -113,7 +113,7 @@ BOOLEAN _app_notify_command (
 	_r_obj_dereference (ptr_app);
 	_r_obj_dereference (rules);
 
-	_app_profile_save (hwnd);
+	_app_profile_save (hmain);
 
 	return TRUE;
 }
@@ -125,6 +125,7 @@ BOOLEAN _app_notify_addobject (
 )
 {
 	LONG64 current_time, notification_timeout;
+	PITEM_LOG notification;
 
 	notification_timeout = _r_config_getlong64_ex(L"NotificationsTimeout", NOTIFY_TIMEOUT_DEFAULT, NULL);
 	current_time = _r_unixtime_now ();
@@ -135,9 +136,12 @@ BOOLEAN _app_notify_addobject (
 
 	ptr_app->last_notify = current_time;
 
+	_r_queuedlock_acquireexclusive (&lock_notification_ref);
 	_r_obj_swapreference ((PVOID_PTR)&ptr_app->notification, ptr_log);
+	notification = ptr_app->notification;
+	_r_queuedlock_releaseexclusive (&lock_notification_ref);
 
-	if (_r_wnd_sendmessage (hwnd, 0, WM_NOTIFICATION, 0, (LPARAM)ptr_app->notification))
+	if (_r_wnd_sendmessage (hwnd, 0, WM_NOTIFICATION, 0, (LPARAM)notification))
 	{
 		if (_r_config_getboolean_ex(L"IsNotificationsSound", TRUE, NULL) && (!_r_config_getboolean_ex(L"IsNotificationsFullscreenSilentMode", TRUE, NULL) || !_r_wnd_isfullscreenmode ()))
 			_app_notify_playsound ();
@@ -156,8 +160,12 @@ VOID _app_notify_freeobject (
 	if (!hwnd)
 		hwnd = _app_notify_getwindow (NULL);
 
+	_r_queuedlock_acquireexclusive (&lock_notification_ref);
+
 	if (ptr_app->notification)
 		_r_obj_clearreference ((PVOID_PTR)&ptr_app->notification);
+
+	_r_queuedlock_releaseexclusive (&lock_notification_ref);
 
 	if (hwnd)
 	{
@@ -185,7 +193,9 @@ PITEM_LOG _app_notify_getobject (
 	if (!ptr_app)
 		return NULL;
 
+	_r_queuedlock_acquireshared (&lock_notification_ref);
 	ptr_log = (PITEM_LOG)_r_obj_referencesafe (ptr_app->notification);
+	_r_queuedlock_releaseshared (&lock_notification_ref);
 
 	_r_obj_dereference (ptr_app);
 
@@ -940,6 +950,24 @@ INT_PTR CALLBACK NotificationProc (
 			break;
 		}
 
+		case WM_NOTIFYINFO:
+		{
+			PITEM_NOTIFYINFO ptr_info = (PITEM_NOTIFYINFO)lparam;
+
+			if (ptr_info)
+			{
+				// discard stale information (window may display another app)
+				if (ptr_info->app_hash == _app_notify_getapp_id (hwnd))
+					_app_notify_applyinfo (hwnd, ptr_info);
+
+				_app_notifyinfo_free (ptr_info);
+			}
+
+			SetWindowLongPtrW (hwnd, DWLP_MSGRESULT, TRUE);
+
+			return TRUE;
+		}
+
 		case WM_TIMER:
 		{
 			KillTimer (hwnd, wparam);
@@ -1276,7 +1304,7 @@ INT_PTR CALLBACK NotificationProc (
 							_app_listview_updateby_id (hmain, DATA_LISTVIEW_CURRENT, PR_UPDATE_TYPE);
 						}
 
-						_app_profile_save (hwnd);
+						_app_profile_save (hmain);
 
 						_r_obj_dereference (rule);
 					}
@@ -1329,7 +1357,7 @@ INT_PTR CALLBACK NotificationProc (
 					_r_obj_dereference (ptr_rule);
 					_r_obj_dereference (ptr_app);
 
-					_app_profile_save (hwnd);
+					_app_profile_save (hmain);
 				}
 
 				return FALSE;
@@ -1465,7 +1493,7 @@ INT_PTR CALLBACK NotificationProc (
 							_app_listview_updateby_id (hmain, DATA_LISTVIEW_CURRENT, PR_UPDATE_TYPE);
 						}
 
-						_app_profile_save (hwnd);
+						_app_profile_save (hmain);
 
 						_app_editor_deletewindow (context);
 					}

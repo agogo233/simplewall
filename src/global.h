@@ -65,6 +65,7 @@ DECLSPEC_SELECTANY R_QUEUED_LOCK lock_rules = PR_QUEUED_LOCK_INIT;
 DECLSPEC_SELECTANY R_QUEUED_LOCK lock_rules_config = PR_QUEUED_LOCK_INIT;
 DECLSPEC_SELECTANY R_QUEUED_LOCK lock_loglist = PR_QUEUED_LOCK_INIT;
 DECLSPEC_SELECTANY R_QUEUED_LOCK lock_notify = PR_QUEUED_LOCK_INIT;
+DECLSPEC_SELECTANY R_QUEUED_LOCK lock_notification_ref = PR_QUEUED_LOCK_INIT;
 DECLSPEC_SELECTANY R_QUEUED_LOCK lock_profile = PR_QUEUED_LOCK_INIT;
 DECLSPEC_SELECTANY R_QUEUED_LOCK lock_transaction = PR_QUEUED_LOCK_INIT;
 
@@ -113,6 +114,7 @@ DECLSPEC_SELECTANY const LONG64 timer_array[] =
 #endif // !FWP_DIRECTION_FORWARD2
 
 #define WM_NOTIFICATION (WM_APP + 21)
+#define WM_NOTIFYINFO (WM_APP + 22)
 
 // Missing routine library functions (compatibility shims)
 // note: a control id of zero means that the given window is the target itself
