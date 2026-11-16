@@ -433,6 +433,63 @@ VOID _app_notify_playsound ()
 		PlaySoundW (NOTIFY_SOUND_NAME, NULL, flags);
 }
 
+VOID _app_notifyinfo_free (
+	_In_ PITEM_NOTIFYINFO ptr_info
+)
+{
+	if (ptr_info->hicon)
+		DestroyIcon (ptr_info->hicon);
+
+	if (ptr_info->signature_str)
+		_r_obj_dereference (ptr_info->signature_str);
+
+	if (ptr_info->address_str)
+		_r_obj_dereference (ptr_info->address_str);
+
+	if (ptr_info->host_str)
+		_r_obj_dereference (ptr_info->host_str);
+
+	_r_mem_free (ptr_info);
+}
+
+VOID _app_notify_applyinfo (
+	_In_ HWND hwnd,
+	_In_ PITEM_NOTIFYINFO ptr_info
+)
+{
+	PNOTIFY_CONTEXT context;
+	PR_STRING localized_string = NULL;
+	HDWP hdefer;
+
+	context = _app_notify_getcontext (hwnd);
+
+	if (!context)
+		return;
+
+	_app_notify_setapp_icon (hwnd, ptr_info->hicon);
+	ptr_info->hicon = NULL; // ownership transferred
+
+	hdefer = BeginDeferWindowPos (3);
+
+	// set signature string
+	_r_obj_movereference ((PVOID_PTR)&localized_string, _r_obj_concatstrings (2, _r_locale_getstring (IDS_SIGNATURE), L":"));
+	_r_ctrl_settablestring (hwnd, &hdefer, IDC_SIGNATURE_ID, &localized_string->sr, IDC_SIGNATURE_TEXT, &ptr_info->signature_str->sr);
+
+	// set address string
+	_r_obj_movereference ((PVOID_PTR)&localized_string, _r_obj_concatstrings (2, _r_locale_getstring (IDS_ADDRESS), L":"));
+	_r_ctrl_settablestring (hwnd, &hdefer, IDC_ADDRESS_ID, &localized_string->sr, IDC_ADDRESS_TEXT, &ptr_info->address_str->sr);
+
+	// set host string
+	_r_obj_movereference ((PVOID_PTR)&localized_string, _r_obj_concatstrings (2, _r_locale_getstring (IDS_HOST), L":"));
+	_r_ctrl_settablestring (hwnd, &hdefer, IDC_HOST_ID, &localized_string->sr, IDC_HOST_TEXT, &ptr_info->host_str->sr);
+
+	if (hdefer)
+		EndDeferWindowPos (hdefer);
+
+	if (localized_string)
+		_r_obj_dereference (localized_string);
+}
+
 VOID _app_notify_queueinfo (
 	_In_ HWND hwnd,
 	_In_ PITEM_LOG ptr_log

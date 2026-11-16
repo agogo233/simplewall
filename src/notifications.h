@@ -22,6 +22,15 @@ typedef struct _NOTIFY_CONTEXT
 	ULONG app_hash;
 } NOTIFY_CONTEXT, *PNOTIFY_CONTEXT;
 
+typedef struct _ITEM_NOTIFYINFO
+{
+	HICON hicon;
+	PR_STRING signature_str;
+	PR_STRING address_str;
+	PR_STRING host_str;
+	ULONG app_hash;
+} ITEM_NOTIFYINFO, *PITEM_NOTIFYINFO;
+
 _Ret_maybenull_
 HWND _app_notify_getwindow (
 	_In_opt_ PITEM_LOG ptr_log
@@ -94,6 +103,15 @@ VOID _app_notify_playsound ();
 VOID _app_notify_queueinfo (
 	_In_ HWND hwnd,
 	_In_ PITEM_LOG ptr_log
+);
+
+VOID _app_notifyinfo_free (
+	_In_ PITEM_NOTIFYINFO ptr_info
+);
+
+VOID _app_notify_applyinfo (
+	_In_ HWND hwnd,
+	_Inout_ PITEM_NOTIFYINFO ptr_info
 );
 
 VOID _app_notify_refresh (

@@ -1780,15 +1780,15 @@ VOID NTAPI _app_queue_notifyinformation (
 	_In_ PVOID arglist
 )
 {
-	PR_STRING address_str, host_str = NULL, localized_string, signature_str = NULL;
+	PR_STRING address_str, host_str = NULL, signature_str = NULL;
+	PITEM_NOTIFYINFO ptr_info;
 	PITEM_APP_INFO ptr_app_info;
 	PITEM_CONTEXT context;
 	PITEM_LOG ptr_log;
+	HWND hnotify;
 	HANDLE hfile;
 	HICON hicon;
-	HDWP hdefer;
 	ULONG attempts = 6;
-	BOOLEAN is_iconset = FALSE;
 	NTSTATUS status;
 
 	context = (PITEM_CONTEXT)arglist;
@@ -1828,79 +1828,69 @@ VOID NTAPI _app_queue_notifyinformation (
 	// query file icon
 	hicon = _app_icons_getsafeapp_hicon (ptr_log->app_hash);
 
-	if (_r_wnd_isvisible (context->hwnd, FALSE))
+	// query signature information
+	do
 	{
-		if (ptr_log->app_hash == _app_notify_getapp_id (context->hwnd))
+		if (!_app_getappinfoparam2 (ptr_log->app_hash, 0, INFO_SIGNATURE_STRING, &signature_str, sizeof (PR_STRING)))
 		{
-			// set file icon
-			_app_notify_setapp_icon (context->hwnd, hicon);
-
-			is_iconset = TRUE;
-
-			// set signature information
-			localized_string = _r_obj_concatstrings (
-				2,
-				_r_locale_getstring (IDS_SIGNATURE),
-				L":"
-			);
-
-			do
-			{
-				if (!_app_getappinfoparam2 (ptr_log->app_hash, 0, INFO_SIGNATURE_STRING, &signature_str, sizeof (PR_STRING)))
-				{
-					_r_sys_sleep (250); // wait
-				}
-				else
-				{
-					break;
-				}
-			}
-			while (--attempts);
-
-			if (!signature_str)
-				_r_obj_movereference ((PVOID_PTR)&signature_str, _r_locale_getstring_ex (IDS_SIGN_UNSIGNED));
-
-			hdefer = BeginDeferWindowPos (2);
-
-			// set signature string
-			_r_ctrl_settablestring (context->hwnd, &hdefer, IDC_SIGNATURE_ID, &localized_string->sr, IDC_SIGNATURE_TEXT, &signature_str->sr);
-
-			// query address string
-			address_str = _app_formataddress (ptr_log->af, ptr_log->protocol, &ptr_log->remote_addr, 0, FMTADDR_USE_PROTOCOL);
-
-			// set address string
-			_r_obj_movereference ((PVOID_PTR)&localized_string, _r_obj_concatstrings (2, _r_locale_getstring (IDS_ADDRESS), L":"));
-
-			if (_r_obj_isstringempty (address_str))
-				_r_obj_movereference ((PVOID_PTR)&address_str, _r_locale_getstring_ex (IDS_STATUS_EMPTY));
-
-			_r_ctrl_settablestring (context->hwnd, &hdefer, IDC_ADDRESS_ID, &localized_string->sr, IDC_ADDRESS_TEXT, &address_str->sr);
-
-			// set host string
-			_r_obj_movereference ((PVOID_PTR)&localized_string, _r_obj_concatstrings (2, _r_locale_getstring (IDS_HOST), L":"));
-
-			if (_r_obj_isstringempty (host_str))
-				_r_obj_movereference ((PVOID_PTR)&host_str, _r_locale_getstring_ex (IDS_STATUS_EMPTY));
-
-			_r_ctrl_settablestring (context->hwnd, &hdefer, IDC_HOST_ID, &localized_string->sr, IDC_HOST_TEXT, &host_str->sr);
-
-			_r_obj_dereference (localized_string);
-
-			if (address_str)
-				_r_obj_dereference (address_str);
-
-			if (hdefer)
-				EndDeferWindowPos (hdefer);
+			_r_sys_sleep (250); // wait
 		}
+		else
+		{
+			break;
+		}
+	}
+	while (--attempts);
+
+	if (!signature_str)
+		_r_obj_movereference ((PVOID_PTR)&signature_str, _r_locale_getstring_ex (IDS_SIGN_UNSIGNED));
+
+	// query address string
+	address_str = _app_formataddress (ptr_log->af, ptr_log->protocol, &ptr_log->remote_addr, 0, FMTADDR_USE_PROTOCOL);
+
+	if (_r_obj_isstringempty (address_str))
+		_r_obj_movereference ((PVOID_PTR)&address_str, _r_locale_getstring_ex (IDS_STATUS_EMPTY));
+
+	if (_r_obj_isstringempty (host_str))
+		_r_obj_movereference ((PVOID_PTR)&host_str, _r_locale_getstring_ex (IDS_STATUS_EMPTY));
+
+	// Note: we intentionally do not touch the notification window (or its context) from
+	// this worker thread; all ui updates are marshalled to the window thread to avoid
+	// use-after-free races with DestroyWindow (_app_notify_destroy).
+
+	hnotify = (HWND)_InterlockedCompareExchangePointer ((volatile PVOID_PTR)&config.hnotification, NULL, NULL);
+
+	if (hnotify)
+	{
+		ptr_info = _r_mem_allocate (sizeof (ITEM_NOTIFYINFO));
+
+		ptr_info->hicon = hicon;
+		ptr_info->signature_str = signature_str;
+		ptr_info->address_str = address_str;
+		ptr_info->host_str = host_str;
+		ptr_info->app_hash = ptr_log->app_hash;
+
+		hicon = NULL;
+		signature_str = NULL;
+		address_str = NULL;
+		host_str = NULL;
+
+		// transfer ownership; the target window frees the info on success,
+		// we free it ourselves on failure (window is already destroyed)
+		if (!SendMessageW (hnotify, WM_NOTIFYINFO, 0, (LPARAM)ptr_info))
+			_app_notifyinfo_free (ptr_info);
 	}
 
 	_r_freelist_deleteitem (&context_free_list, context);
 
-	if (!is_iconset && hicon)
+	if (hicon)
 		DestroyIcon (hicon);
 
 	if (signature_str)
 		_r_obj_dereference (signature_str);
+
+	if (address_str)
+		_r_obj_dereference (address_str);
 
 	if (host_str)
 		_r_obj_dereference (host_str);
