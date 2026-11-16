@@ -59,13 +59,11 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force -Path upload\x64
           Copy-Item bin\64\simplewall.exe upload\x64\
-          Copy-Item bin\64\simplewall.pdb upload\x64\
           Copy-Item bin\simplewall.lng upload\x64\
           Copy-Item bin\Readme.txt upload\x64\
           Copy-Item bin\License.txt upload\x64\
           Copy-Item bin\History.txt upload\x64\
-          Copy-Item bin\profile_internal.xml upload\x64\
-          Copy-Item -Recurse bin\i18n upload\x64\
+          Set-Content -Path upload\x64\portable.dat -Value '#PORTABLE#' -NoNewline -Encoding Ascii
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
