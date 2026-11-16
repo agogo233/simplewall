@@ -152,17 +152,16 @@ VOID _app_listview_addruleitem (
 
 static INT _app_listview_probeinsert (
 	_In_ HWND hwnd,
+	_In_ INT ctrl_id,
 	_In_ LPCWSTR string,
 	_In_ INT image_id,
-	_In_ INT group_id,
-	_In_ LPARAM lparam
+	_In_ INT group_id
 )
 {
 	LVITEMW lvi = {0};
 
 	lvi.iItem = INT_ERROR;
 	lvi.iSubItem = 0;
-	lvi.lParam = lparam;
 
 	if (string)
 	{
@@ -182,24 +181,17 @@ static INT _app_listview_probeinsert (
 		lvi.iGroupId = group_id;
 	}
 
-	return (INT)_r_wnd_sendmessage (hwnd, IDC_NETWORK, LVM_INSERTITEM, 0, (LPARAM)&lvi);
+	return (INT)_r_wnd_sendmessage (hwnd, ctrl_id, LVM_INSERTITEM, 0, (LPARAM)&lvi);
 }
 
-VOID _app_listview_addnetworkitem (
-	_In_ HWND hwnd,
-	_In_ ULONG network_hash
+static VOID _app_listview_probecheck (
+	_In_ HWND hwnd
 )
 {
 	static INT probe_count = 0;
 
-	INT item_id;
 	INT probe_idx;
 	HWND hctrl;
-
-	item_id = _r_listview_additem (hwnd, IDC_NETWORK, INT_ERROR, LPSTR_TEXTCALLBACK, I_IMAGECALLBACK, I_GROUPIDCALLBACK, _app_listview_createcontext (network_hash));
-
-	if (item_id != INT_ERROR)
-		return;
 
 	if (probe_count >= 3)
 		return;
@@ -210,50 +202,63 @@ VOID _app_listview_addnetworkitem (
 
 	if (hctrl)
 	{
-		_r_log (
-			LOG_LEVEL_INFO,
-			NULL,
-			L"network: probe state",
-			_r_format_string (
-				L"ctrl=0x%p, style=0x%08lx, exstyle=0x%08lx, items=%d, unicode=%d",
-				hctrl,
-				(ULONG)GetWindowLongPtrW (hctrl, GWL_STYLE),
-				(ULONG)GetWindowLongPtrW (hctrl, GWL_EXSTYLE),
-				(INT)SendMessageW (hctrl, LVM_GETITEMCOUNT, 0, 0),
-				IsWindowUnicode (hctrl) ? 1 : 0
-			),
-			0
-		);
+		_r_log (LOG_LEVEL_INFO, NULL, L"network: probe style", NULL, (LONG)GetWindowLongPtrW (hctrl, GWL_STYLE));
+		_r_log (LOG_LEVEL_INFO, NULL, L"network: probe exstyle", NULL, (LONG)GetWindowLongPtrW (hctrl, GWL_EXSTYLE));
+		_r_log (LOG_LEVEL_INFO, NULL, L"network: probe items", NULL, (LONG)SendMessageW (hctrl, LVM_GETITEMCOUNT, 0, 0));
+		_r_log (LOG_LEVEL_INFO, NULL, L"network: probe unicode", NULL, IsWindowUnicode (hctrl) ? 1 : 0);
 	}
 
-	probe_idx = _app_listview_probeinsert (hwnd, LPSTR_TEXTCALLBACK, I_IMAGECALLBACK, I_DEFAULT, _app_listview_createcontext (network_hash));
+	// probe1: same arguments as the apps list, cross-thread reference
+	probe_idx = _app_listview_probeinsert (hwnd, IDC_APPS_PROFILE, LPSTR_TEXTCALLBACK, I_IMAGECALLBACK, I_GROUPIDCALLBACK);
 
 	if (probe_idx != INT_ERROR)
 	{
-		_r_log (LOG_LEVEL_INFO, NULL, L"network: probe1 success (no group)", NULL, probe_idx);
-		_r_wnd_sendmessage (hwnd, IDC_NETWORK, LVM_DELETEITEM, (WPARAM)probe_idx, 0);
-		return;
+		_r_log (LOG_LEVEL_INFO, NULL, L"network: probe1 success (apps list)", NULL, probe_idx);
+		_r_wnd_sendmessage (hwnd, IDC_APPS_PROFILE, LVM_DELETEITEM, (WPARAM)probe_idx, 0);
+	}
+	else
+	{
+		_r_log (LOG_LEVEL_ERROR, NULL, L"network: probe1 failed (apps list)", NULL, (LONG)GetLastError ());
 	}
 
-	probe_idx = _app_listview_probeinsert (hwnd, LPSTR_TEXTCALLBACK, I_DEFAULT, I_GROUPIDCALLBACK, _app_listview_createcontext (network_hash));
+	// probe2: plain text, no callbacks
+	probe_idx = _app_listview_probeinsert (hwnd, IDC_NETWORK, L"probe", I_DEFAULT, I_DEFAULT);
 
 	if (probe_idx != INT_ERROR)
 	{
-		_r_log (LOG_LEVEL_INFO, NULL, L"network: probe2 success (no image)", NULL, probe_idx);
+		_r_log (LOG_LEVEL_INFO, NULL, L"network: probe2 success (plain text)", NULL, probe_idx);
 		_r_wnd_sendmessage (hwnd, IDC_NETWORK, LVM_DELETEITEM, (WPARAM)probe_idx, 0);
-		return;
+	}
+	else
+	{
+		_r_log (LOG_LEVEL_ERROR, NULL, L"network: probe2 failed (plain text)", NULL, (LONG)GetLastError ());
 	}
 
-	probe_idx = _app_listview_probeinsert (hwnd, LPSTR_TEXTCALLBACK, I_IMAGECALLBACK, I_GROUPIDCALLBACK, _app_listview_createcontext (network_hash));
+	// probe3: text callback only
+	probe_idx = _app_listview_probeinsert (hwnd, IDC_NETWORK, LPSTR_TEXTCALLBACK, I_DEFAULT, I_DEFAULT);
 
 	if (probe_idx != INT_ERROR)
 	{
-		_r_log (LOG_LEVEL_INFO, NULL, L"network: probe3 success (same args retry)", NULL, probe_idx);
+		_r_log (LOG_LEVEL_INFO, NULL, L"network: probe3 success (text callback)", NULL, probe_idx);
 		_r_wnd_sendmessage (hwnd, IDC_NETWORK, LVM_DELETEITEM, (WPARAM)probe_idx, 0);
-		return;
 	}
+	else
+	{
+		_r_log (LOG_LEVEL_ERROR, NULL, L"network: probe3 failed (text callback)", NULL, (LONG)GetLastError ());
+	}
+}
 
-	_r_log (LOG_LEVEL_ERROR, NULL, L"network: all probes failed", NULL, (LONG)GetLastError ());
+VOID _app_listview_addnetworkitem (
+	_In_ HWND hwnd,
+	_In_ ULONG network_hash
+)
+{
+	INT item_id;
+
+	item_id = _r_listview_additem (hwnd, IDC_NETWORK, INT_ERROR, LPSTR_TEXTCALLBACK, I_IMAGECALLBACK, I_GROUPIDCALLBACK, _app_listview_createcontext (network_hash));
+
+	if (item_id == INT_ERROR)
+		_app_listview_probecheck (hwnd);
 }
 
 VOID _app_listview_addlogitem (
