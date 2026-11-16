@@ -214,16 +214,13 @@ VOID _app_listview_addnetworkitem (
 			LOG_LEVEL_INFO,
 			NULL,
 			L"network: probe state",
-			_r_obj_getstring (
-				_r_format_string (
-					L"ctrl=0x%p, style=0x%08lx, exstyle=0x%08lx, items=%d, unicode=%d",
-					hctrl,
-					(ULONG)GetWindowLongPtrW (hctrl, GWL_STYLE),
-					(ULONG)GetWindowLongPtrW (hctrl, GWL_EXSTYLE),
-					(INT)SendMessageW (hctrl, LVM_GETITEMCOUNT, 0, 0),
-					IsWindowUnicode (hctrl) ? 1 : 0
-				),
-				L"(null)"
+			_r_format_string (
+				L"ctrl=0x%p, style=0x%08lx, exstyle=0x%08lx, items=%d, unicode=%d",
+				hctrl,
+				(ULONG)GetWindowLongPtrW (hctrl, GWL_STYLE),
+				(ULONG)GetWindowLongPtrW (hctrl, GWL_EXSTYLE),
+				(INT)SendMessageW (hctrl, LVM_GETITEMCOUNT, 0, 0),
+				IsWindowUnicode (hctrl) ? 1 : 0
 			),
 			0
 		);
