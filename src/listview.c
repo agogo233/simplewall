@@ -75,7 +75,6 @@ VOID _app_listview_additems (
 	PITEM_APP ptr_app = NULL;
 	PITEM_RULE ptr_rule;
 	ULONG_PTR enum_key = 0;
-	INT apps_added = 0;
 
 	// add apps
 	_r_queuedlock_acquireshared (&lock_apps);
@@ -83,8 +82,6 @@ VOID _app_listview_additems (
 	while (_r_obj_enumhashtablepointer (apps_table, (PVOID_PTR)&ptr_app, NULL, &enum_key))
 	{
 		_app_listview_addappitem (hwnd, ptr_app);
-
-		apps_added += 1;
 
 		// install timer
 		if (ptr_app->timer > 0)
@@ -105,9 +102,6 @@ VOID _app_listview_additems (
 	}
 
 	_r_queuedlock_releaseshared (&lock_rules);
-
-	_r_log (LOG_LEVEL_INFO, NULL, L"listview: additems apps added", NULL, apps_added);
-	_r_log (LOG_LEVEL_INFO, NULL, L"listview: apps list count", NULL, _r_listview_getitemcount (hwnd, IDC_APPS_PROFILE));
 }
 
 VOID _app_listview_addappitem (
@@ -156,114 +150,6 @@ VOID _app_listview_addruleitem (
 	_app_listview_unlock (hwnd, listview_id);
 }
 
-static INT _app_listview_probeinsert (
-	_In_ HWND hwnd,
-	_In_ INT ctrl_id,
-	_In_ LPCWSTR string,
-	_In_ INT image_id,
-	_In_ INT group_id
-)
-{
-	LVITEMW lvi = {0};
-
-	lvi.iItem = INT_ERROR;
-	lvi.iSubItem = 0;
-
-	if (string)
-	{
-		lvi.mask |= LVIF_TEXT;
-		lvi.pszText = (LPWSTR)string;
-	}
-
-	if (image_id != I_DEFAULT)
-	{
-		lvi.mask |= LVIF_IMAGE;
-		lvi.iImage = image_id;
-	}
-
-	if (group_id != I_DEFAULT)
-	{
-		lvi.mask |= LVIF_GROUPID;
-		lvi.iGroupId = group_id;
-	}
-
-	return (INT)_r_wnd_sendmessage (hwnd, ctrl_id, LVM_INSERTITEM, 0, (LPARAM)&lvi);
-}
-
-static VOID _app_listview_probecheck (
-	_In_ HWND hwnd
-)
-{
-	static INT probe_count = 0;
-
-	INT probe_idx;
-	HWND hctrl;
-
-	if (probe_count >= 3)
-		return;
-
-	probe_count += 1;
-
-	hctrl = GetDlgItem (hwnd, IDC_NETWORK);
-
-	if (hctrl)
-	{
-		_r_log (LOG_LEVEL_INFO, NULL, L"network: probe style", NULL, (LONG)GetWindowLongPtrW (hctrl, GWL_STYLE));
-		_r_log (LOG_LEVEL_INFO, NULL, L"network: probe exstyle", NULL, (LONG)GetWindowLongPtrW (hctrl, GWL_EXSTYLE));
-		_r_log (LOG_LEVEL_INFO, NULL, L"network: probe items", NULL, (LONG)SendMessageW (hctrl, LVM_GETITEMCOUNT, 0, 0));
-		_r_log (LOG_LEVEL_INFO, NULL, L"network: probe unicode", NULL, IsWindowUnicode (hctrl) ? 1 : 0);
-	}
-
-	// probe1: same arguments as the apps list, cross-thread reference
-	probe_idx = _app_listview_probeinsert (hwnd, IDC_APPS_PROFILE, LPSTR_TEXTCALLBACK, I_IMAGECALLBACK, I_GROUPIDCALLBACK);
-
-	if (probe_idx != INT_ERROR)
-	{
-		_r_log (LOG_LEVEL_INFO, NULL, L"network: probe1 success (apps list)", NULL, probe_idx);
-		_r_wnd_sendmessage (hwnd, IDC_APPS_PROFILE, LVM_DELETEITEM, (WPARAM)probe_idx, 0);
-	}
-	else
-	{
-		_r_log (LOG_LEVEL_ERROR, NULL, L"network: probe1 failed (apps list)", NULL, (LONG)GetLastError ());
-	}
-
-	// probe2: plain text, no callbacks
-	probe_idx = _app_listview_probeinsert (hwnd, IDC_NETWORK, L"probe", I_DEFAULT, I_DEFAULT);
-
-	if (probe_idx != INT_ERROR)
-	{
-		_r_log (LOG_LEVEL_INFO, NULL, L"network: probe2 success (plain text)", NULL, probe_idx);
-		_r_wnd_sendmessage (hwnd, IDC_NETWORK, LVM_DELETEITEM, (WPARAM)probe_idx, 0);
-	}
-	else
-	{
-		_r_log (LOG_LEVEL_ERROR, NULL, L"network: probe2 failed (plain text)", NULL, (LONG)GetLastError ());
-	}
-
-	// probe3: text callback only
-	probe_idx = _app_listview_probeinsert (hwnd, IDC_NETWORK, LPSTR_TEXTCALLBACK, I_DEFAULT, I_DEFAULT);
-
-	if (probe_idx != INT_ERROR)
-	{
-		_r_log (LOG_LEVEL_INFO, NULL, L"network: probe3 success (text callback)", NULL, probe_idx);
-		_r_wnd_sendmessage (hwnd, IDC_NETWORK, LVM_DELETEITEM, (WPARAM)probe_idx, 0);
-	}
-	else
-	{
-		_r_log (LOG_LEVEL_ERROR, NULL, L"network: probe3 failed (text callback)", NULL, (LONG)GetLastError ());
-	}
-
-	// probe4: basic cross-thread message to the main dialog itself
-	probe_idx = (INT)SendMessageW (hwnd, WM_GETTEXTLENGTH, 0, 0);
-
-	_r_log (LOG_LEVEL_INFO, NULL, L"network: probe4 (dlg text length)", NULL, probe_idx);
-
-	// probe5: cross-thread message to the status bar (non-listview control)
-	probe_idx = (INT)SendMessageW (GetDlgItem (hwnd, IDC_STATUSBAR), SB_SETTEXT, 0, (LPARAM)L"probe");
-
-	_r_log (LOG_LEVEL_INFO, NULL, L"network: probe5 (statusbar settext)", NULL, probe_idx);
-}
-
 VOID _app_listview_addnetworkitem (
 	_In_ HWND hwnd,
 	_In_ ULONG network_hash
@@ -273,9 +159,6 @@ VOID _app_listview_addnetworkitem (
 
 	item_id = _r_listview_getitemcount (hwnd, IDC_NETWORK);
 	item_id = _r_listview_additem (hwnd, IDC_NETWORK, item_id, LPSTR_TEXTCALLBACK, I_IMAGECALLBACK, I_GROUPIDCALLBACK, _app_listview_createcontext (network_hash));
-
-	if (item_id == INT_ERROR)
-		_app_listview_probecheck (hwnd);
 }
 
 VOID _app_listview_addlogitem (

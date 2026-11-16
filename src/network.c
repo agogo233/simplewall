@@ -222,164 +222,10 @@ VOID _app_network_initialize (
 	_r_obj_clearhashtable (network_context->checker_ptr);
 	_r_queuedlock_releaseexclusive (&network_context->lock_checker);
 
-	// ui-thread reference probes
-	{
-		HWND hctrl;
-		HWND hctrl_apps;
-		LVITEMW lvi = {0};
-		LVCOLUMNW lvc = {0};
-		INT probe_idx;
-		WCHAR class_name[64];
-		ULONG class_packed = 0;
-		INT i;
-
-		hctrl = GetDlgItem (hwnd, IDC_NETWORK);
-		hctrl_apps = GetDlgItem (hwnd, IDC_APPS_PROFILE);
-
-		if (hctrl)
-		{
-			// INT_ERROR actual value (is it really -1?)
-			_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe int_error value", NULL, (LONG)INT_ERROR);
-
-			// item count probe
-			probe_idx = (INT)SendMessageW (hctrl, LVM_GETITEMCOUNT, 0, 0);
-
-			_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe getitemcount", NULL, probe_idx);
-
-			// literal -1 append probe (bypasses INT_ERROR macro)
-			{
-				LVITEMW lvil = {0};
-
-				lvil.iItem = -1;
-				lvil.iSubItem = 0;
-				lvil.mask = LVIF_TEXT;
-				lvil.pszText = (LPWSTR)L"probe-m1";
-
-				probe_idx = (INT)SendMessageW (hctrl, LVM_INSERTITEM, 0, (LPARAM)&lvil);
-
-				_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe insert literal -1", NULL, probe_idx);
-
-				if (probe_idx != INT_ERROR)
-					SendMessageW (hctrl, LVM_DELETEITEM, (WPARAM)probe_idx, 0);
-			}
-
-			// class probe: expect 'SysL' == 0x4C737953
-			if (GetClassNameW (hctrl, class_name, RTL_NUMBER_OF (class_name)))
-			{
-				for (i = 0; i < 4 && class_name[i]; i++)
-					class_packed |= (ULONG)(class_name[i] & 0xff) << (i * 8);
-			}
-
-			_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe class", NULL, (LONG)class_packed);
-
-			// plain insert
-			lvi.iItem = INT_ERROR;
-			lvi.iSubItem = 0;
-			lvi.mask = LVIF_TEXT;
-			lvi.pszText = (LPWSTR)L"probe-ui";
-
-			probe_idx = (INT)SendMessageW (hctrl, LVM_INSERTITEM, 0, (LPARAM)&lvi);
-
-			_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe insert", NULL, probe_idx);
-
-			if (probe_idx != INT_ERROR)
-				SendMessageW (hctrl, LVM_DELETEITEM, (WPARAM)probe_idx, 0);
-
-			// column probe
-			lvc.mask = LVCF_TEXT | LVCF_WIDTH;
-			lvc.pszText = (LPWSTR)L"c";
-			lvc.cx = 50;
-
-			probe_idx = (INT)SendMessageW (hctrl, LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
-
-			_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe column", NULL, probe_idx);
-
-			if (probe_idx != INT_ERROR)
-				SendMessageW (hctrl, LVM_DELETECOLUMN, (WPARAM)probe_idx, 0);
-
-			// wndproc probe: low 32 bits of the window procedure addresses
-			_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe proc (network)", NULL, (LONG)(LONG_PTR)GetWindowLongPtrW (hctrl, GWLP_WNDPROC));
-
-			if (hctrl_apps)
-				_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe proc (apps)", NULL, (LONG)(LONG_PTR)GetWindowLongPtrW (hctrl_apps, GWLP_WNDPROC));
-
-			// explicit index insert
-			{
-				LVITEMW lvi3 = {0};
-				RECT rc = {0};
-				LONG gle;
-
-				lvi3.iItem = 0;
-				lvi3.iSubItem = 0;
-				lvi3.mask = LVIF_TEXT;
-				lvi3.pszText = (LPWSTR)L"p0";
-
-				probe_idx = (INT)SendMessageW (hctrl, LVM_INSERTITEM, 0, (LPARAM)&lvi3);
-
-				gle = (LONG)GetLastError ();
-
-				_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe insert0", NULL, probe_idx);
-				_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe insert0 gle", NULL, gle);
-
-				if (probe_idx != INT_ERROR)
-					SendMessageW (hctrl, LVM_DELETEITEM, (WPARAM)probe_idx, 0);
-
-				// empty mask insert
-				lvi3.iItem = 0;
-				lvi3.iSubItem = 0;
-				lvi3.mask = 0;
-				lvi3.pszText = NULL;
-
-				probe_idx = (INT)SendMessageW (hctrl, LVM_INSERTITEM, 0, (LPARAM)&lvi3);
-
-				_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe insert0 mask0", NULL, probe_idx);
-
-				if (probe_idx != INT_ERROR)
-					SendMessageW (hctrl, LVM_DELETEITEM, (WPARAM)probe_idx, 0);
-
-				// notify format query
-				probe_idx = (INT)SendMessageW (hctrl, WM_NOTIFYFORMAT, (WPARAM)hwnd, NF_QUERY);
-
-				_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe notifyfmt", NULL, probe_idx);
-
-				// window rect (width | height << 16)
-				if (GetWindowRect (hctrl, &rc))
-					_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe rect", NULL, (LONG)((rc.right - rc.left) | ((rc.bottom - rc.top) << 16)));
-			}
-		}
-
-		// apps list reference insert (same thread, same arguments)
-		if (hctrl_apps)
-		{
-			LVITEMW lvi2 = {0};
-
-			lvi2.iItem = INT_ERROR;
-			lvi2.iSubItem = 0;
-			lvi2.mask = LVIF_TEXT;
-			lvi2.pszText = (LPWSTR)L"probe-ui2";
-
-			probe_idx = (INT)SendMessageW (hctrl_apps, LVM_INSERTITEM, 0, (LPARAM)&lvi2);
-
-			_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe apps insert", NULL, probe_idx);
-
-			if (probe_idx != INT_ERROR)
-				SendMessageW (hctrl_apps, LVM_DELETEITEM, (WPARAM)probe_idx, 0);
-		}
-	}
-
 	// create network monitor thread
 	_r_sys_setenvironment (&environment, THREAD_PRIORITY_ABOVE_NORMAL, IoPriorityNormal, MEMORY_PRIORITY_NORMAL);
 
-	status = _r_sys_createthread (NULL, NtCurrentProcess (), (PUSER_THREAD_START_ROUTINE)&_app_network_threadproc, network_context, &environment, L"NetworkMonitor");
-
-	if (NT_SUCCESS (status))
-	{
-		_r_log (LOG_LEVEL_INFO, NULL, L"network: monitor thread created", NULL, 0);
-	}
-	else
-	{
-		_r_log (LOG_LEVEL_ERROR, NULL, L"network: monitor thread creation failed", NULL, status);
-	}
+	_r_sys_createthread (NULL, NtCurrentProcess (), (PUSER_THREAD_START_ROUTINE)&_app_network_threadproc, network_context, &environment, L"NetworkMonitor");
 }
 
 VOID _app_network_uninitialize (
@@ -419,9 +265,6 @@ VOID _app_network_generatetable (
 	ULONG allocated_size, network_hash, required_size = 0;
 	BOOL udp4_complete = FALSE, udp6_complete = FALSE;
 	ULONG status;
-	ULONG tcp4_count = 0, tcp6_count = 0, udp4_count = 0, udp6_count = 0;
-	ULONG tcp4_status = ERROR_SUCCESS, tcp6_status = ERROR_SUCCESS, udp4_status = ERROR_SUCCESS, udp6_status = ERROR_SUCCESS;
-	PR_STRING log_string;
 
 	udp_stats_poll (network_context->udp_stats);
 	udp_stats_begin_refresh (network_context->udp_stats);
@@ -440,12 +283,9 @@ VOID _app_network_generatetable (
 	{
 		tcp4_table = (PMIB_TCPTABLE_OWNER_MODULE)buffer;
 		status = GetExtendedTcpTable (tcp4_table, &required_size, FALSE, AF_INET, TCP_TABLE_OWNER_MODULE_ALL, 0);
-		tcp4_status = status;
 
 		if (status == NO_ERROR)
 		{
-			tcp4_count = tcp4_table->dwNumEntries;
-
 			for (ULONG i = 0; i < tcp4_table->dwNumEntries; i++)
 			{
 				if (_app_network_iswaitingconnection (tcp4_table->table[i].dwOwningPid))
@@ -537,12 +377,9 @@ VOID _app_network_generatetable (
 
 		tcp6_table = (PMIB_TCP6TABLE_OWNER_MODULE)buffer;
 		status = GetExtendedTcpTable (tcp6_table, &required_size, FALSE, AF_INET6, TCP_TABLE_OWNER_MODULE_ALL, 0);
-		tcp6_status = status;
 
 		if (status == NO_ERROR)
 		{
-			tcp6_count = tcp6_table->dwNumEntries;
-
 			for (ULONG i = 0; i < tcp6_table->dwNumEntries; i++)
 			{
 				if (_app_network_iswaitingconnection (tcp6_table->table[i].dwOwningPid))
@@ -628,12 +465,10 @@ VOID _app_network_generatetable (
 
 		udp4_table = (PMIB_UDPTABLE_OWNER_MODULE)buffer;
 		status = GetExtendedUdpTable (udp4_table, &required_size, FALSE, AF_INET, UDP_TABLE_OWNER_MODULE, 0);
-		udp4_status = status;
 
 		if (status == NO_ERROR)
 		{
 			udp4_complete = TRUE;
-			udp4_count = udp4_table->dwNumEntries;
 
 			for (ULONG i = 0; i < udp4_table->dwNumEntries; i++)
 			{
@@ -707,12 +542,10 @@ VOID _app_network_generatetable (
 
 		udp6_table = (PMIB_UDP6TABLE_OWNER_MODULE)buffer;
 		status = GetExtendedUdpTable (udp6_table, &required_size, FALSE, AF_INET6, UDP_TABLE_OWNER_MODULE, 0);
-		udp6_status = status;
 
 		if (status == NO_ERROR)
 		{
 			udp6_complete = TRUE;
-			udp6_count = udp6_table->dwNumEntries;
 
 			for (ULONG i = 0; i < udp6_table->dwNumEntries; i++)
 			{
@@ -769,19 +602,6 @@ VOID _app_network_generatetable (
 	}
 
 	udp_stats_end_refresh (network_context->udp_stats, udp4_complete, udp6_complete);
-
-	log_string = _r_format_string (
-		L"tcp4=%lu (%08lx) tcp6=%lu (%08lx) udp4=%lu (%08lx) udp6=%lu (%08lx)",
-		tcp4_count, tcp4_status,
-		tcp6_count, tcp6_status,
-		udp4_count, udp4_status,
-		udp6_count, udp6_status
-	);
-
-	_r_log (LOG_LEVEL_INFO, NULL, L"network: table query pass", _r_obj_getstring (log_string), 0);
-
-	if (log_string)
-		_r_obj_dereference (log_string);
 
 	if (buffer)
 		_r_mem_free (buffer);
@@ -1049,10 +869,8 @@ VOID _app_network_printlistviewtable (
 {
 	PITEM_NETWORK ptr_network = NULL;
 	PR_STRING string;
-	PR_STRING log_string;
 	ULONG_PTR enum_key = 0;
 	ULONG app_hash;
-	ULONG add_count = 0;
 	ULONG_PTR network_hash;
 	INT item_count;
 	BOOLEAN is_highlight = FALSE, is_refresh = FALSE;
@@ -1071,8 +889,6 @@ VOID _app_network_printlistviewtable (
 			continue;
 
 		_app_listview_addnetworkitem (network_context->hwnd, network_hash);
-
-		add_count++;
 
 		if (ptr_network->app_hash && ptr_network->path)
 			_app_getfileinformation (ptr_network->path, ptr_network->app_hash, ptr_network->type, IDC_NETWORK);
@@ -1100,13 +916,6 @@ VOID _app_network_printlistviewtable (
 
 	// remove closed connections from list
 	item_count = _r_listview_getitemcount (network_context->hwnd, IDC_NETWORK);
-
-	log_string = _r_format_string (L"adds=%lu rows=%d", add_count, item_count);
-
-	_r_log (LOG_LEVEL_INFO, NULL, L"network: listview pass", _r_obj_getstring (log_string), 0);
-
-	if (log_string)
-		_r_obj_dereference (log_string);
 
 	if (!item_count)
 		return;
@@ -1152,8 +961,6 @@ VOID NTAPI _app_network_threadproc (
 	PITEM_NETWORK_CONTEXT network_context;
 
 	network_context = (PITEM_NETWORK_CONTEXT)arglist;
-
-	_r_log (LOG_LEVEL_INFO, NULL, L"network: monitor thread started", NULL, 0);
 
 	while (TRUE)
 	{
