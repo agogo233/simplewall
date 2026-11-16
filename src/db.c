@@ -906,7 +906,7 @@ NTSTATUS _app_db_save_streamtofile (
 		_r_fs_getattributes (&path->sr, &attributes);
 
 		if ((attributes & FILE_ATTRIBUTE_READONLY) == FILE_ATTRIBUTE_READONLY)
-			_r_fs_setattributes (&path->sr, NULL, attributes & ~FILE_ATTRIBUTE_READONLY);
+			_r_fs_setattributes (NULL, &path->sr, attributes & ~FILE_ATTRIBUTE_READONLY);
 	}
 
 	status = _r_fs_createfile (&path->sr, FILE_OVERWRITE_IF, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, FILE_ATTRIBUTE_NORMAL, 0, FALSE, NULL, &hfile);

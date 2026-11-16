@@ -1907,7 +1907,7 @@ VOID _app_command_logshow (
 			L"\""
 		);
 
-		status = _r_sys_createprocess (&viewer_path->sr, &cmdline->sr, NULL, FALSE);
+		status = _r_sys_createprocess (viewer_path->buffer, cmdline->buffer, NULL, FALSE);
 
 		if (status != STATUS_SUCCESS)
 			_r_show_errormessage (hwnd, L"Could not create process!", cmdline->buffer, status, ET_NATIVE);
@@ -1932,7 +1932,7 @@ VOID _app_command_logclear (
 	current_handle = _InterlockedCompareExchangePointer (&config.hlogfile, NULL, NULL);
 
 	if (current_handle)
-		_r_fs_getsize (NULL, current_handle, &file_size);
+		_r_fs_getsize (NULL, current_handle, (PLARGE_INTEGER)&file_size);
 
 	is_valid = (current_handle && file_size > 2) || (log_path && _r_fs_isexists (&log_path->sr));
 
@@ -1983,7 +1983,7 @@ VOID _app_command_logerrshow (
 		L"\""
 	);
 
-	status = _r_sys_createprocess (&viewer_path->sr, &process_path->sr, NULL, FALSE);
+	status = _r_sys_createprocess (viewer_path->buffer, process_path->buffer, NULL, FALSE);
 
 	if (status != STATUS_SUCCESS)
 		_r_show_errormessage (hwnd, L"Could not create process!", viewer_path->buffer, status, ET_NATIVE);

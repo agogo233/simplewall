@@ -870,7 +870,8 @@ VOID _app_network_printlistviewtable (
 	PITEM_NETWORK ptr_network = NULL;
 	PR_STRING string;
 	ULONG_PTR enum_key = 0;
-	ULONG app_hash, network_hash;
+	ULONG app_hash;
+	ULONG_PTR network_hash;
 	INT item_count;
 	BOOLEAN is_highlight = FALSE, is_refresh = FALSE;
 
