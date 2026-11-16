@@ -991,7 +991,7 @@ INT_PTR CALLBACK EditorPagesProc (
 						}
 					}
 
-					_r_menu_popup (hsubmenu, hwnd, NULL, 0);
+					_r_menu_popup (hsubmenu, hwnd, NULL, TRUE);
 
 					DestroyMenu (hsubmenu);
 

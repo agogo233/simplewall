@@ -790,7 +790,7 @@ VOID _app_message_contextmenu (
 		}
 	}
 
-	_r_menu_popup (hmenu, hwnd, NULL, (LPARAM)lpnmlv->iSubItem);
+	_r_menu_popup (hmenu, hwnd, NULL, TRUE);
 
 	if (localized_string)
 		_r_obj_dereference (localized_string);
@@ -846,7 +846,7 @@ VOID _app_message_contextmenu_columns (
 
 	}
 
-	_r_menu_popup (hmenu, hwnd, NULL, 0);
+	_r_menu_popup (hmenu, hwnd, NULL, TRUE);
 
 	DestroyMenu (hmenu);
 }
@@ -929,7 +929,7 @@ VOID _app_message_traycontextmenu (
 
 	SetForegroundWindow (hwnd); // don't fucking touch!
 
-	_r_menu_popup (hsubmenu, hwnd, NULL, 0);
+	_r_menu_popup (hsubmenu, hwnd, NULL, TRUE);
 
 	DestroyMenu (hmenu);
 }

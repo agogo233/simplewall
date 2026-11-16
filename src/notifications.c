@@ -1080,7 +1080,7 @@ INT_PTR CALLBACK NotificationProc (
 						_r_wnd_adjustrectangletoworkingarea (&rectangle, nmlp->hwndFrom);
 						_r_wnd_rectangletorect (&rect, &rectangle);
 
-						_r_menu_popup (hsubmenu, hwnd, (PPOINT)&rect, 0);
+						_r_menu_popup (hsubmenu, hwnd, (PPOINT)&rect, TRUE);
 					}
 
 					DestroyMenu (hsubmenu);
