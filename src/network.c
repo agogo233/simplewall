@@ -222,16 +222,32 @@ VOID _app_network_initialize (
 	_r_obj_clearhashtable (network_context->checker_ptr);
 	_r_queuedlock_releaseexclusive (&network_context->lock_checker);
 
-	// ui-thread reference probe: plain insert into the same listview from the ui thread
+	// ui-thread reference probes
 	{
 		HWND hctrl;
+		HWND hctrl_apps;
 		LVITEMW lvi = {0};
+		LVCOLUMNW lvc = {0};
 		INT probe_idx;
+		WCHAR class_name[64];
+		ULONG class_packed = 0;
+		INT i;
 
 		hctrl = GetDlgItem (hwnd, IDC_NETWORK);
+		hctrl_apps = GetDlgItem (hwnd, IDC_APPS_PROFILE);
 
 		if (hctrl)
 		{
+			// class probe: expect 'SysL' == 0x4C737953
+			if (GetClassNameW (hctrl, class_name, RTL_NUMBER_OF (class_name)))
+			{
+				for (i = 0; i < 4 && class_name[i]; i++)
+					class_packed |= (ULONG)(class_name[i] & 0xff) << (i * 8);
+			}
+
+			_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe class", NULL, (LONG)class_packed);
+
+			// plain insert
 			lvi.iItem = INT_ERROR;
 			lvi.iSubItem = 0;
 			lvi.mask = LVIF_TEXT;
@@ -243,6 +259,42 @@ VOID _app_network_initialize (
 
 			if (probe_idx != INT_ERROR)
 				SendMessageW (hctrl, LVM_DELETEITEM, (WPARAM)probe_idx, 0);
+
+			// column probe
+			lvc.mask = LVCF_TEXT | LVCF_WIDTH;
+			lvc.pszText = (LPWSTR)L"c";
+			lvc.cx = 50;
+
+			probe_idx = (INT)SendMessageW (hctrl, LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
+
+			_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe column", NULL, probe_idx);
+
+			if (probe_idx != INT_ERROR)
+				SendMessageW (hctrl, LVM_DELETECOLUMN, (WPARAM)probe_idx, 0);
+
+			// wndproc probe: low 32 bits of the window procedure addresses
+			_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe proc (network)", NULL, (LONG)(LONG_PTR)GetWindowLongPtrW (hctrl, GWLP_WNDPROC));
+
+			if (hctrl_apps)
+				_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe proc (apps)", NULL, (LONG)(LONG_PTR)GetWindowLongPtrW (hctrl_apps, GWLP_WNDPROC));
+		}
+
+		// apps list reference insert (same thread, same arguments)
+		if (hctrl_apps)
+		{
+			LVITEMW lvi2 = {0};
+
+			lvi2.iItem = INT_ERROR;
+			lvi2.iSubItem = 0;
+			lvi2.mask = LVIF_TEXT;
+			lvi2.pszText = (LPWSTR)L"probe-ui2";
+
+			probe_idx = (INT)SendMessageW (hctrl_apps, LVM_INSERTITEM, 0, (LPARAM)&lvi2);
+
+			_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe apps insert", NULL, probe_idx);
+
+			if (probe_idx != INT_ERROR)
+				SendMessageW (hctrl_apps, LVM_DELETEITEM, (WPARAM)probe_idx, 0);
 		}
 	}
 
