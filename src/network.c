@@ -225,7 +225,16 @@ VOID _app_network_initialize (
 	// create network monitor thread
 	_r_sys_setenvironment (&environment, THREAD_PRIORITY_ABOVE_NORMAL, IoPriorityNormal, MEMORY_PRIORITY_NORMAL);
 
-	_r_sys_createthread (NULL, NtCurrentProcess (), (PUSER_THREAD_START_ROUTINE)&_app_network_threadproc, network_context, &environment, L"NetworkMonitor");
+	status = _r_sys_createthread (NULL, NtCurrentProcess (), (PUSER_THREAD_START_ROUTINE)&_app_network_threadproc, network_context, &environment, L"NetworkMonitor");
+
+	if (NT_SUCCESS (status))
+	{
+		_r_log (LOG_LEVEL_INFO, NULL, L"network: monitor thread created", NULL, 0);
+	}
+	else
+	{
+		_r_log (LOG_LEVEL_ERROR, NULL, L"network: monitor thread creation failed", NULL, status);
+	}
 }
 
 VOID _app_network_uninitialize (
@@ -265,6 +274,9 @@ VOID _app_network_generatetable (
 	ULONG allocated_size, network_hash, required_size = 0;
 	BOOL udp4_complete = FALSE, udp6_complete = FALSE;
 	ULONG status;
+	ULONG tcp4_count = 0, tcp6_count = 0, udp4_count = 0, udp6_count = 0;
+	ULONG tcp4_status = ERROR_SUCCESS, tcp6_status = ERROR_SUCCESS, udp4_status = ERROR_SUCCESS, udp6_status = ERROR_SUCCESS;
+	PR_STRING log_string;
 
 	udp_stats_poll (network_context->udp_stats);
 	udp_stats_begin_refresh (network_context->udp_stats);
@@ -283,9 +295,12 @@ VOID _app_network_generatetable (
 	{
 		tcp4_table = (PMIB_TCPTABLE_OWNER_MODULE)buffer;
 		status = GetExtendedTcpTable (tcp4_table, &required_size, FALSE, AF_INET, TCP_TABLE_OWNER_MODULE_ALL, 0);
+		tcp4_status = status;
 
 		if (status == NO_ERROR)
 		{
+			tcp4_count = tcp4_table->dwNumEntries;
+
 			for (ULONG i = 0; i < tcp4_table->dwNumEntries; i++)
 			{
 				if (_app_network_iswaitingconnection (tcp4_table->table[i].dwOwningPid))
@@ -377,9 +392,12 @@ VOID _app_network_generatetable (
 
 		tcp6_table = (PMIB_TCP6TABLE_OWNER_MODULE)buffer;
 		status = GetExtendedTcpTable (tcp6_table, &required_size, FALSE, AF_INET6, TCP_TABLE_OWNER_MODULE_ALL, 0);
+		tcp6_status = status;
 
 		if (status == NO_ERROR)
 		{
+			tcp6_count = tcp6_table->dwNumEntries;
+
 			for (ULONG i = 0; i < tcp6_table->dwNumEntries; i++)
 			{
 				if (_app_network_iswaitingconnection (tcp6_table->table[i].dwOwningPid))
@@ -465,10 +483,12 @@ VOID _app_network_generatetable (
 
 		udp4_table = (PMIB_UDPTABLE_OWNER_MODULE)buffer;
 		status = GetExtendedUdpTable (udp4_table, &required_size, FALSE, AF_INET, UDP_TABLE_OWNER_MODULE, 0);
+		udp4_status = status;
 
 		if (status == NO_ERROR)
 		{
 			udp4_complete = TRUE;
+			udp4_count = udp4_table->dwNumEntries;
 
 			for (ULONG i = 0; i < udp4_table->dwNumEntries; i++)
 			{
@@ -542,10 +562,12 @@ VOID _app_network_generatetable (
 
 		udp6_table = (PMIB_UDP6TABLE_OWNER_MODULE)buffer;
 		status = GetExtendedUdpTable (udp6_table, &required_size, FALSE, AF_INET6, UDP_TABLE_OWNER_MODULE, 0);
+		udp6_status = status;
 
 		if (status == NO_ERROR)
 		{
 			udp6_complete = TRUE;
+			udp6_count = udp6_table->dwNumEntries;
 
 			for (ULONG i = 0; i < udp6_table->dwNumEntries; i++)
 			{
@@ -602,6 +624,19 @@ VOID _app_network_generatetable (
 	}
 
 	udp_stats_end_refresh (network_context->udp_stats, udp4_complete, udp6_complete);
+
+	log_string = _r_format_string (
+		L"tcp4=%lu (%08lx) tcp6=%lu (%08lx) udp4=%lu (%08lx) udp6=%lu (%08lx)",
+		tcp4_count, tcp4_status,
+		tcp6_count, tcp6_status,
+		udp4_count, udp4_status,
+		udp6_count, udp6_status
+	);
+
+	_r_log (LOG_LEVEL_INFO, NULL, L"network: table query pass", _r_obj_getstring (log_string), 0);
+
+	if (log_string)
+		_r_obj_dereference (log_string);
 
 	if (buffer)
 		_r_mem_free (buffer);
@@ -869,8 +904,10 @@ VOID _app_network_printlistviewtable (
 {
 	PITEM_NETWORK ptr_network = NULL;
 	PR_STRING string;
+	PR_STRING log_string;
 	ULONG_PTR enum_key = 0;
 	ULONG app_hash;
+	ULONG add_count = 0;
 	ULONG_PTR network_hash;
 	INT item_count;
 	BOOLEAN is_highlight = FALSE, is_refresh = FALSE;
@@ -889,6 +926,8 @@ VOID _app_network_printlistviewtable (
 			continue;
 
 		_app_listview_addnetworkitem (network_context->hwnd, network_hash);
+
+		add_count++;
 
 		if (ptr_network->app_hash && ptr_network->path)
 			_app_getfileinformation (ptr_network->path, ptr_network->app_hash, ptr_network->type, IDC_NETWORK);
@@ -916,6 +955,13 @@ VOID _app_network_printlistviewtable (
 
 	// remove closed connections from list
 	item_count = _r_listview_getitemcount (network_context->hwnd, IDC_NETWORK);
+
+	log_string = _r_format_string (L"adds=%lu rows=%d", add_count, item_count);
+
+	_r_log (LOG_LEVEL_INFO, NULL, L"network: listview pass", _r_obj_getstring (log_string), 0);
+
+	if (log_string)
+		_r_obj_dereference (log_string);
 
 	if (!item_count)
 		return;
@@ -961,6 +1007,8 @@ VOID NTAPI _app_network_threadproc (
 	PITEM_NETWORK_CONTEXT network_context;
 
 	network_context = (PITEM_NETWORK_CONTEXT)arglist;
+
+	_r_log (LOG_LEVEL_INFO, NULL, L"network: monitor thread started", NULL, 0);
 
 	while (TRUE)
 	{

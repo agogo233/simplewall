@@ -155,7 +155,12 @@ VOID _app_listview_addnetworkitem (
 	_In_ ULONG network_hash
 )
 {
-	_r_listview_additem (hwnd, IDC_NETWORK, INT_ERROR, LPSTR_TEXTCALLBACK, I_IMAGECALLBACK, I_GROUPIDCALLBACK, _app_listview_createcontext (network_hash));
+	INT item_id;
+
+	item_id = _r_listview_additem (hwnd, IDC_NETWORK, INT_ERROR, LPSTR_TEXTCALLBACK, I_IMAGECALLBACK, I_GROUPIDCALLBACK, _app_listview_createcontext (network_hash));
+
+	if (item_id == INT_ERROR)
+		_r_log (LOG_LEVEL_ERROR, NULL, L"network: listview insert failed", NULL, (LONG)GetLastError ());
 }
 
 VOID _app_listview_addlogitem (
