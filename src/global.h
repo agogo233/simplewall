@@ -320,6 +320,14 @@ FORCEINLINE HRESULT _r_imagelist_replace (
 	return ImageList_Replace (himg, index, hbitmap, hmask) ? S_OK : HRESULT_FROM_WIN32 (GetLastError ());
 }
 
+FORCEINLINE HRESULT _r_imagelist_setimagecount (
+	_In_ HIMAGELIST himg,
+	_In_ INT count
+)
+{
+	return ImageList_SetImageCount (himg, count) ? S_OK : HRESULT_FROM_WIN32 (GetLastError ());
+}
+
 FORCEINLINE NTSTATUS _r_fs_createhardlink (
 	_In_ PR_STRINGREF link_path,
 	_In_ PR_STRINGREF target_path
