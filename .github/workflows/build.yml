@@ -59,6 +59,7 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force -Path upload\x64
           Copy-Item bin\64\simplewall.exe upload\x64\
+          Copy-Item bin\64\simplewall.pdb upload\x64\
           Copy-Item bin\simplewall.lng upload\x64\
           Copy-Item bin\Readme.txt upload\x64\
           Copy-Item bin\License.txt upload\x64\
