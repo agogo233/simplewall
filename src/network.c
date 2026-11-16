@@ -238,6 +238,31 @@ VOID _app_network_initialize (
 
 		if (hctrl)
 		{
+			// INT_ERROR actual value (is it really -1?)
+			_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe int_error value", NULL, (LONG)INT_ERROR);
+
+			// item count probe
+			probe_idx = (INT)SendMessageW (hctrl, LVM_GETITEMCOUNT, 0, 0);
+
+			_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe getitemcount", NULL, probe_idx);
+
+			// literal -1 append probe (bypasses INT_ERROR macro)
+			{
+				LVITEMW lvil = {0};
+
+				lvil.iItem = -1;
+				lvil.iSubItem = 0;
+				lvil.mask = LVIF_TEXT;
+				lvil.pszText = (LPWSTR)L"probe-m1";
+
+				probe_idx = (INT)SendMessageW (hctrl, LVM_INSERTITEM, 0, (LPARAM)&lvil);
+
+				_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe insert literal -1", NULL, probe_idx);
+
+				if (probe_idx != INT_ERROR)
+					SendMessageW (hctrl, LVM_DELETEITEM, (WPARAM)probe_idx, 0);
+			}
+
 			// class probe: expect 'SysL' == 0x4C737953
 			if (GetClassNameW (hctrl, class_name, RTL_NUMBER_OF (class_name)))
 			{

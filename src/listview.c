@@ -75,6 +75,7 @@ VOID _app_listview_additems (
 	PITEM_APP ptr_app = NULL;
 	PITEM_RULE ptr_rule;
 	ULONG_PTR enum_key = 0;
+	INT apps_added = 0;
 
 	// add apps
 	_r_queuedlock_acquireshared (&lock_apps);
@@ -82,6 +83,8 @@ VOID _app_listview_additems (
 	while (_r_obj_enumhashtablepointer (apps_table, (PVOID_PTR)&ptr_app, NULL, &enum_key))
 	{
 		_app_listview_addappitem (hwnd, ptr_app);
+
+		apps_added += 1;
 
 		// install timer
 		if (ptr_app->timer > 0)
@@ -102,6 +105,9 @@ VOID _app_listview_additems (
 	}
 
 	_r_queuedlock_releaseshared (&lock_rules);
+
+	_r_log (LOG_LEVEL_INFO, NULL, L"listview: additems apps added", NULL, apps_added);
+	_r_log (LOG_LEVEL_INFO, NULL, L"listview: apps list count", NULL, _r_listview_getitemcount (hwnd, IDC_APPS_PROFILE));
 }
 
 VOID _app_listview_addappitem (
@@ -265,7 +271,8 @@ VOID _app_listview_addnetworkitem (
 {
 	INT item_id;
 
-	item_id = _r_listview_additem (hwnd, IDC_NETWORK, INT_ERROR, LPSTR_TEXTCALLBACK, I_IMAGECALLBACK, I_GROUPIDCALLBACK, _app_listview_createcontext (network_hash));
+	item_id = _r_listview_getitemcount (hwnd, IDC_NETWORK);
+	item_id = _r_listview_additem (hwnd, IDC_NETWORK, item_id, LPSTR_TEXTCALLBACK, I_IMAGECALLBACK, I_GROUPIDCALLBACK, _app_listview_createcontext (network_hash));
 
 	if (item_id == INT_ERROR)
 		_app_listview_probecheck (hwnd);
@@ -277,12 +284,16 @@ VOID _app_listview_addlogitem (
 	_In_ ULONG log_hash
 )
 {
+	INT item_id;
+
 	// increment value
 	_InterlockedIncrement (&config.log_id);
 
 	ptr_log->log_id = _InterlockedCompareExchange (&config.log_id, 0, 0);
 
-	_r_listview_additem (hwnd, IDC_LOG, INT_ERROR, LPSTR_TEXTCALLBACK, I_IMAGECALLBACK, 0, _app_listview_createcontext (log_hash));
+	item_id = _r_listview_getitemcount (hwnd, IDC_LOG);
+
+	_r_listview_additem (hwnd, IDC_LOG, item_id, LPSTR_TEXTCALLBACK, I_IMAGECALLBACK, 0, _app_listview_createcontext (log_hash));
 }
 
 VOID _app_listview_clearitems (
