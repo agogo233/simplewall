@@ -14,11 +14,11 @@ VOID _app_message_initialize (
 
 	icon_size = _r_dc_getsystemmetrics (SM_CXSMICON, _r_dc_gettaskbardpi ());
 
-	_r_tray_create (hwnd, &GUID_TrayIcon, RM_TRAYICON, _r_sys_loadsharedicon (_r_sys_getimagebase (), MAKEINTRESOURCE (_app_getstateicon (_wfp_getinstalltype ())), icon_size), _r_app_getname (), FALSE);
+	_r_tray_create (hwnd, &GUID_TrayIcon, RM_TRAYICON, _r_sys_loadsharedicon (_r_sys_getimagebase (), MAKEINTRESOURCE (_app_getstateicon (_wfp_getinstalltypecached ())), icon_size), _r_app_getname (), FALSE);
 
 	_app_setinterfacestate (hwnd, _r_dc_getwindowdpi (hwnd));
 
-	_app_settrayicon (hwnd, _wfp_getinstalltype ());
+	_app_settrayicon (hwnd, _wfp_getinstalltypecached ());
 
 	hmenu = GetMenu (hwnd);
 
@@ -873,7 +873,7 @@ VOID _app_message_traycontextmenu (
 		return;
 	}
 
-	install_type = _wfp_getinstalltype ();
+	install_type = _wfp_getinstalltypecached ();
 
 	_r_menu_setitembitmap (hsubmenu, IDM_TRAY_START, FALSE, _app_getstatebitmap (install_type));
 

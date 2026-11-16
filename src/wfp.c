@@ -3,6 +3,15 @@
 
 #include "global.h"
 
+static volatile LONG cached_install_type = INSTALL_DISABLED;
+
+static VOID _wfp_setinstalltypecached (
+	_In_ ENUM_INSTALL_TYPE install_type
+)
+{
+	_InterlockedExchange (&cached_install_type, (LONG)install_type);
+}
+
 // there is russian documentation on how WFP works:
 // https://www.cyberforum.ru/drivers-programming/thread1298567.html
 HANDLE _wfp_getenginehandle ()
@@ -135,7 +144,18 @@ BOOLEAN _wfp_isfiltersinstalled ()
 
 ENUM_INSTALL_TYPE _wfp_getinstalltype ()
 {
-	return _wfp_isproviderinstalled (_wfp_getenginehandle ());
+	ENUM_INSTALL_TYPE install_type;
+
+	install_type = _wfp_isproviderinstalled (_wfp_getenginehandle ());
+
+	_wfp_setinstalltypecached (install_type);
+
+	return install_type;
+}
+
+ENUM_INSTALL_TYPE _wfp_getinstalltypecached ()
+{
+	return (ENUM_INSTALL_TYPE)_InterlockedCompareExchange (&cached_install_type, 0, 0);
 }
 
 _Ret_maybenull_

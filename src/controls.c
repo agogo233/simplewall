@@ -646,7 +646,7 @@ VOID _app_setinterfacestate (
 	LONG icon_id, icon_large, icon_small;
 	ENUM_INSTALL_TYPE install_type;
 
-	install_type = _wfp_getinstalltype ();
+	install_type = _wfp_getinstalltypecached ();
 
 	icon_small = _r_dc_getsystemmetrics (SM_CXSMICON, dpi_value);
 	icon_large = _r_dc_getsystemmetrics (SM_CXICON, dpi_value);

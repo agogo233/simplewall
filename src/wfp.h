@@ -44,6 +44,8 @@ BOOLEAN _wfp_isfiltersinstalled ();
 
 ENUM_INSTALL_TYPE _wfp_getinstalltype ();
 
+ENUM_INSTALL_TYPE _wfp_getinstalltypecached ();
+
 _Ret_maybenull_
 PR_STRING _wfp_getlayername (
 	_In_ LPCGUID layer_guid

@@ -40,6 +40,46 @@ BOOLEAN _app_changefilters (
 	return FALSE;
 }
 
+VOID NTAPI _app_probe_threadproc (
+	_In_ PVOID arglist
+)
+{
+	PITEM_CONTEXT context;
+	ENUM_INSTALL_TYPE install_type;
+
+	context = (PITEM_CONTEXT)arglist;
+
+	install_type = _wfp_getinstalltype ();
+
+	if (install_type != INSTALL_DISABLED)
+	{
+		if (install_type == INSTALL_ENABLED_TEMPORARY)
+			config.is_filterstemporary = TRUE;
+
+		_app_changefilters (context->hwnd, TRUE, TRUE);
+	}
+	else
+	{
+		_app_setinterfacestate (context->hwnd, _r_dc_getwindowdpi (context->hwnd));
+	}
+
+	_r_freelist_deleteitem (&context_free_list, context);
+}
+
+VOID _app_probeinstalltype (
+	_In_opt_ HWND hwnd
+)
+{
+	PITEM_CONTEXT context;
+
+	context = (PITEM_CONTEXT)_r_freelist_allocateitem (&context_free_list);
+
+	context->hwnd = hwnd;
+	context->is_install = FALSE;
+
+	_r_workqueue_queueitem (&wfp_queue, &_app_probe_threadproc, context);
+}
+
 BOOLEAN _app_installmessage (
 	_In_opt_ HWND hwnd,
 	_In_ BOOLEAN is_install
@@ -1816,9 +1856,7 @@ VOID _app_tabs_init (
 	}
 }
 
-VOID _app_initialize (
-	_In_opt_ HWND hwnd
-)
+VOID _app_initialize_once ()
 {
 	ULONG privileges[] = {
 		SE_SECURITY_PRIVILEGE,
@@ -1927,9 +1965,28 @@ VOID _app_initialize (
 	cache_resolution = _r_obj_createhashtablepointer (0x20);
 
 	NtCreateEvent (&config.hnotify_evt, EVENT_ALL_ACCESS, NULL, NotificationEvent, TRUE);
+}
+
+VOID _app_initialize (
+	_In_opt_ HWND hwnd
+)
+{
+	static R_INITONCE init_once = PR_INITONCE_INIT;
+	R_ENVIRONMENT environment;
+
+	if (_r_initonce_begin (&init_once))
+	{
+		_app_initialize_once ();
+
+		_r_initonce_end (&init_once);
+	}
 
 	if (hwnd)
+	{
+		_r_sys_setenvironment (&environment, THREAD_PRIORITY_HIGHEST, IoPriorityHigh, MEMORY_PRIORITY_NORMAL);
+
 		_r_sys_createthread (NULL, NtCurrentProcess (), (PUSER_THREAD_START_ROUTINE)&_app_package_threadproc, hwnd, &environment, L"ServicesMonitor");
+	}
 }
 
 INT FirstDriveFromMask (
@@ -1961,7 +2018,6 @@ INT_PTR CALLBACK DlgProc (
 		case WM_INITDIALOG:
 		{
 			WCHAR internal_profile_version[0x40];
-			ENUM_INSTALL_TYPE install_type;
 			LONG dpi_value;
 
 			// initialize vars
@@ -1993,20 +2049,8 @@ INT_PTR CALLBACK DlgProc (
 			// load profile
 			_app_profile_load (hwnd, NULL);
 
-			// install filters
-			install_type = _wfp_getinstalltype ();
-
-			if (install_type != INSTALL_DISABLED)
-			{
-				if (install_type == INSTALL_ENABLED_TEMPORARY)
-					config.is_filterstemporary = TRUE;
-
-				_app_changefilters (hwnd, TRUE, TRUE);
-			}
-			else
-			{
-				_r_status_settext (hwnd, IDC_STATUSBAR, 0, _app_getstatelocale (install_type));
-			}
+			// probe filters state and install them if required (async)
+			_app_probeinstalltype (hwnd);
 
 			// initialize settings
 			_r_settings_addpage (IDD_SETTINGS_GENERAL, IDS_SETTINGS_GENERAL);
@@ -2063,9 +2107,9 @@ INT_PTR CALLBACK DlgProc (
 			// refresh tray icon
 			LONG icon_size = _r_dc_getsystemmetrics (SM_CXSMICON, _r_dc_gettaskbardpi ());
 
-			_r_tray_create (hwnd, &GUID_TrayIcon, RM_TRAYICON, _r_sys_loadsharedicon (_r_sys_getimagebase (), MAKEINTRESOURCE (_app_getstateicon (_wfp_getinstalltype ())), icon_size), _r_app_getname (), FALSE);
+			_r_tray_create (hwnd, &GUID_TrayIcon, RM_TRAYICON, _r_sys_loadsharedicon (_r_sys_getimagebase (), MAKEINTRESOURCE (_app_getstateicon (_wfp_getinstalltypecached ())), icon_size), _r_app_getname (), FALSE);
 
-			_app_settrayicon (hwnd, _wfp_getinstalltype ());
+			_app_settrayicon (hwnd, _wfp_getinstalltypecached ());
 
 			break;
 		}
@@ -3575,7 +3619,7 @@ BOOLEAN NTAPI _app_parseargs (
 	_In_ R_CMDLINE_INFO_CLASS info_class
 )
 {
-	HANDLE hengine = _wfp_getenginehandle ();
+	HANDLE hengine;
 
 	_app_initialize (NULL);
 
@@ -3607,6 +3651,8 @@ BOOLEAN NTAPI _app_parseargs (
 				_app_profile_initialize ();
 				_app_profile_load (NULL, NULL);
 
+				hengine = _wfp_getenginehandle ();
+
 				if (_wfp_initialize (NULL, hengine))
 					_wfp_installfilters (hengine);
 
@@ -3622,6 +3668,8 @@ BOOLEAN NTAPI _app_parseargs (
 			// https://github.com/henrypp/simplewall/issues/1698#issuecomment-4532518363
 			if (_wfp_isfiltersinstalled () && _app_installmessage (NULL, FALSE))
 			{
+				hengine = _wfp_getenginehandle ();
+
 				_wfp_destroyfilters (hengine);
 				_wfp_uninitialize (hengine, TRUE);
 			}
