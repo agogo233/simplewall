@@ -222,6 +222,30 @@ VOID _app_network_initialize (
 	_r_obj_clearhashtable (network_context->checker_ptr);
 	_r_queuedlock_releaseexclusive (&network_context->lock_checker);
 
+	// ui-thread reference probe: plain insert into the same listview from the ui thread
+	{
+		HWND hctrl;
+		LVITEMW lvi = {0};
+		INT probe_idx;
+
+		hctrl = GetDlgItem (hwnd, IDC_NETWORK);
+
+		if (hctrl)
+		{
+			lvi.iItem = INT_ERROR;
+			lvi.iSubItem = 0;
+			lvi.mask = LVIF_TEXT;
+			lvi.pszText = (LPWSTR)L"probe-ui";
+
+			probe_idx = (INT)SendMessageW (hctrl, LVM_INSERTITEM, 0, (LPARAM)&lvi);
+
+			_r_log (LOG_LEVEL_INFO, NULL, L"network: uiprobe insert", NULL, probe_idx);
+
+			if (probe_idx != INT_ERROR)
+				SendMessageW (hctrl, LVM_DELETEITEM, (WPARAM)probe_idx, 0);
+		}
+	}
+
 	// create network monitor thread
 	_r_sys_setenvironment (&environment, THREAD_PRIORITY_ABOVE_NORMAL, IoPriorityNormal, MEMORY_PRIORITY_NORMAL);
 

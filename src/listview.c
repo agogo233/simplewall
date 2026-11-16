@@ -246,6 +246,16 @@ static VOID _app_listview_probecheck (
 	{
 		_r_log (LOG_LEVEL_ERROR, NULL, L"network: probe3 failed (text callback)", NULL, (LONG)GetLastError ());
 	}
+
+	// probe4: basic cross-thread message to the main dialog itself
+	probe_idx = (INT)SendMessageW (hwnd, WM_GETTEXTLENGTH, 0, 0);
+
+	_r_log (LOG_LEVEL_INFO, NULL, L"network: probe4 (dlg text length)", NULL, probe_idx);
+
+	// probe5: cross-thread message to the status bar (non-listview control)
+	probe_idx = (INT)SendMessageW (GetDlgItem (hwnd, IDC_STATUSBAR), SB_SETTEXT, 0, (LPARAM)L"probe");
+
+	_r_log (LOG_LEVEL_INFO, NULL, L"network: probe5 (statusbar settext)", NULL, probe_idx);
 }
 
 VOID _app_listview_addnetworkitem (
