@@ -53,10 +53,16 @@ static INT udp_match (
 	}
 	else if (af == AF_INET && endpoint->af == AF_INET6)
 	{
-		if (RtlEqualMemory (endpoint->address, mapped, 12) && !RtlEqualMemory (endpoint->address + 12, address, 4)) // set correct sizes
-			return 2;
+		if (RtlEqualMemory (endpoint->address, mapped, 12))
+		{
+			if (RtlEqualMemory (endpoint->address + 12, address, 4))
+				return 3;
 
-		if (RtlEqualMemory (endpoint->address, zero, 16)) // set correct sizes
+			if (RtlEqualMemory (endpoint->address + 12, zero, 4))
+				return 1;
+		}
+
+		if (RtlEqualMemory (endpoint->address, zero, 16))
 			return 1;
 	}
 
@@ -590,6 +596,7 @@ VOID udp_stats_stop (
 	ReleaseSRWLockExclusive (&stats->control_lock);
 }
 
+// intentionally never called during normal shutdown: the network worker keeps the stats context valid until process exit, and freeing it earlier would race that worker. kept for tests and post-mortem analysis only.
 VOID udp_stats_destroy (
 	_In_opt_ PSW_UDP_STATS stats
 )
