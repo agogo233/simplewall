@@ -2035,11 +2035,13 @@ VOID NTAPI _wfp_applythread (
 {
 	PITEM_CONTEXT context;
 	HANDLE engine_handle;
+	HWND hwnd;
 
 	_r_queuedlock_acquireshared (&lock_apply);
 
 	context = (PITEM_CONTEXT)arglist;
 	engine_handle = _wfp_getenginehandle ();
+	hwnd = context->hwnd;
 
 	// dropped packets logging (win7+)
 	if (config.is_neteventset)
@@ -2047,13 +2049,13 @@ VOID NTAPI _wfp_applythread (
 
 	if (context->is_install)
 	{
-		if (_wfp_initialize (context->hwnd, engine_handle))
+		if (_wfp_initialize (hwnd, engine_handle))
 			_wfp_installfilters (engine_handle);
 	}
 	else
 	{
 		if (_r_sys_isosversiongreaterorequal (WINDOWS_10))
-			_app_wufixenable (context->hwnd, FALSE);
+			_app_wufixenable (hwnd, FALSE);
 
 		_wfp_destroyfilters (engine_handle);
 		_wfp_uninitialize (engine_handle, TRUE);
@@ -2061,17 +2063,17 @@ VOID NTAPI _wfp_applythread (
 
 	// dropped packets logging (win7+)
 	if (config.is_neteventset)
-		_wfp_logsubscribe (context->hwnd, engine_handle);
+		_wfp_logsubscribe (hwnd, engine_handle);
 
 	if (_r_sys_isosversiongreaterorequal (WINDOWS_10))
-		_app_wufixenable (context->hwnd, _r_config_getboolean_ex(L"IsWUFixEnabled", FALSE, NULL));
+		_app_wufixenable (hwnd, _r_config_getboolean_ex(L"IsWUFixEnabled", FALSE, NULL));
 
-	_app_restoreinterfacestate (context->hwnd, TRUE);
-	_app_setinterfacestate (context->hwnd, _r_dc_getwindowdpi (context->hwnd));
+	// marshal the interface-state restore to the main window thread; a blocking send here would deadlock against the main thread's non-pumping exit wait (WM_DESTROY)
+	PostMessageW (hwnd, WM_UPDATEINTERFACE, (WPARAM)_r_dc_getwindowdpi (hwnd), 0);
 
 	_r_freelist_deleteitem (&context_free_list, context);
 
-	_app_profile_save (context->hwnd);
+	_app_profile_save (hwnd);
 
 	_r_queuedlock_releaseshared (&lock_apply);
 }

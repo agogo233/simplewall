@@ -54,7 +54,7 @@ VOID NTAPI _app_probe_threadproc (
 	if (install_type != INSTALL_DISABLED)
 	{
 		if (install_type == INSTALL_ENABLED_TEMPORARY)
-			config.is_filterstemporary = TRUE;
+			_InterlockedExchange8 ((volatile CHAR *)&config.is_filterstemporary, TRUE);
 
 		_app_changefilters (context->hwnd, TRUE, TRUE);
 	}
@@ -154,14 +154,14 @@ BOOLEAN _app_installmessage (
 		{
 			if (is_install)
 			{
-				config.is_filterstemporary = (radio_id == IDNO);
+				_InterlockedExchange8 ((volatile CHAR *)&config.is_filterstemporary, (radio_id == IDNO));
 
 				if (is_flagchecked)
 					_wfp_firewallenable (FALSE);
 			}
 			else
 			{
-				config.is_filterstemporary = FALSE;
+				_InterlockedExchange8 ((volatile CHAR *)&config.is_filterstemporary, FALSE);
 
 				if (is_flagchecked)
 					_wfp_firewallenable (TRUE);
@@ -2189,6 +2189,14 @@ INT_PTR CALLBACK DlgProc (
 			break;
 		}
 
+		case WM_UPDATEINTERFACE:
+		{
+			_app_restoreinterfacestate (hwnd, TRUE);
+			_app_setinterfacestate (hwnd, (LONG)wparam);
+
+			break;
+		}
+
 		case WM_NOTIFICATION:
 		{
 			HWND hnotify;
@@ -3658,7 +3666,7 @@ BOOLEAN NTAPI _app_parseargs (
 			if (_r_sys_getopt (_r_sys_getcommandline (), L"silent", NULL) || _app_installmessage (NULL, TRUE))
 			{
 				if (_r_sys_getopt (_r_sys_getcommandline (), L"temp", NULL))
-					config.is_filterstemporary = TRUE;
+					_InterlockedExchange8 ((volatile CHAR *)&config.is_filterstemporary, TRUE);
 
 				_app_profile_initialize ();
 				_app_profile_load (NULL, NULL);

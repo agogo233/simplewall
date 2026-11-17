@@ -971,5 +971,6 @@ VOID NTAPI _app_network_threadproc (
 		_r_sys_waitforsingleobject (NtCurrentThread (), 2000);
 	}
 
+	// not reached: the worker lives until process exit (see _app_network_stop)
 	_app_network_uninitialize (network_context);
 }

@@ -1595,22 +1595,47 @@ PR_STRING _app_resolveaddress_interlocked (
 	return current_string;
 }
 
+static HANDLE hmonitor_stop_event = NULL;
+
 VOID _app_fileloggingenable ()
 {
 	if (_r_config_getboolean_ex(L"IsEnableAppMonitor", FALSE, NULL))
 	{
 		// TODO! rewrite this and watch FS changes through NtNotifyChangeDirectoryFile, then read file hash!
-		if (NT_SUCCESS (_r_sys_createthread (&config.hmonitor_thread, NtCurrentProcess (), (PUSER_THREAD_START_ROUTINE)&_app_timercallback, NULL, NULL, L"FileMonitor")))
-			NtResumeThread (config.hmonitor_thread, NULL);
+		if (config.hmonitor_thread)
+			return;
+
+		if (hmonitor_stop_event)
+		{
+			NtClose (hmonitor_stop_event);
+			hmonitor_stop_event = NULL;
+		}
+
+		NtCreateEvent (&hmonitor_stop_event, EVENT_ALL_ACCESS, NULL, NotificationEvent, FALSE);
+
+		if (hmonitor_stop_event)
+		{
+			if (NT_SUCCESS (_r_sys_createthread (&config.hmonitor_thread, NtCurrentProcess (), (PUSER_THREAD_START_ROUTINE)&_app_timercallback, NULL, NULL, L"FileMonitor")))
+				NtResumeThread (config.hmonitor_thread, NULL);
+		}
 	}
 	else
 	{
 		if (config.hmonitor_thread)
 		{
-			_r_sys_terminatethread (config.hmonitor_thread, STATUS_CANCELLED);
-			NtClose (config.hmonitor_thread);
+			if (hmonitor_stop_event)
+				NtSetEvent (hmonitor_stop_event, NULL);
 
+			_r_sys_waitforsingleobject (config.hmonitor_thread, INFINITE);
+
+			NtClose (config.hmonitor_thread);
 			config.hmonitor_thread = NULL;
+
+			if (hmonitor_stop_event)
+			{
+				NtClose (hmonitor_stop_event);
+				hmonitor_stop_event = NULL;
+			}
 		}
 	}
 }
@@ -1654,7 +1679,8 @@ VOID NTAPI _app_timercallback (
 
 		_r_queuedlock_releaseshared (&lock_apps);
 
-		_r_sys_waitforsingleobject (NtCurrentThread (), _r_calc_minutes2milliseconds (10));
+		if (hmonitor_stop_event && _r_sys_waitforsingleobject (hmonitor_stop_event, _r_calc_minutes2milliseconds (10)) == STATUS_WAIT_0)
+			break;
 	}
 }
 
@@ -1737,7 +1763,10 @@ VOID NTAPI _app_queue_fileinformation (
 	ptr_app_info = (PITEM_APP_INFO)arglist;
 
 	if (ptr_app_info->is_loaded)
+	{
+		_r_obj_dereference (ptr_app_info);
 		return;
+	}
 
 	hwnd = _r_app_gethwnd ();
 
@@ -1748,6 +1777,7 @@ VOID NTAPI _app_queue_fileinformation (
 		if (status != STATUS_OBJECT_NAME_NOT_FOUND && status != STATUS_OBJECT_PATH_NOT_FOUND && status != STATUS_ACCESS_DENIED)
 			_r_log (LOG_LEVEL_ERROR, NULL, L"_r_fs_openfile", ptr_app_info->path->buffer, status);
 
+		_r_obj_dereference (ptr_app_info);
 		return;
 	}
 
