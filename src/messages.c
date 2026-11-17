@@ -2929,7 +2929,10 @@ VOID _app_command_purgeinvalid (
 				ptr_app = (PITEM_APP)_r_obj_findhashtablepointer (apps_table, (ULONG)hash_code);
 
 				if (ptr_app && (ptr_app->is_undeletable || ptr_app->type != DATA_APP_REGULAR || !ptr_app->real_path || _r_fs_isexists (&ptr_app->real_path->sr)))
+				{
+					_r_obj_dereference (ptr_app);
 					ptr_app = NULL;
+				}
 
 				if (ptr_app && !_r_obj_isempty (ptr_app->guids))
 					_r_obj_addarrayitems (guids, ptr_app->guids->items, ptr_app->guids->count);
@@ -2944,6 +2947,8 @@ VOID _app_command_purgeinvalid (
 				_app_timer_reset (NULL, ptr_app, FALSE);
 
 				_app_freeapplication (hwnd, (ULONG)hash_code);
+
+				_r_obj_dereference (ptr_app);
 			}
 
 			if (!_r_obj_isempty2 (guids) && _wfp_isfiltersinstalled ())
