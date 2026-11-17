@@ -863,6 +863,9 @@ BEGIN
 	IDS_UDP_ACCOUNTING "UDP (including QUIC): ETW bytes since this socket was first monitored."
 	IDS_UDP_UNAVAILABLE "UDP measurement unavailable or incomplete. Restart simplewall to retry. Error"
 	IDS_UDP_PENDING "UDP: no verified measurement yet. Sockets opened before monitoring must be reopened."
+
+	IDS_QUESTION_KILLPROCESS "Terminate %d instance(s) of %s?"
+	IDS_KILLPROCESS_NOTFOUND "No running instance of this application was found."
 END
 
 //

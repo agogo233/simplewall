@@ -412,7 +412,7 @@ VOID _app_notify_playsound ()
 {
 	static volatile PR_STRING cached_path = NULL;
 
-	PR_STRING current_path, path;
+	PR_STRING current_path, path, old_path;
 	HANDLE hkey;
 	ULONG flags = SND_ASYNC | SND_NODEFAULT | SND_NOWAIT | SND_SENTRY;
 	NTSTATUS status;
@@ -429,10 +429,20 @@ VOID _app_notify_playsound ()
 
 			if (NT_SUCCESS (status))
 			{
-				current_path = (PR_STRING)_InterlockedCompareExchangePointer ((volatile PVOID_PTR)&cached_path, path, current_path);
+				old_path = (PR_STRING)_InterlockedCompareExchangePointer ((volatile PVOID_PTR)&cached_path, path, current_path);
 
-				if (current_path)
+				if (old_path == current_path)
+				{
+					if (old_path)
+						_r_obj_dereference (old_path);
+
+					current_path = path;
+				}
+				else
+				{
 					_r_obj_dereference (path);
+					current_path = old_path;
+				}
 			}
 
 			NtClose (hkey);
@@ -522,8 +532,9 @@ BOOLEAN _app_notify_killprocess (
 	PSYSTEM_PROCESS_INFORMATION process, spi;
 	PNOTIFY_CONTEXT context;
 	PITEM_APP ptr_app;
-	PR_STRING file_name, path;
+	PR_STRING file_name, path, text;
 	HANDLE hprocess;
+	ULONG matches, terminated;
 	NTSTATUS status;
 
 	context = _app_notify_getcontext (hwnd);
@@ -544,10 +555,15 @@ BOOLEAN _app_notify_killprocess (
 
 		_r_log (LOG_LEVEL_ERROR, NULL, L"_r_sys_enumprocesses", NULL, status);
 
+		_r_obj_dereference (ptr_app);
+
 		return FALSE;
 	}
 
 	file_name = _r_path_getbasenamestring (&ptr_app->real_path->sr);
+
+	// count running instances of the target image
+	matches = 0;
 
 	process = PR_FIRST_PROCESS (spi);
 
@@ -556,46 +572,102 @@ BOOLEAN _app_notify_killprocess (
 		if (!process->ImageName.Buffer || process->ImageName.Length == 0)
 			continue;
 
-		if (_r_str_isequal2 (&file_name->sr, process->ImageName.Buffer, TRUE))
+		if (!_r_str_isequal2 (&file_name->sr, process->ImageName.Buffer, TRUE))
+			continue;
+
+		status = _r_sys_getprocessimagepathbyid (process->UniqueProcessId, TRUE, &path);
+
+		if (NT_SUCCESS (status))
 		{
-			status = _r_sys_getprocessimagepathbyid (process->UniqueProcessId, TRUE, &path);
+			if (_r_str_isequal (&path->sr, &ptr_app->real_path->sr, TRUE))
+				matches += 1;
 
-			if (NT_SUCCESS (status))
-			{
-				if (_r_str_isequal (&path->sr, &ptr_app->real_path->sr, TRUE))
-				{
-					status = _r_sys_openprocess (process->UniqueProcessId, PROCESS_TERMINATE, &hprocess);
-
-					if (NT_SUCCESS (status))
-					{
-						status = NtTerminateProcess (hprocess, STATUS_SUCCESS);
-
-						if (!NT_SUCCESS (status))
-							_r_show_errormessage (hwnd, L"Cannot terminate process!", file_name->buffer, status, ET_NATIVE);
-
-						NtClose (hprocess);
-					}
-					else
-					{
-						_r_show_errormessage (hwnd, L"Cannot open process for termination!", file_name->buffer, status, ET_NATIVE);
-					}
-				}
-
-				_r_obj_dereference (path);
-			}
-			else
-			{
-				_r_show_errormessage (hwnd, L"Cannot get process path!", file_name->buffer, status, ET_NATIVE);
-			}
+			_r_obj_dereference (path);
 		}
 	}
 	while ((process = PR_NEXT_PROCESS (process)));
 
-	_r_obj_dereference (file_name);
+	if (matches == 0)
+	{
+		_r_show_message (hwnd, MB_OK | MB_ICONINFORMATION, NULL, _r_locale_getstring (IDS_KILLPROCESS_NOTFOUND));
+
+		_r_mem_free (spi);
+		_r_obj_dereference (file_name);
+		_r_obj_dereference (ptr_app);
+
+		return FALSE;
+	}
+
+	// ask before the irreversible action
+	text = _r_format_string (_r_locale_getstring (IDS_QUESTION_KILLPROCESS), matches, file_name->buffer);
+
+	if (_r_show_message (hwnd, MB_YESNO | MB_ICONEXCLAMATION, NULL, _r_obj_getstring (text)) != IDYES)
+	{
+		if (text)
+			_r_obj_dereference (text);
+
+		_r_mem_free (spi);
+		_r_obj_dereference (file_name);
+		_r_obj_dereference (ptr_app);
+
+		return FALSE;
+	}
+
+	if (text)
+		_r_obj_dereference (text);
+
+	// terminate every matched instance
+	terminated = 0;
+
+	process = PR_FIRST_PROCESS (spi);
+
+	do
+	{
+		if (!process->ImageName.Buffer || process->ImageName.Length == 0)
+			continue;
+
+		if (!_r_str_isequal2 (&file_name->sr, process->ImageName.Buffer, TRUE))
+			continue;
+
+		status = _r_sys_getprocessimagepathbyid (process->UniqueProcessId, TRUE, &path);
+
+		if (NT_SUCCESS (status))
+		{
+			if (_r_str_isequal (&path->sr, &ptr_app->real_path->sr, TRUE))
+			{
+				status = _r_sys_openprocess (process->UniqueProcessId, PROCESS_TERMINATE, &hprocess);
+
+				if (NT_SUCCESS (status))
+				{
+					status = NtTerminateProcess (hprocess, STATUS_SUCCESS);
+
+					if (NT_SUCCESS (status))
+					{
+						terminated += 1;
+					}
+					else
+					{
+						_r_show_errormessage (hwnd, L"Cannot terminate process!", file_name->buffer, status, ET_NATIVE);
+					}
+
+					NtClose (hprocess);
+				}
+				else
+				{
+					_r_show_errormessage (hwnd, L"Cannot open process for termination!", file_name->buffer, status, ET_NATIVE);
+				}
+			}
+
+			_r_obj_dereference (path);
+		}
+	}
+	while ((process = PR_NEXT_PROCESS (process)));
 
 	_r_mem_free (spi);
+	_r_obj_dereference (file_name);
+	_r_obj_dereference (ptr_app);
 
-	return NT_SUCCESS (status);
+	return (terminated != 0);
 }
 
 VOID _app_notify_refresh (
@@ -1307,9 +1379,11 @@ INT_PTR CALLBACK NotificationProc (
 						_app_profile_save (hmain);
 
 						_r_obj_dereference (rule);
+						_r_obj_dereference (ptr_log);
 					}
 
 					_app_notify_freeobject (hwnd, ptr_app);
+					_r_obj_dereference (ptr_app);
 
 					break;
 				}
@@ -1354,11 +1428,11 @@ INT_PTR CALLBACK NotificationProc (
 					if (hmain)
 						_app_listview_updateby_id (hmain, DATA_LISTVIEW_CURRENT, PR_UPDATE_TYPE);
 
-					_r_obj_dereference (ptr_rule);
-					_r_obj_dereference (ptr_app);
-
 					_app_profile_save (hmain);
 				}
+
+				_r_obj_dereference (ptr_rule);
+				_r_obj_dereference (ptr_app);
 
 				return FALSE;
 			}
