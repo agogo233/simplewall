@@ -2246,6 +2246,13 @@ INT_PTR CALLBACK DlgProc (
 			break;
 		}
 
+		case WM_QUEUEDREDRAW:
+		{
+			SetTimer (hwnd, INFOREDRAW_TIMER_ID, INFOREDRAW_TIMEOUT, NULL);
+
+			break;
+		}
+
 		case WM_TIMER:
 		{
 			if (wparam == INFOREDRAW_TIMER_ID)

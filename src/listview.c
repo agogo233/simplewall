@@ -237,7 +237,7 @@ VOID _app_listview_queueredraw (
 
 	_InterlockedOr (&listview_redraw_mask, (1 << index));
 
-	_r_sys_settimer (hwnd, INFOREDRAW_TIMER_ID, INFOREDRAW_TIMEOUT, NULL);
+	PostMessageW (hwnd, WM_QUEUEDREDRAW, 0, 0);
 }
 
 VOID _app_listview_flushredraw (
