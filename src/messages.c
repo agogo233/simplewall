@@ -196,8 +196,6 @@ VOID _app_message_localize (
 		_r_menu_setitemtext (hmenu, IDM_PROFILETYPE_COMPRESSED, FALSE, _r_locale_getstring (IDS_PROFILE_TYPE_COMPRESSED));
 		_r_menu_setitemtext (hmenu, IDM_PROFILETYPE_ENCRYPTED, FALSE, _r_locale_getstring (IDS_PROFILE_TYPE_ENCRYPTED));
 
-		_r_menu_enableitem (hmenu, IDM_PROFILETYPE_ENCRYPTED, FALSE, FALSE);
-
 		_r_menu_setitemtext (hmenu, IDM_CONNECTIONS_ENABLE, FALSE, _r_locale_getstring (IDS_CONNECTIONS_ENABLE));
 		_r_menu_setitemtext (hmenu, IDM_CONNECTIONS_SHOWAITCONNECTIONS, FALSE, _r_locale_getstring (IDS_CONNECTIONS_SHOWAITCONNECTIONS));
 		_r_menu_setitemtext (hmenu, IDM_CONNECTIONS_MEASUREUDPTRAFFIC, FALSE, _r_locale_getstring (IDS_CONNECTIONS_MEASUREUDPTRAFFIC));
