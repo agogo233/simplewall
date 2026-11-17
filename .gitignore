@@ -8,6 +8,7 @@ bin/arm64/
 x64/
 win32/
 arm64/
+simplewall_crash/
 __pycache__
 
 thumbs.db
