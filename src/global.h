@@ -119,6 +119,7 @@ DECLSPEC_SELECTANY const LONG64 timer_array[] =
 #define WM_NOTIFYINFO (WM_APP + 22)
 #define WM_UPDATEINTERFACE (WM_APP + 23)
 #define WM_QUEUEDREDRAW (WM_APP + 24)
+#define WM_INSTALLFILTERS (WM_APP + 25)
 
 // Missing routine library functions (compatibility shims)
 // note: a control id of zero means that the given window is the target itself

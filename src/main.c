@@ -56,11 +56,11 @@ VOID NTAPI _app_probe_threadproc (
 		if (install_type == INSTALL_ENABLED_TEMPORARY)
 			_InterlockedExchange8 ((volatile CHAR *)&config.is_filterstemporary, TRUE);
 
-		_app_changefilters (context->hwnd, TRUE, TRUE);
+		PostMessageW (context->hwnd, WM_INSTALLFILTERS, 0, 0);
 	}
 	else
 	{
-		_app_setinterfacestate (context->hwnd, _r_dc_getwindowdpi (context->hwnd));
+		PostMessageW (context->hwnd, WM_UPDATEINTERFACE, (WPARAM)_r_dc_getwindowdpi (context->hwnd), 0);
 	}
 
 	_r_freelist_deleteitem (&context_free_list, context);
@@ -2193,6 +2193,13 @@ INT_PTR CALLBACK DlgProc (
 		{
 			_app_restoreinterfacestate (hwnd, TRUE);
 			_app_setinterfacestate (hwnd, (LONG)wparam);
+
+			break;
+		}
+
+		case WM_INSTALLFILTERS:
+		{
+			_app_changefilters (hwnd, TRUE, TRUE);
 
 			break;
 		}
