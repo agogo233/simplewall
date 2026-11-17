@@ -2833,7 +2833,7 @@ VOID _app_command_purgeunused (
 
 		if (_r_show_confirmmessage (hwnd, _r_locale_getstring (IDS_PURGE_UNUSED), string->buffer, L"ConfirmUnused", FALSE))
 		{
-			//_r_queuedlock_acquireexclusive (&lock_apps);
+			_r_queuedlock_acquireexclusive (&lock_apps);
 
 			for (ULONG_PTR i = 0; i < _r_obj_getlistsize (apps_list); i++)
 			{
@@ -2851,7 +2851,7 @@ VOID _app_command_purgeunused (
 				_app_freeapplication (hwnd, (ULONG)hash_code);
 			}
 
-			//_r_queuedlock_releaseexclusive (&lock_apps);
+			_r_queuedlock_releaseexclusive (&lock_apps);
 
 			if (!_r_obj_isempty2 (guids) && _wfp_isfiltersinstalled ())
 				_wfp_destroyfilters_array (_wfp_getenginehandle (), guids, DBG_ARG);
@@ -2948,7 +2948,9 @@ VOID _app_command_purgeinvalid (
 				_app_notify_freeobject (NULL, ptr_app);
 				_app_timer_reset (NULL, ptr_app, FALSE);
 
+				_r_queuedlock_acquireexclusive (&lock_apps);
 				_app_freeapplication (hwnd, (ULONG)hash_code);
+				_r_queuedlock_releaseexclusive (&lock_apps);
 
 				_r_obj_dereference (ptr_app);
 			}
