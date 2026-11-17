@@ -1062,7 +1062,7 @@ VOID _app_getfileversioninfo (
 	}
 
 	// get file version
-	if (_r_res_queryversion (ver_block.buffer, (PVOID_PTR)&ver_info))
+	if (_r_res_queryversion ((PVOID_PTR)&ver_info, ver_block.buffer))
 	{
 		_r_obj_appendstringbuilder (&sb, _r_obj_isstringempty2 (sb.string) ? SZ_TAB : L" ");
 		_r_obj_appendstringbuilderformat (&sb, L"%d.%d", HIWORD (ver_info->dwFileVersionMS), LOWORD (ver_info->dwFileVersionMS));

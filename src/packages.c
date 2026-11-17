@@ -116,7 +116,7 @@ VOID _app_package_getpackagebyname (
 	if (!NT_SUCCESS (status))
 		goto CleanupExit;
 
-	status = _r_str_fromsid (&package_sid_string, (PSID)(package_sid->buffer));
+	status = _r_str_fromsid ((PSID)(package_sid->buffer), &package_sid_string);
 
 	if (!NT_SUCCESS (status))
 		goto CleanupExit;

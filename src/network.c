@@ -737,7 +737,7 @@ BOOLEAN _app_network_getpath (
 
 					if (NT_SUCCESS (status))
 					{
-						_r_str_fromsid (&process_name, app_container->TokenAppContainer);
+						_r_str_fromsid (app_container->TokenAppContainer, &process_name);
 
 						_r_mem_free (app_container);
 					}

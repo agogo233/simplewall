@@ -573,7 +573,7 @@ VOID CALLBACK _wfp_logcallback (
 	// get package id (win8+)
 	if ((log->flags & FWPM_NET_EVENT_FLAG_PACKAGE_ID_SET) == FWPM_NET_EVENT_FLAG_PACKAGE_ID_SET && log->package_id)
 	{
-		if (NT_SUCCESS (_r_str_fromsid (&sid_string, log->package_id)))
+		if (NT_SUCCESS (_r_str_fromsid (log->package_id, &sid_string)))
 		{
 			if (!_app_package_isnotexists (sid_string))
 				_r_obj_clearreference ((PVOID_PTR)&sid_string);
