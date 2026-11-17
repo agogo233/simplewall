@@ -1675,6 +1675,9 @@ VOID NTAPI _app_timercallback (
 					_r_obj_dereference (string);
 				}
 			}
+
+			if (hmonitor_stop_event && _r_sys_waitforsingleobject (hmonitor_stop_event, 0) == STATUS_WAIT_0)
+				break;
 		}
 
 		_r_queuedlock_releaseshared (&lock_apps);
