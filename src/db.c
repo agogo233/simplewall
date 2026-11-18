@@ -1070,8 +1070,7 @@ VOID _app_db_save_rule (
 		if (ptr_rule->profile)
 			_r_xml_setattribute_long (&db_info->xml_library, L"profile", ptr_rule->profile);
 
-		if (ptr_rule->direction != FWP_DIRECTION_OUTBOUND)
-			_r_xml_setattribute_long (&db_info->xml_library, L"dir", ptr_rule->direction);
+		_r_xml_setattribute_long (&db_info->xml_library, L"dir", ptr_rule->direction);
 
 		if (ptr_rule->protocol != 0)
 			_r_xml_setattribute_long (&db_info->xml_library, L"protocol", ptr_rule->protocol);
